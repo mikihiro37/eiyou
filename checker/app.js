@@ -896,5 +896,6 @@ function renderAll() {
   document.getElementById('periodStart').value = d7.toISOString().split('T')[0];
   document.getElementById('periodEnd').value = today;
 
+  initBulk();
   renderAll();
 })();

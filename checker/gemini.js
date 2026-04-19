@@ -234,6 +234,80 @@ categoryは「主食」「主菜」「副菜」「汁物」「デザート」「
   return await callGemini(prompt);
 }
 
+// --- まとめてテキスト解析（複数日・複数食対応） ---
+async function analyzeBulkText(text) {
+  const today = new Date().toISOString().split('T')[0];
+  const year = new Date().getFullYear();
+
+  const prompt = `あなたは管理栄養士です。以下の食事記録を分析してください。
+複数日・複数食をまとめてパースし、各食材の栄養素を推定してください。
+
+食事記録:
+"""
+${text}
+"""
+
+以下のJSON形式で返してください:
+{
+  "days": [
+    {
+      "date": "YYYY-MM-DD形式（年が不明なら${year}年）",
+      "meals": [
+        {
+          "mealType": "breakfast|lunch|dinner|snack",
+          "skipped": false,
+          "items": [
+            {
+              "original": "元のテキストそのまま",
+              "ambiguous": true,
+              "interpretations": [
+                {
+                  "label": "解釈の短い名前（15字以内）",
+                  "details": "具体的な内容と推定量",
+                  "nutrients": {${NUTRIENT_PROMPT_KEYS}}
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+ルール:
+- 「欠食」「食べてない」等はskipped:trueにし、itemsは空配列
+- 改行で途切れた食材名は結合して1つにする（例: "ブロ\\nッコリー" → "ブロッコリー"）
+- 曖昧な食材（「野菜サラダ」「丼」等、内容が特定できないもの）はambiguous:trueで2〜3の解釈候補を返す
+  - 各候補は栄養素が大きく異なるバリエーションを選ぶ
+- 明確な食材（「豆腐」「珈琲」「納豆」等）はambiguous:falseで候補1つ
+- 各解釈のnutrientsには全てのキーを含めること（値は数値のみ）
+- 日本食品標準成分表に基づいて推定
+- 「朝」「昼」「夜」「夕」等からmealTypeを推定
+- 日付が推定できない場合は${today}を使用
+- アミノ酸はmg単位`;
+
+  const raw = await callGemini(prompt);
+
+  // レスポンスの正規化
+  if (!raw.days || !Array.isArray(raw.days)) {
+    throw new Error('解析結果のフォーマットが不正です');
+  }
+
+  raw.days.forEach(day => {
+    (day.meals || []).forEach(meal => {
+      if (meal.skipped) { meal.items = []; return; }
+      (meal.items || []).forEach(item => {
+        (item.interpretations || []).forEach(interp => {
+          interp.nutrients = normalizeNutrients(interp.nutrients || {});
+        });
+      });
+    });
+  });
+
+  return raw;
+}
+
 // --- 画像リサイズ ---
 function resizeImage(file, maxBytes) {
   maxBytes = maxBytes || 3 * 1024 * 1024;

@@ -214,6 +214,30 @@ textarea{resize:vertical;min-height:80px}
 /* --- Empty State --- */
 .empty-state{text-align:center;padding:30px;color:#ccc;font-size:14px}
 
+/* --- Bulk Report --- */
+.bulk-profile-badge{font-size:12px;color:#666;padding:8px 12px;background:#f0f7ff;border-radius:6px;margin-bottom:16px;text-align:center}
+.bulk-alert-title{font-size:14px;font-weight:600;color:#333;margin:16px 0 8px;padding-top:16px;border-top:1px solid #eee}
+.bulk-no-alert{text-align:center;padding:12px;color:#27ae60;font-size:13px;background:#f0fff4;border-radius:6px;margin:16px 0}
+.bulk-meals-title{font-size:14px;font-weight:600;color:#333;margin:16px 0 8px;padding-top:16px;border-top:1px solid #eee}
+.bulk-day-header{font-size:13px;font-weight:600;color:#5b9bd5;margin:12px 0 6px;padding:4px 8px;background:#f0f7ff;border-radius:4px}
+.bulk-meal-card{background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:8px}
+.bulk-meal-header{font-size:13px;font-weight:600;color:#444;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.bulk-skipped{font-size:12px;color:#999;font-style:italic;padding:4px 8px}
+.bulk-item{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #eee}
+.bulk-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.bulk-item-original{font-size:13px;font-weight:600;color:#333;margin-bottom:6px}
+
+.bulk-interp-selector{display:flex;flex-direction:column;gap:4px}
+.bulk-interp-option{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border:2px solid #e0e0e0;border-radius:6px;cursor:pointer;transition:all .15s;flex-wrap:wrap}
+.bulk-interp-option:hover{border-color:#5b9bd5;background:#f0f7ff}
+.bulk-interp-option.selected{border-color:#5b9bd5;background:#e3f2fd}
+.bulk-interp-option input[type="radio"]{margin:0;flex-shrink:0}
+.bulk-interp-label{font-size:13px;font-weight:500;color:#333}
+.bulk-interp-details{font-size:11px;color:#888;flex:1}
+.bulk-interp-macro{font-size:11px;color:#5b9bd5;font-weight:500;white-space:nowrap}
+
+.bulk-interp-single{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#fff;border-radius:6px;border:1px solid #eee;flex-wrap:wrap}
+
 /* --- Responsive: Tablet --- */
 @media(max-width:640px){
   .header h1{font-size:15px}

@@ -114,9 +114,43 @@
       <div class="tab-content" id="tab-text">
         <div class="form-group">
           <label>食事の内容を自由に入力</label>
-          <textarea id="textInput" placeholder="例: 昨日の夜はラーメンと餃子5個食べた"></textarea>
+          <textarea id="textInput" rows="8" placeholder="例:&#10;4月19日&#10;朝　欠食&#10;昼　珈琲、蓬と小豆のマフィン&#10;夕　豆腐＋ブロッコリー＋ミンチ丼&#10;　　野菜サラダ&#10;&#10;※1食分でも複数日分でもOK"></textarea>
         </div>
-        <button class="btn btn-primary btn-block" id="textAnalyzeBtn">Geminiで解析</button>
+        <button class="btn btn-primary btn-block" id="textAnalyzeBtn">Geminiで解析（1食分）</button>
+
+        <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
+
+        <div class="form-group">
+          <label>お客様情報（まとめて解析用）</label>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>年齢</label>
+            <input type="number" id="bulkAge" min="1" max="120" value="35">
+          </div>
+          <div class="form-group">
+            <label>性別</label>
+            <select id="bulkSex">
+              <option value="male">男性</option>
+              <option value="female">女性</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>体重 (kg)</label>
+            <input type="number" id="bulkWeight" min="20" max="200" value="65" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>活動量</label>
+            <select id="bulkActivity">
+              <option value="low">低い</option>
+              <option value="normal" selected>普通</option>
+              <option value="high">高い</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-success btn-block" id="bulkAnalyzeBtn">まとめて解析 → 不足栄養素レポート</button>
       </div>
     </div>
   </div>
@@ -372,6 +406,26 @@
   </div>
 </div>
 
+<!-- ======== Bulk Report Modal ======== -->
+<div class="modal-overlay" id="bulkReportModal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <h3>食事分析レポート</h3>
+      <button class="modal-close" data-close="bulkReportModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="bulkProfileSummary"></div>
+      <div id="bulkBarChart"></div>
+      <div id="bulkAlerts"></div>
+      <div id="bulkMealBreakdown"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close="bulkReportModal">閉じる</button>
+      <button class="btn btn-success" id="bulkReportSave">この記録を保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- ======== Loading ======== -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
@@ -387,6 +441,7 @@
 <script src="checker/data.js"></script>
 <script src="checker/gemini.js"></script>
 <script src="checker/demo.js"></script>
+<script src="checker/bulk.js"></script>
 <script src="checker/app.js"></script>
 
 </body>
