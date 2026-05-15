@@ -72,14 +72,42 @@ GitHub Settings → Pages から手動で有効化が必要な場合もある。
 
 ### 4. 動作確認
 
-ユーザーに確認してもらう:
+デプロイ後、実際にページが表示されるか確認する。**必ず `.html` 拡張子付きのURLでアクセスすること。**
+
+確認するURL（ユーザーに実際のURLを伝えて開いてもらう）:
 - `<公開URL>/index.html` → 栄養素のネットワークグラフが表示される
 - `<公開URL>/checker.html` → チェッカー画面が表示される
 - チェッカーでAPIキー設定後、何か食事を入力して「分析」→ 結果が返ればOK
 
+**重要**: URLは必ず `.html` 付きで案内すること。`/checker` のように拡張子なしだと環境によっては404になる。
+
+### 5. デプロイ確認の自動化
+
+デプロイ直後にcurlで200が返るか確認する:
+
+```bash
+# GitHub Pagesの場合
+curl -s -o /dev/null -w "%{http_code}" "https://<ユーザー名>.github.io/eiyou/index.html"
+curl -s -o /dev/null -w "%{http_code}" "https://<ユーザー名>.github.io/eiyou/checker.html"
+
+# Cloudflare Pagesの場合
+curl -s -o /dev/null -w "%{http_code}" "https://<プロジェクト名>.pages.dev/index.html"
+curl -s -o /dev/null -w "%{http_code}" "https://<プロジェクト名>.pages.dev/checker.html"
+```
+
+200が返ればOK。404の場合はトラブルシューティングへ。
+
 ## トラブルシューティング
 
-- **GitHub Pagesが404**: 有効化後、反映まで数分かかる場合がある
+- **404エラー（GitHub Pages）**:
+  - 有効化後、反映まで最大10分かかる。数分待ってからリトライ
+  - Settings → Pages で「Your site is live at ...」が表示されているか確認
+  - URLが `https://<ユーザー名>.github.io/eiyou/` であること（リポジトリ名が一致しているか）
+  - `.html` 拡張子を付けてアクセスしているか確認
+- **404エラー（Cloudflare Pages）**:
+  - ビルド出力ディレクトリが `/` になっているか確認（`dist` 等ではない）
+  - Cloudflare Dashboard → Pages → プロジェクト → Deployments でデプロイが成功しているか確認
+  - 失敗している場合はログを確認
 - **チェッカーで「APIキーが設定されていません」**: ⚙からキーを再入力
 - **分析結果が返らない**: APIキーが正しいか確認。Google AI Studioでキーのステータスをチェック
 
