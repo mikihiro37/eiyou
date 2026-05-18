@@ -21,7 +21,7 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
 .header-controls button:hover{background:#f0f0f0}
 .header-controls button.active{background:#5b9bd5;color:#fff;border-color:#5b9bd5}
 .main{display:flex;flex:1;overflow:hidden;position:relative}
-.left-panel{width:200px;background:#fff;border-right:1px solid #e0e0e0;padding:12px;overflow-y:auto;flex-shrink:0}
+.left-panel{width:220px;background:#fff;border-right:1px solid #e0e0e0;padding:12px;overflow-y:auto;flex-shrink:0}
 .left-panel h3{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid #eee}
 .left-panel h3:first-child{margin-top:0}
 .filter-group label{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:13px;cursor:pointer}
@@ -83,7 +83,7 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
 .stat-bar{height:4px;background:#eee;border-radius:2px;margin-top:4px;overflow:hidden}
 .stat-fill{height:100%;border-radius:2px;transition:width .3s}
 .tooltip{position:absolute;background:rgba(44,62,80,.9);color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:100;white-space:nowrap;display:none}
-@media(max-width:900px){.left-panel{width:160px}.right-panel{width:260px}}
+@media(max-width:900px){.left-panel{width:180px}.right-panel{width:260px}}
 .evidence-badge{display:inline-block;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;font-weight:600}
 .evidence-badge.established{background:#e8f5e9;color:#2e7d32}
 .evidence-badge.probable{background:#fff8e1;color:#f57f17}
@@ -113,6 +113,16 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
 .result-type-badge{font-size:9px;padding:1px 5px;border-radius:8px;color:#fff;margin-left:3px;white-space:nowrap;display:inline-block;vertical-align:middle;font-weight:600}
 /* Symptom search note */
 .symptom-search-note{font-size:9px;color:#bbb;padding:4px 2px;line-height:1.4;margin-top:4px;border-top:1px solid #eee}
+/* Left-panel sub-labels and how-to-read collapsible */
+.lp-sub-label{font-size:10px;color:#aaa;font-weight:600;letter-spacing:.5px;margin:8px 0 3px}
+details.how-to-read summary{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid #eee;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
+details.how-to-read summary::-webkit-details-marker{display:none}
+details.how-to-read summary::after{content:'▶';font-size:9px;color:#bbb;transition:transform .15s}
+details.how-to-read[open] summary::after{transform:rotate(90deg)}
+.htr-body{padding:0 0 8px;display:flex;flex-direction:column;gap:3px}
+.htr-body .legend-item{font-size:12px;display:flex;align-items:center;gap:6px;padding:2px 0;color:#555}
+/* Hide graph-overlay legend (content moved to sidebar) */
+.legend{display:none !important}
 </style>
 </head>
 <body>
@@ -132,13 +142,15 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
 </header>
 <div class="main">
   <div class="left-panel">
-    <h3>カテゴリ</h3>
+    <!-- A. 表示フィルター -->
+    <h3>表示フィルター</h3>
+    <div class="lp-sub-label">カテゴリ</div>
     <div class="filter-group" id="catFilters">
-      <label><input type="checkbox" checked data-cat="vitamin"><span class="color-dot" style="background:#e67e22"></span>ビタミン (18)</label>
-      <label><input type="checkbox" checked data-cat="mineral"><span class="color-dot" style="background:#27ae60"></span>ミネラル (20)</label>
-      <label><input type="checkbox" checked data-cat="aminoAcid"><span class="color-dot" style="background:#8e44ad"></span>アミノ酸 (8)</label>
+      <label><input type="checkbox" checked data-cat="vitamin"><span class="shape-circle-icon"></span>ビタミン (18)</label>
+      <label><input type="checkbox" checked data-cat="mineral"><span class="shape-triangle-icon"></span>ミネラル (20)</label>
+      <label><input type="checkbox" checked data-cat="aminoAcid"><span class="shape-square-icon"></span>アミノ酸 (8)</label>
     </div>
-    <h3>サブカテゴリ</h3>
+    <div class="lp-sub-label">サブカテゴリ</div>
     <div class="filter-group" id="subFilters">
       <label><input type="checkbox" checked data-sub="脂溶性"><span class="color-dot" style="background:#e67e22"></span>脂溶性ビタミン</label>
       <label><input type="checkbox" checked data-sub="水溶性"><span class="color-dot" style="background:#3498db"></span>水溶性ビタミン</label>
@@ -146,18 +158,41 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
       <label><input type="checkbox" checked data-sub="微量ミネラル"><span class="color-dot" style="background:#16a085"></span>微量ミネラル</label>
       <label><input type="checkbox" checked data-sub="必須アミノ酸"><span class="color-dot" style="background:#8e44ad"></span>必須アミノ酸</label>
     </div>
-    <h3>エビデンス</h3>
+    <div class="lp-sub-label">エビデンス</div>
     <div class="filter-group" id="evidenceFilters">
-      <label><input type="checkbox" checked data-ev="established"><span class="color-dot" style="background:#2e7d32"></span>確立 (36)</label>
-      <label><input type="checkbox" checked data-ev="probable"><span class="color-dot" style="background:#f57f17;border:1px dashed #f57f17"></span>有力 (2)</label>
-      <label><input type="checkbox" checked data-ev="limited"><span class="color-dot" style="background:#fff;border:1px dashed #c62828"></span>限定的 (8)</label>
+      <label><input type="checkbox" checked data-ev="established"><span class="border-solid-icon"></span>確立 (36)</label>
+      <label><input type="checkbox" checked data-ev="probable"><span class="border-dashed-icon"></span>有力 (2)</label>
+      <label><input type="checkbox" checked data-ev="limited"><span class="border-dotted-icon"></span>限定的 (8)</label>
     </div>
-    <h3>エッジ表示</h3>
+    <div class="lp-sub-label">エッジ</div>
     <div class="filter-group" id="edgeFilters">
       <label><input type="checkbox" checked data-edge="synergy"><span class="legend-line" style="background:#4caf50"></span>相乗</label>
       <label><input type="checkbox" checked data-edge="absorption"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</label>
       <label><input type="checkbox" checked data-edge="antagonist"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</label>
     </div>
+    <!-- B. 見方・凡例 -->
+    <details class="how-to-read">
+      <summary>見方・凡例</summary>
+      <div class="htr-body">
+        <div class="lp-sub-label">形状（カテゴリ）</div>
+        <div class="legend-item"><span class="shape-circle-icon"></span>ビタミン</div>
+        <div class="legend-item"><span class="shape-triangle-icon"></span>ミネラル</div>
+        <div class="legend-item"><span class="shape-square-icon"></span>アミノ酸</div>
+        <div class="lp-sub-label">枠線（エビデンス）</div>
+        <div class="legend-item"><span class="border-solid-icon"></span>確立</div>
+        <div class="legend-item"><span class="border-dashed-icon"></span>有力</div>
+        <div class="legend-item"><span class="border-dotted-icon"></span>限定的</div>
+        <div class="lp-sub-label">線（エッジ）</div>
+        <div class="legend-item"><span class="legend-line" style="background:#4caf50"></span>相乗</div>
+        <div class="legend-item"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</div>
+        <div class="legend-item"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</div>
+        <div class="lp-sub-label">枠色（状態検索）</div>
+        <div class="legend-item"><span class="color-dot" style="background:#e65100;border:2px solid #e65100"></span>少なめ傾向</div>
+        <div class="legend-item"><span class="color-dot" style="background:#c62828;border:2px dashed #c62828"></span>多め傾向</div>
+        <div class="legend-disclaimer">診断・治療・疾病予防を目的としません</div>
+      </div>
+    </details>
+    <!-- C. 逆引き検索 -->
     <div class="reverse-section">
       <h3>逆引き検索</h3>
       <button class="reverse-btn" id="foodSearchBtn">食材 → 栄養素</button>
@@ -176,35 +211,6 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
   </div>
   <div class="graph-container">
     <div id="cy"></div>
-    <div class="legend" id="legend">
-      <button class="legend-toggle-btn" id="legendToggle" aria-expanded="true">▲ 凡例</button>
-      <div class="legend-body" id="legendBody">
-        <div class="legend-section">
-          <div class="legend-section-title">形状（大カテゴリ）</div>
-          <div class="legend-item"><span class="shape-circle-icon"></span>ビタミン</div>
-          <div class="legend-item"><span class="shape-triangle-icon"></span>ミネラル</div>
-          <div class="legend-item"><span class="shape-square-icon"></span>アミノ酸</div>
-        </div>
-        <div class="legend-section">
-          <div class="legend-section-title">枠線（エビデンス）</div>
-          <div class="legend-item"><span class="border-solid-icon"></span>確立</div>
-          <div class="legend-item"><span class="border-dashed-icon"></span>有力</div>
-          <div class="legend-item"><span class="border-dotted-icon"></span>限定的</div>
-        </div>
-        <div class="legend-section">
-          <div class="legend-section-title">線（エッジ）</div>
-          <div class="legend-item"><span class="legend-line" style="background:#4caf50"></span>相乗</div>
-          <div class="legend-item"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</div>
-          <div class="legend-item"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</div>
-        </div>
-        <div class="legend-section">
-          <div class="legend-section-title">枠色（状態検索）</div>
-          <div class="legend-item"><span class="color-dot" style="background:#e65100;border:2px solid #e65100"></span>少なめ傾向に関連</div>
-          <div class="legend-item"><span class="color-dot" style="background:#c62828;border:2px dashed #c62828"></span>多め傾向に関連</div>
-        </div>
-        <div class="legend-disclaimer">この表示は診断・治療・疾病予防を目的としません</div>
-      </div>
-    </div>
     <div class="disclaimer">※ 食品成分値は日本食品標準成分表等を参考にした概算値です。エビデンスレベルは主要な学術機関の評価に基づきます。掲載情報は一般的な参考情報であり、診断・治療・疾病予防を目的としません。</div>
   </div>
   <div class="right-panel" id="detailPanel">
@@ -1103,17 +1109,6 @@ document.addEventListener('keydown', e=>{
     detailPanel.classList.remove('open');
     cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
   }
-});
-
-// ============================================================
-// LEGEND TOGGLE
-// ============================================================
-document.getElementById('legendToggle').addEventListener('click', ()=>{
-  const body = document.getElementById('legendBody');
-  const btn  = document.getElementById('legendToggle');
-  const collapsed = body.classList.toggle('collapsed');
-  btn.textContent = collapsed ? '▼ 凡例' : '▲ 凡例';
-  btn.setAttribute('aria-expanded', !collapsed);
 });
 
 // ============================================================
