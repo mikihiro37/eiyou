@@ -93,6 +93,26 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
 .legend-evidence{display:flex;gap:8px;margin-left:12px;padding-left:12px;border-left:1px solid #ddd}
 .mobile-toggle{display:none;position:fixed;bottom:16px;left:16px;z-index:20;width:44px;height:44px;border-radius:50%;background:#5b9bd5;color:#fff;border:none;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 @media(max-width:640px){.left-panel{position:fixed;left:-260px;top:0;bottom:0;width:240px;z-index:25;box-shadow:2px 0 8px rgba(0,0,0,.15);transition:left .25s ease}.left-panel.open{left:0}.right-panel{width:100%}.mobile-toggle{display:block}.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:24}.mobile-overlay.show{display:block}}
+/* ---- Legend (enhanced) ---- */
+.legend{flex-direction:column;align-items:flex-start;cursor:default;min-width:90px;max-width:240px;padding:8px 10px}
+.legend-toggle-btn{font-size:11px;background:none;border:none;cursor:pointer;color:#5b9bd5;padding:0;font-weight:600;margin-bottom:2px;line-height:1.4}
+.legend-body{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:4px}
+.legend-body.collapsed{display:none}
+.legend-section{display:flex;flex-direction:column;gap:3px}
+.legend-section-title{font-size:9px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;padding-bottom:3px;border-bottom:1px solid #f0f0f0;margin-bottom:1px}
+.legend-disclaimer{font-size:9px;color:#bbb;line-height:1.4;margin-top:4px;padding-top:4px;border-top:1px solid #f0f0f0}
+/* Shape icons for legend */
+.shape-circle-icon{width:12px;height:12px;border-radius:50%;border:2px solid rgba(0,0,0,.3);display:inline-block;flex-shrink:0;background:#e67e22}
+.shape-triangle-icon{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid #27ae60;display:inline-block;flex-shrink:0}
+.shape-square-icon{width:11px;height:11px;border:2px solid rgba(0,0,0,.3);display:inline-block;flex-shrink:0;background:#8e44ad}
+/* Evidence border icons for legend */
+.border-solid-icon{width:20px;height:11px;border:2px solid rgba(0,0,0,.35);border-radius:2px;display:inline-block;flex-shrink:0}
+.border-dashed-icon{width:20px;height:11px;border:2px dashed #f57f17;border-radius:2px;display:inline-block;flex-shrink:0}
+.border-dotted-icon{width:20px;height:11px;border:2px dotted #e57373;border-radius:2px;display:inline-block;flex-shrink:0;opacity:.8}
+/* Search result match badges */
+.result-type-badge{font-size:9px;padding:1px 5px;border-radius:8px;color:#fff;margin-left:3px;white-space:nowrap;display:inline-block;vertical-align:middle;font-weight:600}
+/* Symptom search note */
+.symptom-search-note{font-size:9px;color:#bbb;padding:4px 2px;line-height:1.4;margin-top:4px;border-top:1px solid #eee}
 </style>
 </head>
 <body>
@@ -146,24 +166,43 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
       <div class="reverse-sort" id="foodSort"><label>並び:</label><select id="foodSortSelect"><option value="default">検索順</option><option value="category">カテゴリ別</option><option value="subcategory">サブカテゴリ別</option><option value="name">五十音順</option></select></div>
       <button class="reverse-highlight-btn" id="foodHighlightBtn" style="display:none">グラフ上でハイライト</button>
       <div class="reverse-results" id="foodResults"></div>
-      <button class="reverse-btn" id="symptomSearchBtn">症状 → 栄養素</button>
-      <input type="text" class="reverse-input" id="symptomSearchInput" placeholder="症状を入力 or 下から選択...">
+      <button class="reverse-btn" id="symptomSearchBtn">気になる状態 → 関連栄養素</button>
+      <input type="text" class="reverse-input" id="symptomSearchInput" placeholder="気になる状態を入力 or 下から選択...">
       <div class="tag-chips" id="symptomTags"></div>
       <div class="reverse-sort" id="symptomSort"><label>並び:</label><select id="symptomSortSelect"><option value="default">検索順</option><option value="category">カテゴリ別</option><option value="subcategory">サブカテゴリ別</option><option value="name">五十音順</option></select></div>
-      <button class="reverse-highlight-btn" id="symptomHighlightBtn" style="display:none">グラフ上でハイライト</button>
+      <button class="reverse-highlight-btn" id="symptomHighlightBtn" style="display:none">ハイライト解除</button>
       <div class="reverse-results" id="symptomResults"></div>
     </div>
   </div>
   <div class="graph-container">
     <div id="cy"></div>
-    <div class="legend">
-      <div class="legend-item"><span class="legend-line" style="background:#4caf50"></span>相乗</div>
-      <div class="legend-item"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</div>
-      <div class="legend-item"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</div>
-      <div class="legend-evidence">
-        <div class="legend-item"><span class="color-dot" style="background:#2e7d32;border:2px solid #2e7d32"></span>確立</div>
-        <div class="legend-item"><span class="color-dot" style="background:#fff;border:2px solid #f57f17"></span>有力</div>
-        <div class="legend-item"><span class="color-dot" style="background:#fff;border:2px dashed #c62828"></span>限定的</div>
+    <div class="legend" id="legend">
+      <button class="legend-toggle-btn" id="legendToggle" aria-expanded="true">▲ 凡例</button>
+      <div class="legend-body" id="legendBody">
+        <div class="legend-section">
+          <div class="legend-section-title">形状（大カテゴリ）</div>
+          <div class="legend-item"><span class="shape-circle-icon"></span>ビタミン</div>
+          <div class="legend-item"><span class="shape-triangle-icon"></span>ミネラル</div>
+          <div class="legend-item"><span class="shape-square-icon"></span>アミノ酸</div>
+        </div>
+        <div class="legend-section">
+          <div class="legend-section-title">枠線（エビデンス）</div>
+          <div class="legend-item"><span class="border-solid-icon"></span>確立</div>
+          <div class="legend-item"><span class="border-dashed-icon"></span>有力</div>
+          <div class="legend-item"><span class="border-dotted-icon"></span>限定的</div>
+        </div>
+        <div class="legend-section">
+          <div class="legend-section-title">線（エッジ）</div>
+          <div class="legend-item"><span class="legend-line" style="background:#4caf50"></span>相乗</div>
+          <div class="legend-item"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</div>
+          <div class="legend-item"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</div>
+        </div>
+        <div class="legend-section">
+          <div class="legend-section-title">枠色（状態検索）</div>
+          <div class="legend-item"><span class="color-dot" style="background:#e65100;border:2px solid #e65100"></span>少なめ傾向に関連</div>
+          <div class="legend-item"><span class="color-dot" style="background:#c62828;border:2px dashed #c62828"></span>多め傾向に関連</div>
+        </div>
+        <div class="legend-disclaimer">この表示は診断・治療・疾病予防を目的としません</div>
       </div>
     </div>
     <div class="disclaimer">※ 食品成分値は日本食品標準成分表等を参考にした概算値です。エビデンスレベルは主要な学術機関の評価に基づきます。掲載情報は一般的な参考情報であり、診断・治療・疾病予防を目的としません。</div>
@@ -329,6 +368,22 @@ const EVIDENCE_LABELS = {
 };
 
 // ============================================================
+// PATTERN IMAGES (SVG data URI) for deficiency/excess match nodes
+// ============================================================
+const _stripeImgSrc = 'data:image/svg+xml;base64,' + btoa(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10">' +
+  '<line x1="0" y1="10" x2="10" y2="0" stroke="rgba(255,255,255,0.3)" stroke-width="2.5"/>' +
+  '<line x1="-5" y1="5" x2="5" y2="-5" stroke="rgba(255,255,255,0.3)" stroke-width="2.5"/>' +
+  '<line x1="5" y1="15" x2="15" y2="5" stroke="rgba(255,255,255,0.3)" stroke-width="2.5"/>' +
+  '</svg>'
+);
+const _dotImgSrc = 'data:image/svg+xml;base64,' + btoa(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">' +
+  '<circle cx="4" cy="4" r="1.8" fill="rgba(255,255,255,0.4)"/>' +
+  '</svg>'
+);
+
+// ============================================================
 // BUILD CYTOSCAPE ELEMENTS
 // ============================================================
 const cyElements = [];
@@ -347,6 +402,7 @@ const cy = cytoscape({
   container: document.getElementById('cy'),
   elements: cyElements,
   style: [
+    // Base node style
     {selector:'node',style:{
       'background-color':'data(color)',
       'label':'data(label)',
@@ -356,31 +412,49 @@ const cy = cytoscape({
       'text-valign':'bottom',
       'text-margin-y':4,
       'width':32,'height':32,
-      'border-width':2,'border-color':'#fff',
+      'border-width':2,'border-color':'rgba(0,0,0,0.2)','border-style':'solid',
       'text-outline-width':2,'text-outline-color':'#fff',
-      'transition-property':'opacity,width,height,border-color',
+      'transition-property':'opacity,width,height,border-color,border-width',
       'transition-duration':'0.2s'
     }},
-    {selector:'node:selected',style:{
-      'border-color':'#2c3e50','border-width':3,'width':40,'height':40
-    }},
-    {selector:'node.highlighted',style:{
-      'border-color':'#f39c12','border-width':3,'width':40,'height':40
-    }},
-    {selector:'node.dimmed',style:{
-      'opacity':0.15
-    }},
-    {selector:'node.searchMatch',style:{
-      'border-color':'#e74c3c','border-width':3,'width':42,'height':42
-    }},
-    {selector:'node.hidden',style:{
-      'display':'none'
+    // Shape by category (data selectors — lower specificity than class selectors)
+    {selector:'node[category="vitamin"]',   style:{'shape':'ellipse'}},
+    {selector:'node[category="mineral"]',   style:{'shape':'triangle'}},
+    {selector:'node[category="aminoAcid"]', style:{'shape':'rectangle'}},
+    // Evidence level by border style
+    {selector:'node[evidence="established"]',style:{
+      'border-style':'solid','border-color':'rgba(0,0,0,0.25)','border-width':2
     }},
     {selector:'node[evidence="probable"]',style:{
       'border-style':'dashed','border-color':'#f57f17','border-width':2.5
     }},
     {selector:'node[evidence="limited"]',style:{
-      'border-style':'dashed','border-color':'#e57373','border-width':2.5,'opacity':0.75
+      'border-style':'dotted','border-color':'#e57373','border-width':2.5,'opacity':0.75
+    }},
+    // Class-based overrides — come after data selectors to take precedence
+    {selector:'node:selected',style:{
+      'border-color':'#2c3e50','border-style':'solid','border-width':3,'width':40,'height':40,'opacity':1
+    }},
+    {selector:'node.highlighted',style:{
+      'border-color':'#f39c12','border-style':'solid','border-width':3,'width':40,'height':40,'opacity':1
+    }},
+    {selector:'node.dimmed',style:{
+      'opacity':0.12
+    }},
+    {selector:'node.searchMatch',style:{
+      'border-color':'#e74c3c','border-style':'solid','border-width':3,'width':42,'height':42,'opacity':1
+    }},
+    // Symptom search: 少なめ傾向=斜線(stripe), 多め傾向=ドット(dot)
+    {selector:'node.deficiencyMatch',style:{
+      'border-color':'#e65100','border-style':'solid','border-width':4,'width':44,'height':44,'opacity':1,
+      'background-image':_stripeImgSrc,'background-fit':'none','background-repeat':'repeat'
+    }},
+    {selector:'node.excessMatch',style:{
+      'border-color':'#c62828','border-style':'dashed','border-width':4,'width':44,'height':44,'opacity':1,
+      'background-image':_dotImgSrc,'background-fit':'none','background-repeat':'repeat'
+    }},
+    {selector:'node.hidden',style:{
+      'display':'none'
     }},
     {selector:'edge',style:{
       'line-color':'data(color)',
@@ -606,7 +680,8 @@ function showDetail(nodeId){
 }
 
 function highlightNode(nodeId){
-  cy.elements().removeClass('highlighted dimmed');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+  symptomHighlightBtn.style.display = 'none';
   const node = cy.getElementById(nodeId);
   const neighborhood = node.closedNeighborhood();
   cy.elements().not(neighborhood).addClass('dimmed');
@@ -622,8 +697,9 @@ cy.on('tap','node', e=>{
 
 cy.on('tap', e=>{
   if(e.target === cy){
-    cy.elements().removeClass('highlighted dimmed searchMatch');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
     detailPanel.classList.remove('open');
+    symptomHighlightBtn.style.display = 'none';
   }
 });
 
@@ -633,7 +709,8 @@ cy.on('tap', e=>{
 const searchInput = document.getElementById('searchInput');
 searchInput.addEventListener('input', ()=>{
   const q = searchInput.value.trim().toLowerCase();
-  cy.nodes().removeClass('searchMatch dimmed');
+  cy.nodes().removeClass('searchMatch dimmed deficiencyMatch excessMatch');
+  symptomHighlightBtn.style.display = 'none';
   if(!q){return;}
   const matches = cy.nodes().filter(n=>{
     const d = nutrients.find(x=>x.id===n.id());
@@ -692,7 +769,7 @@ document.querySelectorAll('#catFilters input, #subFilters input, #evidenceFilter
 // REVERSE LOOKUP: Shared Utilities
 // ============================================================
 function highlightMultipleNodes(nodeIds){
-  cy.elements().removeClass('highlighted dimmed searchMatch');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
   if(nodeIds.length === 0) return;
   const matchNodes = cy.nodes().filter(n=>nodeIds.includes(n.id()));
   cy.elements().not(matchNodes).addClass('dimmed');
@@ -814,7 +891,7 @@ foodSearchBtn.addEventListener('click', ()=>{
     foodHighlightBtn.style.display='none';
     lastFoodMatches=[];
     document.querySelectorAll('#foodTags .tag-chip').forEach(c=>c.classList.remove('active'));
-    cy.elements().removeClass('highlighted dimmed searchMatch');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
   } else {
     foodSearchInput.focus();
   }
@@ -912,6 +989,16 @@ const symptomHighlightBtn = document.getElementById('symptomHighlightBtn');
 
 let lastSymptomMatches = [];
 
+// 症状検索の状態をすべてリセットする（パネルは閉じない）
+function resetSymptomSearch(){
+  symptomSearchInput.value = '';
+  symptomResults.innerHTML = '';
+  symptomHighlightBtn.style.display = 'none';
+  lastSymptomMatches = [];
+  document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+}
+
 symptomSearchBtn.addEventListener('click', ()=>{
   const open = !symptomSearchInput.classList.contains('show');
   symptomSearchInput.classList.toggle('show', open);
@@ -919,11 +1006,7 @@ symptomSearchBtn.addEventListener('click', ()=>{
   symptomSort.classList.toggle('show', open);
   symptomSearchBtn.classList.toggle('active', open);
   if(!open){
-    symptomSearchInput.value='';symptomResults.innerHTML='';
-    symptomHighlightBtn.style.display='none';
-    lastSymptomMatches=[];
-    document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
-    cy.elements().removeClass('highlighted dimmed searchMatch');
+    resetSymptomSearch();
   } else {
     symptomSearchInput.focus();
   }
@@ -933,22 +1016,50 @@ function doSymptomSearch(){
   const q = symptomSearchInput.value.trim().toLowerCase();
   symptomResults.innerHTML = '';
   lastSymptomMatches = [];
-  symptomHighlightBtn.style.display='none';
-  if(!q) return;
-  const matches = [];
+  symptomHighlightBtn.style.display = 'none';
+
+  // 前の検索ハイライトを必ずクリア
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+
+  if(!q){
+    document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
+    return;
+  }
+
+  const defMatches = [];
+  const exMatches  = [];
   nutrients.forEach(n=>{
-    const defMatch = n.deficiency.toLowerCase().includes(q);
-    const exMatch = n.excess.toLowerCase().includes(q);
-    if(defMatch) matches.push({nutrient:n, type:'欠乏', text:n.deficiency});
-    if(exMatch) matches.push({nutrient:n, type:'過剰', text:n.excess});
+    if(n.deficiency.toLowerCase().includes(q)) defMatches.push({nutrient:n, matchType:'deficiency'});
+    if(n.excess.toLowerCase().includes(q))     exMatches.push({nutrient:n, matchType:'excess'});
   });
-  lastSymptomMatches = matches;
-  const sorted = sortResults(matches, symptomSortSelect.value, 'nutrient');
+
+  const allMatches = [...defMatches, ...exMatches];
+  lastSymptomMatches = allMatches;
+
+  if(allMatches.length === 0){
+    symptomResults.innerHTML = '<div style="padding:6px 4px;color:#999;font-size:11px">一致する参考情報が見つかりませんでした</div>';
+    return;
+  }
+
+  // 自動ハイライト（ボタン不要）
+  const defIds = [...new Set(defMatches.map(m=>m.nutrient.id))];
+  const exIds  = [...new Set(exMatches.map(m=>m.nutrient.id))];
+  const allIds = [...new Set(allMatches.map(m=>m.nutrient.id))];
+  const matchNodes = cy.nodes().filter(n=>allIds.includes(n.id()));
+  cy.elements().not(matchNodes).addClass('dimmed');
+  matchNodes.forEach(n=>n.removeClass('dimmed'));
+  defIds.forEach(id=>cy.getElementById(id).addClass('deficiencyMatch'));
+  exIds.forEach(id=>cy.getElementById(id).addClass('excessMatch'));
+  cy.fit(matchNodes, 40);
+
+  // 結果リスト描画（「欠乏」「過剰」は内部判定のみ、表示は安全な表現）
+  const sorted = sortResults(allMatches, symptomSortSelect.value, 'nutrient');
   renderGrouped(symptomResults, sorted, symptomSortSelect.value, 'nutrient', m=>{
     const div = document.createElement('div');
     div.className = 'result-item';
-    const typeColor = m.type === '欠乏' ? '#e65100' : '#c62828';
-    div.innerHTML = `<span style="color:${COLORS[m.nutrient.subCategory].bg}">●</span> <strong>${m.nutrient.name}</strong> <span style="color:${typeColor};font-size:10px">[${m.type}]</span>`;
+    const label = m.matchType === 'deficiency' ? '少なめ傾向に関連' : '多め傾向に関連';
+    const color = m.matchType === 'deficiency' ? '#e65100' : '#c62828';
+    div.innerHTML = `<span style="color:${COLORS[m.nutrient.subCategory].bg}">●</span> <strong>${m.nutrient.name}</strong> <span class="result-type-badge" style="background:${color}">${label}</span>`;
     div.addEventListener('click', ()=>{
       const node = cy.getElementById(m.nutrient.id);
       node.select();
@@ -958,14 +1069,30 @@ function doSymptomSearch(){
     });
     return div;
   });
-  if(matches.length > 0) symptomHighlightBtn.style.display='block';
+
+  // 免責・参考案内
+  const note = document.createElement('div');
+  note.className = 'symptom-search-note';
+  note.textContent = '気になる状態に関連する一般的な参考情報です。診断・治療・疾病予防を目的とするものではありません。必要に応じて専門職にご相談ください。';
+  symptomResults.appendChild(note);
+
+  // 解除ボタンを表示
+  symptomHighlightBtn.style.display = 'block';
 }
 
 symptomSearchInput.addEventListener('input', doSymptomSearch);
 symptomSortSelect.addEventListener('change', doSymptomSearch);
+
+// Enter: 再検索 / Escape: リセット
+symptomSearchInput.addEventListener('keydown', e=>{
+  if(e.key === 'Enter')  doSymptomSearch();
+  if(e.key === 'Escape') resetSymptomSearch();
+});
+
+// 「ハイライト解除」ボタン → クリアのみ（パネルは閉じない）
 symptomHighlightBtn.addEventListener('click', ()=>{
-  const ids = [...new Set(lastSymptomMatches.map(m=>m.nutrient.id))];
-  highlightMultipleNodes(ids);
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+  symptomHighlightBtn.style.display = 'none';
 });
 
 // ============================================================
@@ -974,8 +1101,19 @@ symptomHighlightBtn.addEventListener('click', ()=>{
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     detailPanel.classList.remove('open');
-    cy.elements().removeClass('highlighted dimmed searchMatch');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
   }
+});
+
+// ============================================================
+// LEGEND TOGGLE
+// ============================================================
+document.getElementById('legendToggle').addEventListener('click', ()=>{
+  const body = document.getElementById('legendBody');
+  const btn  = document.getElementById('legendToggle');
+  const collapsed = body.classList.toggle('collapsed');
+  btn.textContent = collapsed ? '▼ 凡例' : '▲ 凡例';
+  btn.setAttribute('aria-expanded', !collapsed);
 });
 
 // ============================================================
