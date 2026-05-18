@@ -8,6 +8,14 @@ const NUTRIENT_PROMPT_KEYS = NUTRIENT_KEYS.map(k => {
   return `"${k}": ${n.name}(${n.unit})`;
 }).join(', ');
 
+// ============================================================
+// APIキー取得（単一の共通関数 — app.js も gemini.js もここを参照する）
+// sessionStorage（セッション限定）→ localStorage（端末保存）の順で探す
+// ============================================================
+function getApiKey() {
+  return sessionStorage.getItem('eiyou_apikey_session') || localStorage.getItem('eiyou_apikey') || '';
+}
+
 // AbortController（外部からキャンセル可能）
 let _currentAbort = null;
 function cancelGemini() {
@@ -16,8 +24,8 @@ function cancelGemini() {
 
 // Gemini API呼び出し
 async function callGemini(prompt, imageBase64) {
-  // sessionStorage（セッション限定）→ localStorage（端末保存）の順で取得
-  const apiKey = sessionStorage.getItem('eiyou_apikey_session') || localStorage.getItem('eiyou_apikey');
+  // 共通関数 getApiKey() で取得（checkApiKey と同じ取得元を保証）
+  const apiKey = getApiKey();
   if (!apiKey) throw new Error('API_KEY_MISSING');
 
   const parts = [];

@@ -23,10 +23,7 @@ function saveProfile(p) {
 }
 
 // --- API Key Helpers ---
-// sessionStorage（セッション限定）→ localStorage（端末保存）の順で取得
-function getApiKey() {
-  return sessionStorage.getItem('eiyou_apikey_session') || localStorage.getItem('eiyou_apikey') || '';
-}
+// getApiKey() は gemini.js で定義（同ファイルが先に読み込まれるため利用可能）
 // mode: 'local'=localStorage, 'session'=sessionStorage
 function saveApiKey(key, mode) {
   localStorage.removeItem('eiyou_apikey');
@@ -440,10 +437,10 @@ function handleApiError(err) {
   if (msg === 'CANCELLED') {
     showToast('キャンセルしました', 'info');
   } else if (msg === 'API_KEY_MISSING') {
-    showToast('APIキーが未設定です', 'error');
+    showToast('APIキーが見つかりません。設定でAPIキーを入力し、保存してください。', 'error');
     openModal('settingsModal');
   } else if (msg === 'API_KEY_INVALID') {
-    showToast('APIキーが無効です。設定を確認してください', 'error');
+    showToast('APIキーが無効です。キーを確認し、再度保存してください。', 'error');
   } else if (msg.startsWith('RATE_LIMITED:')) {
     showToast('レート制限: ' + msg.replace('RATE_LIMITED:', ''), 'error');
   } else if (msg.startsWith('BAD_REQUEST:')) {
