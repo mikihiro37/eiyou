@@ -440,6 +440,7 @@
     </div>
     <div class="modal-body">
       <div id="bulkProfileSummary"></div>
+      <div id="bulkMetaSection"></div>
       <div id="bulkBarChart"></div>
       <div id="bulkAlerts"></div>
       <div id="bulkMealBreakdown"></div>
@@ -480,11 +481,11 @@
         <ul style="margin:8px 0 4px 16px;color:#555">
           <li>食事内容を解析する際、入力内容が <strong>Google Gemini API</strong> へ送信されます。</li>
           <li>APIキーはご自身のGoogle アカウントで取得したものをご使用ください（BYOK構成）。</li>
-          <li>APIキーはこの端末のブラウザ内（localStorage）にのみ保存されます。外部サーバーには送信されません。</li>
+          <li>APIキーはこの端末のブラウザ内（localStorage / sessionStorage）にのみ保存されます。外部サーバーには送信されません。</li>
           <li><strong>共用端末での使用は避けてください。</strong>使用後は設定画面の「APIキーを削除」から削除できます。</li>
+          <li>設定画面で「このセッション中だけ使う」を選ぶと、ブラウザを閉じるとキーが消えます。</li>
           <li>Googleの利用規約・プライバシーポリシーが適用されます。</li>
         </ul>
-        <!-- TODO Phase 1b: sessionStorage / 保存しない選択肢を検討 -->
       </details>
 
       <details style="margin-bottom:10px">

@@ -330,14 +330,18 @@ formAnalyzeBtn.addEventListener('click', async () => {
   if (!checkApiKey()) return;
   showLoading('食事を解析中...');
   try {
-    const nutrients = await analyzeFormItems(foodItems);
+    const result = await analyzeFormItems(foodItems);
     hideLoading();
     showConfirmModal({
       date: document.getElementById('formDate').value,
       mealType: document.getElementById('formMeal').value,
       inputMethod: 'form',
       items: [...foodItems],
-      nutrients
+      nutrients:     result.nutrients,
+      assumptions:   result.assumptions,
+      uncertainItems: result.uncertainItems,
+      confidence:    result.confidence,
+      warnings:      result.warnings
     });
   } catch (err) {
     hideLoading();
@@ -372,8 +376,12 @@ photoAnalyzeBtn.addEventListener('click', async () => {
       date: document.getElementById('photoDate').value,
       mealType: document.getElementById('photoMeal').value,
       inputMethod: 'photo',
-      items: result.items,
-      nutrients: result.nutrients
+      items: result.estimatedFoods,
+      nutrients:     result.nutrients,
+      assumptions:   result.assumptions,
+      uncertainItems: result.uncertainItems,
+      confidence:    result.confidence,
+      warnings:      result.warnings
     });
   } catch (err) {
     hideLoading();
@@ -397,8 +405,12 @@ textAnalyzeBtn.addEventListener('click', async () => {
       date: result.date,
       mealType: result.mealType,
       inputMethod: 'text',
-      items: result.items,
-      nutrients: result.nutrients
+      items: result.estimatedFoods,
+      nutrients:     result.nutrients,
+      assumptions:   result.assumptions,
+      uncertainItems: result.uncertainItems,
+      confidence:    result.confidence,
+      warnings:      result.warnings
     });
   } catch (err) {
     hideLoading();
@@ -465,12 +477,37 @@ function showConfirmModal(data) {
   pendingMealData = data;
   const body = document.getElementById('confirmBody');
 
-  // Items list
-  const itemsHtml = data.items.map(it =>
-    `<span style="display:inline-block;background:#f0f0f0;padding:2px 8px;border-radius:4px;margin:2px;font-size:12px">${esc(it.name)} ${esc(it.quantity || '')} ${it.grams ? esc(it.grams)+'g' : ''}</span>`
+  // 1. 推定した食事内容
+  const itemsHtml = (data.items || []).map(it =>
+    `<span class="confirm-food-tag">${esc(it.name)} ${esc(it.quantity || '')}${it.grams ? ' '+esc(String(it.grams))+'g' : ''}</span>`
   ).join('');
 
-  // Editable nutrient table
+  // 2. 推定精度・仮定・不確実性セクション
+  const confidence = data.confidence || '中';
+  const confClass  = {'低':'conf-low','中':'conf-mid','高':'conf-high'}[confidence] || 'conf-mid';
+
+  let metaHtml = `<div class="confirm-meta-section">
+    <div class="confirm-meta-row">
+      <span class="confirm-meta-label">推定精度</span>
+      <span class="confidence-badge ${confClass}">${esc(confidence)}</span>
+      <span class="confirm-meta-note">AIによる概算です</span>
+    </div>`;
+
+  if ((data.assumptions || []).length > 0) {
+    metaHtml += `<div class="confirm-meta-sub">仮定した内容</div>
+      <ul class="confirm-meta-list">
+        ${data.assumptions.map(a => `<li>${esc(a)}</li>`).join('')}
+      </ul>`;
+  }
+  if ((data.uncertainItems || []).length > 0) {
+    metaHtml += `<div class="confirm-meta-sub">不確実な項目</div>
+      <ul class="confirm-meta-list uncertain">
+        ${data.uncertainItems.map(u => `<li>${esc(u)}</li>`).join('')}
+      </ul>`;
+  }
+  metaHtml += '</div>';
+
+  // 3. 編集可能な栄養素テーブル
   const groupedKeys = {};
   NUTRIENT_KEYS.forEach(k => {
     const info = NUTRIENT_INFO[k];
@@ -478,31 +515,48 @@ function showConfirmModal(data) {
     groupedKeys[info.group].push(k);
   });
 
-  let tableHtml = '<table class="nutrient-edit-table"><thead><tr><th>栄養素</th><th>推定値</th><th>単位</th></tr></thead><tbody>';
+  let tableHtml = '<table class="nutrient-edit-table"><thead><tr><th>栄養素</th><th>概算値</th><th>単位</th><th style="font-size:10px;color:#aaa">指標種別</th></tr></thead><tbody>';
   for (const group of NUTRIENT_GROUPS) {
     const keys = groupedKeys[group] || [];
     const color = GROUP_COLORS[group] || '#666';
-    tableHtml += `<tr><td colspan="3"><span class="nutrient-edit-group" style="background:${color}">${group}</span></td></tr>`;
+    tableHtml += `<tr><td colspan="4"><span class="nutrient-edit-group" style="background:${color}">${group}</span></td></tr>`;
     for (const k of keys) {
       const info = NUTRIENT_INFO[k];
-      const val = data.nutrients[k] || 0;
-      // マクロとビタミン・ミネラル主要のみ編集表示、アミノ酸は折りたたみ
+      const val  = data.nutrients[k] || 0;
+      const refType = info.referenceType ? `<span style="font-size:10px;color:#bbb">${esc(info.referenceType)}</span>` : '';
       tableHtml += `<tr>
-        <td>${info.name}</td>
+        <td>${esc(info.name)}</td>
         <td><input type="number" data-key="${k}" value="${Math.round(val * 10) / 10}" step="any" min="0"></td>
-        <td style="color:#999;font-size:11px">${info.unit}</td>
+        <td style="color:#999;font-size:11px">${esc(info.unit)}</td>
+        <td>${refType}</td>
       </tr>`;
     }
   }
   tableHtml += '</tbody></table>';
 
+  // 4. 注意事項（warnings）
+  let warningsHtml = '';
+  if ((data.warnings || []).length > 0) {
+    warningsHtml = `<div class="confirm-warnings">
+      ${data.warnings.map(w => `<div class="confirm-warning-item">${esc(w)}</div>`).join('')}
+    </div>`;
+  }
+
+  // 5. 免責表示
+  const disclaimerHtml = `<div class="confirm-disclaimer">${esc(REFERENCE_METADATA.versionCaution)}</div>`;
+
   body.innerHTML = `
-    <div style="margin-bottom:12px">
-      <div style="font-size:12px;color:#888;margin-bottom:4px">食品</div>
-      <div>${itemsHtml || '<span style="color:#ccc">食品情報なし</span>'}</div>
+    <div class="confirm-section">
+      <div class="confirm-section-title">推定した食事内容</div>
+      <div>${itemsHtml || '<span style="color:#ccc;font-size:12px">食品情報なし</span>'}</div>
     </div>
-    <div style="font-size:12px;color:#888;margin-bottom:4px">栄養素（値を修正できます）</div>
-    <div style="max-height:400px;overflow-y:auto">${tableHtml}</div>
+    ${metaHtml}
+    <div class="confirm-section">
+      <div class="confirm-section-title">栄養素の参考概算値（値を修正できます）</div>
+      <div style="max-height:360px;overflow-y:auto">${tableHtml}</div>
+    </div>
+    ${warningsHtml}
+    ${disclaimerHtml}
   `;
   openModal('confirmModal');
 }
@@ -693,19 +747,22 @@ function renderAlerts(daily, rda) {
     const pct = Math.round((daily[k] / rdaVal) * 100);
 
     if (k === 'na') {
-      // ナトリウムは過剰警告
+      // ナトリウムは参考値超過を表示
       if (pct > 150) {
         alerts.push({key:k, pct, type:'excess',
           icon: pct > 200 ? '🔴' : '🟠',
-          title: `${info.name} ${pct}%`,
-          desc: info.excess || '過剰摂取に注意'
+          title: info.name,
+          pctText: `参考値の${pct}%`,
+          note: '食塩（ナトリウム）の多い食事傾向があります'
         });
       }
     } else if (pct < 80 && info.deficiency) {
+      // 病名・症状名は表示せず、傾向のみ表示
       alerts.push({key:k, pct, type: pct < 50 ? 'danger' : 'warning',
         icon: pct < 50 ? '🔴' : '🟡',
-        title: `${info.name} ${pct}%`,
-        desc: info.deficiency
+        title: info.name,
+        pctText: `参考値の${pct}%`,
+        note: pct < 50 ? '摂取量が参考値を大きく下回っています' : '摂取量が参考値をやや下回っています'
       });
     }
   });
@@ -718,16 +775,16 @@ function renderAlerts(daily, rda) {
   alertCard.style.display = '';
   alertCount.textContent = alerts.length;
 
-  alertContent.innerHTML = alerts.map(a => {
-    const tags = a.desc.split('、').map(t => `<span class="alert-tag">${t}</span>`).join('');
-    return `<div class="alert-item ${a.type}">
+  alertContent.innerHTML = alerts.map(a =>
+    `<div class="alert-item ${a.type}">
       <span class="alert-icon">${a.icon}</span>
       <div class="alert-body">
-        <div class="alert-title">${a.title}</div>
-        <div class="alert-tags">${tags}</div>
+        <div class="alert-title">${esc(a.title)}</div>
+        <div class="alert-sub">${esc(a.pctText)} — ${esc(a.note)}</div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`
+  ).join('') +
+  '<div class="alert-footer-note">摂取傾向の参考表示です。食事の見直しや健康管理については専門職にご相談ください。</div>';
 
   // Show suggestion card
   document.getElementById('suggestCard').style.display = '';
