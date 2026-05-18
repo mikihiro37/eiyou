@@ -113,6 +113,7 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
 .result-type-badge{font-size:9px;padding:1px 5px;border-radius:8px;color:#fff;margin-left:3px;white-space:nowrap;display:inline-block;vertical-align:middle;font-weight:600}
 /* Symptom search note */
 .symptom-search-note{font-size:9px;color:#bbb;padding:4px 2px;line-height:1.4;margin-top:4px;border-top:1px solid #eee}
+.symptom-static-note{font-size:10px;color:#999;line-height:1.5;padding:4px 2px 6px;margin-top:2px}
 /* Left-panel sub-labels and how-to-read collapsible */
 .lp-sub-label{font-size:10px;color:#aaa;font-weight:600;letter-spacing:.5px;margin:8px 0 3px}
 details.how-to-read summary{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid #eee;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
@@ -201,8 +202,9 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
       <div class="reverse-sort" id="foodSort"><label>並び:</label><select id="foodSortSelect"><option value="default">検索順</option><option value="category">カテゴリ別</option><option value="subcategory">サブカテゴリ別</option><option value="name">五十音順</option></select></div>
       <button class="reverse-highlight-btn" id="foodHighlightBtn" style="display:none">グラフ上でハイライト</button>
       <div class="reverse-results" id="foodResults"></div>
-      <button class="reverse-btn" id="symptomSearchBtn">気になる状態 → 関連栄養素</button>
-      <input type="text" class="reverse-input" id="symptomSearchInput" placeholder="気になる状態を入力 or 下から選択...">
+      <button class="reverse-btn" id="symptomSearchBtn">症状 → 関連栄養素</button>
+      <div class="symptom-static-note">症状と栄養素の一般的な関連を調べるための参考機能です。診断・治療・症状改善を目的としたものではありません。気になる症状が続く場合は専門職へご相談ください。</div>
+      <input type="text" class="reverse-input" id="symptomSearchInput" placeholder="症状を入力 or 下から選択...">
       <div class="tag-chips" id="symptomTags"></div>
       <div class="reverse-sort" id="symptomSort"><label>並び:</label><select id="symptomSortSelect"><option value="default">検索順</option><option value="category">カテゴリ別</option><option value="subcategory">サブカテゴリ別</option><option value="name">五十音順</option></select></div>
       <button class="reverse-highlight-btn" id="symptomHighlightBtn" style="display:none">ハイライト解除</button>
@@ -1063,7 +1065,7 @@ function doSymptomSearch(){
   renderGrouped(symptomResults, sorted, symptomSortSelect.value, 'nutrient', m=>{
     const div = document.createElement('div');
     div.className = 'result-item';
-    const label = m.matchType === 'deficiency' ? '少なめ傾向に関連' : '多め傾向に関連';
+    const label = m.matchType === 'deficiency' ? '関連の可能性あり（少なめ傾向）' : '関連の可能性あり（多め傾向）';
     const color = m.matchType === 'deficiency' ? '#e65100' : '#c62828';
     div.innerHTML = `<span style="color:${COLORS[m.nutrient.subCategory].bg}">●</span> <strong>${m.nutrient.name}</strong> <span class="result-type-badge" style="background:${color}">${label}</span>`;
     div.addEventListener('click', ()=>{
@@ -1079,7 +1081,7 @@ function doSymptomSearch(){
   // 免責・参考案内
   const note = document.createElement('div');
   note.className = 'symptom-search-note';
-  note.textContent = '気になる状態に関連する一般的な参考情報です。診断・治療・疾病予防を目的とするものではありません。必要に応じて専門職にご相談ください。';
+  note.textContent = '※ 症状との関連は一般的な参考情報です。掲載情報を診断・治療・症状改善の根拠としないでください。';
   symptomResults.appendChild(note);
 
   // 解除ボタンを表示
