@@ -66,7 +66,6 @@ async function callGemini(prompt, imageBase64) {
   _currentAbort = null;
 
   if (!resp.ok) {
-    // エラーレスポンスの詳細を取得
     let detail = '';
     try {
       const errBody = await resp.json();
@@ -97,82 +96,160 @@ async function callGemini(prompt, imageBase64) {
   return JSON.parse(text);
 }
 
-// レスポンスのバリデーション・正規化
+// 栄養素値のバリデーション・正規化（nutrients オブジェクト専用）
 function normalizeNutrients(raw) {
   const result = {};
   for (const key of NUTRIENT_KEYS) {
     const v = Number(raw[key]) || 0;
     result[key] = Math.max(0, v);
   }
-  // カロリーの範囲チェック
+  // カロリーの範囲チェック（参考ログ）
   if (result.calories < 10 || result.calories > 8000) {
     console.warn('Calorie value out of range:', result.calories);
   }
   return result;
 }
 
+// Gemini出力のメタ情報（仮定・不確実性・信頼度・注意事項）を正規化
+function normalizeMeta(raw) {
+  return {
+    assumptions:    Array.isArray(raw.assumptions)    ? raw.assumptions.map(String)    : [],
+    uncertainItems: Array.isArray(raw.uncertainItems) ? raw.uncertainItems.map(String) : [],
+    confidence:     (raw.confidence === '低' || raw.confidence === '高') ? raw.confidence : '中',
+    warnings:       Array.isArray(raw.warnings)       ? raw.warnings.map(String)       : [],
+    notForMedicalUse: true
+  };
+}
+
+// ============================================================
 // --- フォーム入力解析 ---
+// ============================================================
 async function analyzeFormItems(items) {
   const itemList = items.map(it =>
     `${it.name} ${it.quantity || '普通'} (${it.grams ? it.grams+'g' : '標準量'})`
   ).join('\n');
 
-  const prompt = `あなたは管理栄養士です。以下の食事内容の栄養素を推定してください。
+  const prompt = `あなたは食事記録の内容を整理し、栄養素を概算する補助ツールです。
+医療・診断・治療・疾病予防・栄養指導を目的とした出力は行いません。
+
+以下の食事内容について、各食材の栄養素の概算値を推定してください。
 
 食事内容:
 ${itemList}
 
-以下のJSON形式で各栄養素の推定値を数値で返してください。単位に注意してください。
-{${NUTRIENT_PROMPT_KEYS}}
-
-注意:
-- 全てのキーを含めてください
-- 値は数値のみ（文字列不可）
-- 日本食品標準成分表に基づいて推定
-- アミノ酸はmg単位で返してください`;
-
-  const raw = await callGemini(prompt);
-  return normalizeNutrients(raw);
-}
-
-// --- 写真解析 ---
-async function analyzePhoto(imageBase64) {
-  const prompt = `あなたは管理栄養士です。この食事の写真を分析してください。
+重要な前提:
+- 食材の産地・調理法・ブランドにより実際の栄養値は大きく異なります
+- 分量の記載がない場合は、日本の標準的な1人前を仮定します
+- 仮定した内容はassumptionsに記載してください
+- 判断できない食材や不明な内容はuncertainItemsに記載してください
+- 結果は食事を振り返るための参考情報です
+- 「改善」「予防」「効果がある」などの医療的表現は使用しないでください
 
 以下のJSON形式で返してください:
 {
-  "items": [{"name": "食品名", "quantity": "推定量", "grams": 推定グラム数}],
-  "nutrients": {${NUTRIENT_PROMPT_KEYS}}
+  "nutrients": {${NUTRIENT_PROMPT_KEYS}},
+  "assumptions": ["仮定した内容を日本語で箇条書き"],
+  "uncertainItems": ["推定が難しかった食材・内容"],
+  "confidence": "低または中または高",
+  "warnings": ["特記すべき注意事項（ない場合は空配列）"],
+  "notForMedicalUse": true
 }
 
+confidenceの基準:
+- 高: 食材・分量が明確で推定精度が比較的高い
+- 中: 概ね把握できるが一部に不明点がある
+- 低: 不明点が多く推定誤差が大きい
+
 注意:
-- 写真に写っている全ての食品を特定してください
-- nutrientsの全てのキーを含めてください
-- 値は数値のみ
-- 日本食品標準成分表に基づいて推定`;
+- nutrients の全てのキーを含めてください
+- 値は数値のみ（文字列不可）
+- 日本食品標準成分表を参考に概算
+- アミノ酸はmg単位`;
 
-  const raw = await callGemini(prompt, imageBase64);
-
+  const raw = await callGemini(prompt);
   return {
-    items: Array.isArray(raw.items) ? raw.items : [],
-    nutrients: normalizeNutrients(raw.nutrients || raw)
+    nutrients: normalizeNutrients(raw.nutrients || raw),
+    ...normalizeMeta(raw)
   };
 }
 
-// --- テキスト解析 ---
+// ============================================================
+// --- 写真解析 ---
+// ============================================================
+async function analyzePhoto(imageBase64) {
+  const prompt = `あなたは食事の写真から食べている内容を推定し、栄養素を概算する補助ツールです。
+医療・診断・治療・疾病予防・栄養指導を目的とした出力は行いません。
+
+この食事の写真に写っている食品を推定し、栄養素の概算値を計算してください。
+
+重要な前提:
+- 写真からの食品・分量の特定には誤差があります
+- 食材の産地・調理法・調味料の量は写真から正確に判断できません
+- 一般的な調理法と標準的な分量を仮定します
+- 写真に写っていない食品（飲み物など）は含まれません
+- 結果は食事を振り返るための参考情報です
+
+以下のJSON形式で返してください:
+{
+  "estimatedFoods": [{"name": "食品名", "quantity": "推定量", "grams": 推定グラム数}],
+  "nutrients": {${NUTRIENT_PROMPT_KEYS}},
+  "assumptions": ["仮定した内容を日本語で箇条書き"],
+  "uncertainItems": ["特定が難しかった食品・内容"],
+  "confidence": "低または中または高",
+  "warnings": ["特記すべき注意事項（ない場合は空配列）"],
+  "notForMedicalUse": true
+}
+
+confidenceの基準:
+- 高: 食品が明確に特定でき分量も推定しやすい
+- 中: 概ね特定できるが一部に不確かな点がある
+- 低: 写真が不鮮明または食品が特定しにくい
+
+注意:
+- 写真に写っている全ての食品を推定してください
+- nutrientsの全てのキーを含めてください
+- 値は数値のみ
+- 日本食品標準成分表を参考に概算`;
+
+  const raw = await callGemini(prompt, imageBase64);
+  return {
+    estimatedFoods: Array.isArray(raw.estimatedFoods) ? raw.estimatedFoods
+                  : Array.isArray(raw.items) ? raw.items : [],
+    nutrients: normalizeNutrients(raw.nutrients || raw),
+    ...normalizeMeta(raw)
+  };
+}
+
+// ============================================================
+// --- テキスト解析（1食分） ---
+// ============================================================
 async function analyzeText(text) {
   const today = new Date().toISOString().split('T')[0];
 
-  const prompt = `あなたは管理栄養士です。以下の食事の記述を分析してください。
+  const prompt = `あなたは食事の記述内容を構造化し、栄養素を概算する補助ツールです。
+医療・診断・治療・疾病予防・栄養指導を目的とした出力は行いません。
+
+以下の食事の記述を解析してください。
 
 入力: "${text}"
+
+重要な前提:
+- 文章から読み取れない食材・分量は、一般的なものを仮定します
+- 仮定した内容はassumptionsに記載してください
+- 特定できない内容はuncertainItemsに記載してください
+- 結果は食事を振り返るための参考情報です
 
 以下のJSON形式で返してください:
 {
   "date": "YYYY-MM-DD形式（推定できない場合は${today}）",
   "mealType": "breakfast/lunch/dinner/snackのいずれか",
-  "items": [{"name": "食品名", "quantity": "量", "grams": 推定グラム数}],
-  "nutrients": {${NUTRIENT_PROMPT_KEYS}}
+  "estimatedFoods": [{"name": "食品名", "quantity": "量", "grams": 推定グラム数}],
+  "nutrients": {${NUTRIENT_PROMPT_KEYS}},
+  "assumptions": ["仮定した内容を日本語で箇条書き"],
+  "uncertainItems": ["特定できなかった食材・内容"],
+  "confidence": "低または中または高",
+  "warnings": ["特記すべき注意事項（ない場合は空配列）"],
+  "notForMedicalUse": true
 }
 
 注意:
@@ -180,34 +257,40 @@ async function analyzeText(text) {
 - 「昨日」「一昨日」等は今日(${today})基準で計算
 - nutrientsの全てのキーを含めてください
 - 値は数値のみ
-- 日本食品標準成分表に基づいて推定`;
+- 日本食品標準成分表を参考に概算`;
 
   const raw = await callGemini(prompt);
-
   return {
-    date: raw.date || today,
+    date:    raw.date || today,
     mealType: raw.mealType || 'lunch',
-    items: Array.isArray(raw.items) ? raw.items : [],
-    nutrients: normalizeNutrients(raw.nutrients || raw)
+    estimatedFoods: Array.isArray(raw.estimatedFoods) ? raw.estimatedFoods
+                  : Array.isArray(raw.items) ? raw.items : [],
+    nutrients: normalizeNutrients(raw.nutrients || raw),
+    ...normalizeMeta(raw)
   };
 }
 
-// --- AI献立提案 ---
+// ============================================================
+// --- AI献立アイデア ---
+// ============================================================
 async function suggestMeals(deficiencies, excesses, days) {
   const defList = deficiencies.map(d =>
-    `${NUTRIENT_INFO[d.key].name}: 充足率${d.pct}%（RDA: ${d.rda}${NUTRIENT_INFO[d.key].unit}）`
+    `${NUTRIENT_INFO[d.key].name}: 参考値の${d.pct}%（参考値: ${d.rda}${NUTRIENT_INFO[d.key].unit}）`
   ).join('\n');
 
   const excList = excesses.map(d =>
-    `${NUTRIENT_INFO[d.key].name}: 充足率${d.pct}%（過剰）`
+    `${NUTRIENT_INFO[d.key].name}: 参考値の${d.pct}%`
   ).join('\n');
 
-  const prompt = `あなたは管理栄養士です。以下の栄養状態を改善する${days}日分の献立を提案してください。
+  const prompt = `あなたは食事内容の振り返りと参考情報の提供を補助するツールです。
+医療・診断・治療・疾病予防・栄養指導を目的とした出力は行いません。
 
-不足している栄養素:
+以下の栄養摂取傾向を参考に、${days}日分の食事の参考例を提案してください。
+
+参考値を下回っている傾向の栄養素:
 ${defList || 'なし'}
 
-過剰な栄養素:
+参考値を上回っている傾向の栄養素:
 ${excList || 'なし'}
 
 以下のJSON形式で返してください:
@@ -217,44 +300,53 @@ ${excList || 'なし'}
       "day": 1,
       "breakfast": {
         "dishes": [
-          {"category": "主食", "name": "玄米ご飯", "amount": "茶碗1杯（150g）", "tip": "白米より食物繊維・ビタミンB1が豊富"}
+          {"category": "主食", "name": "玄米ご飯", "amount": "茶碗1杯（150g）", "tip": "白米より食物繊維・ビタミンB1を含みます"}
         ]
       },
-      "lunch": {
-        "dishes": [同上の形式]
-      },
-      "dinner": {
-        "dishes": [同上の形式]
-      },
-      "point": "この日の献立全体のポイント（30字程度で簡潔に）"
+      "lunch": {"dishes": [同上の形式]},
+      "dinner": {"dishes": [同上の形式]},
+      "point": "この日の食事内容のポイント（30字程度で簡潔に）"
     }
   ]
 }
 
 categoryは「主食」「主菜」「副菜」「汁物」「デザート」「飲み物」のいずれか。
-各dishのtipには作り方のコツ・栄養面のワンポイントを1文で書いてください。
+各dishのtipには食材の特徴を事実として記載してください（例：「○○を多く含みます」）。
 
 注意:
-- 日本の家庭料理を中心に、簡単に作れるメニューを提案
-- 不足栄養素を重点的に補う食材を含める
-- 過剰な栄養素（特にナトリウム）は控えめに
-- 各食事は3〜5品で構成`;
+- 日本の家庭料理を中心に、取り入れやすいメニューを提案
+- 参考値を下回っている栄養素を含む食材を意識する
+- ナトリウムが多い傾向がある場合は塩分控えめの料理も含める
+- 各食事は3〜5品で構成
+- 「改善」「治療」「予防」「効果がある」などの医療的表現は使わないでください
+- 結果はあくまでも食事の参考例であることを念頭においてください`;
 
   return await callGemini(prompt);
 }
 
+// ============================================================
 // --- まとめてテキスト解析（複数日・複数食対応） ---
+// ============================================================
 async function analyzeBulkText(text) {
   const today = new Date().toISOString().split('T')[0];
-  const year = new Date().getFullYear();
+  const year  = new Date().getFullYear();
 
-  const prompt = `あなたは管理栄養士です。以下の食事記録を分析してください。
-複数日・複数食をまとめてパースし、各食材の栄養素を推定してください。
+  const prompt = `あなたは食事記録の内容を整理し、栄養素を概算する補助ツールです。
+医療・診断・治療・疾病予防・栄養指導を目的とした出力は行いません。
+
+以下の食事記録を解析してください。
+複数日・複数食をまとめてパースし、各食材の栄養素の概算値を推定してください。
 
 食事記録:
 """
 ${text}
 """
+
+重要な前提:
+- 食材・分量が不明な場合は一般的なものを仮定し、overallAssumptionsに記載
+- 特定できない食材・内容はoverallUncertainItemsに記載
+- 結果は食事を振り返るための参考情報です
+- 「改善」「予防」「効果がある」などの医療的表現は使わないでください
 
 以下のJSON形式で返してください:
 {
@@ -281,24 +373,28 @@ ${text}
         }
       ]
     }
-  ]
+  ],
+  "overallAssumptions": ["全体で仮定した内容を日本語で箇条書き"],
+  "overallUncertainItems": ["特定できなかった食材・内容"],
+  "overallConfidence": "低または中または高",
+  "warnings": ["特記すべき注意事項（ない場合は空配列）"],
+  "notForMedicalUse": true
 }
 
 ルール:
 - 「欠食」「食べてない」等はskipped:trueにし、itemsは空配列
 - 改行で途切れた食材名は結合して1つにする（例: "ブロ\\nッコリー" → "ブロッコリー"）
-- 曖昧な食材（「野菜サラダ」「丼」等、内容が特定できないもの）はambiguous:trueで2〜3の解釈候補を返す
+- 曖昧な食材（「野菜サラダ」「丼」等）はambiguous:trueで2〜3の解釈候補を返す
   - 各候補は栄養素が大きく異なるバリエーションを選ぶ
 - 明確な食材（「豆腐」「珈琲」「納豆」等）はambiguous:falseで候補1つ
 - 各解釈のnutrientsには全てのキーを含めること（値は数値のみ）
-- 日本食品標準成分表に基づいて推定
+- 日本食品標準成分表を参考に概算
 - 「朝」「昼」「夜」「夕」等からmealTypeを推定
 - 日付が推定できない場合は${today}を使用
 - アミノ酸はmg単位`;
 
   const raw = await callGemini(prompt);
 
-  // レスポンスの正規化
   if (!raw.days || !Array.isArray(raw.days)) {
     throw new Error('解析結果のフォーマットが不正です');
   }
@@ -314,7 +410,14 @@ ${text}
     });
   });
 
-  return raw;
+  return {
+    days: raw.days,
+    overallAssumptions:    Array.isArray(raw.overallAssumptions)    ? raw.overallAssumptions.map(String)    : [],
+    overallUncertainItems: Array.isArray(raw.overallUncertainItems) ? raw.overallUncertainItems.map(String) : [],
+    overallConfidence:     (raw.overallConfidence === '低' || raw.overallConfidence === '高') ? raw.overallConfidence : '中',
+    warnings:              Array.isArray(raw.warnings)              ? raw.warnings.map(String)              : [],
+    notForMedicalUse: true
+  };
 }
 
 // --- 画像リサイズ ---
@@ -333,7 +436,7 @@ function resizeImage(file, maxBytes) {
       img.onload = () => {
         const scale = Math.sqrt(maxBytes / file.size) * 0.9;
         const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * scale);
+        canvas.width  = Math.round(img.width  * scale);
         canvas.height = Math.round(img.height * scale);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);

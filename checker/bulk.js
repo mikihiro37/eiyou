@@ -90,6 +90,7 @@ function renderReport() {
   const numDays = _bulkResult?.days?.length || 1;
 
   renderProfileSummary(numDays);
+  renderBulkMeta();
   renderBarChart(daily, rda, numDays);
   renderAlertSection(daily, rda);
   renderMealBreakdown();
@@ -104,6 +105,40 @@ function renderProfileSummary(numDays) {
   document.getElementById('bulkProfileSummary').innerHTML =
     `<div class="bulk-profile-badge">${dateRange} | ${esc(String(p.age))}歳 ${esc(sexLabel)} ${esc(String(p.bodyWeight))}kg 活動量:${esc(actLabel)}` +
     (numDays > 1 ? ` | ${numDays}日間の1日平均` : '') + '</div>';
+}
+
+// --- 解析メタ情報（仮定・信頼度・注意事項） ---
+function renderBulkMeta() {
+  const container = document.getElementById('bulkMetaSection');
+  if (!container || !_bulkResult) return;
+
+  const conf = _bulkResult.overallConfidence || '中';
+  const confClass = {'低':'conf-low','中':'conf-mid','高':'conf-high'}[conf] || 'conf-mid';
+
+  const assumptions    = _bulkResult.overallAssumptions    || [];
+  const uncertainItems = _bulkResult.overallUncertainItems || [];
+  const warnings       = _bulkResult.warnings              || [];
+
+  let html = `<div class="confirm-meta-section" style="margin-bottom:10px">
+    <div class="confirm-meta-row">
+      <span class="confirm-meta-label">推定精度</span>
+      <span class="confidence-badge ${confClass}">${esc(conf)}</span>
+      <span class="confirm-meta-note">AIによる概算です</span>
+    </div>`;
+
+  if (assumptions.length > 0) {
+    html += `<div class="confirm-meta-sub">仮定した内容</div>
+      <ul class="confirm-meta-list">${assumptions.map(a => `<li>${esc(a)}</li>`).join('')}</ul>`;
+  }
+  if (uncertainItems.length > 0) {
+    html += `<div class="confirm-meta-sub">不確実な項目</div>
+      <ul class="confirm-meta-list uncertain">${uncertainItems.map(u => `<li>${esc(u)}</li>`).join('')}</ul>`;
+  }
+  if (warnings.length > 0) {
+    html += warnings.map(w => `<div class="confirm-warning-item">${esc(w)}</div>`).join('');
+  }
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 // --- バーチャート ---
@@ -157,32 +192,40 @@ function renderAlertSection(daily, rda) {
     const pct = Math.round((daily[k] / rdaVal) * 100);
 
     if (k === 'na') {
+      // ナトリウムは参考値超過を表示（病名・症状名は表示しない）
       if (pct > 150) {
         alerts.push({ icon: pct > 200 ? '🔴' : '🟠', type: 'excess',
-          title: `${info.name} ${pct}%`, desc: info.excess || '過剰摂取に注意' });
+          title: info.name,
+          pctText: `参考値の${pct}%`,
+          note: '食塩（ナトリウム）の多い食事傾向があります'
+        });
       }
     } else if (pct < 80 && info.deficiency) {
+      // 病名・症状名は表示せず、傾向のみ表示
       alerts.push({ icon: pct < 50 ? '🔴' : '🟡', type: pct < 50 ? 'danger' : 'warning',
-        title: `${info.name} ${pct}%`, desc: info.deficiency });
+        title: info.name,
+        pctText: `参考値の${pct}%`,
+        note: pct < 50 ? '摂取量が参考値を大きく下回っています' : '摂取量が参考値をやや下回っています'
+      });
     }
   });
 
   if (alerts.length === 0) {
-    container.innerHTML = '<div class="bulk-no-alert">不足・過剰な栄養素はありません ✅</div>';
+    container.innerHTML = '<div class="bulk-no-alert">参考値を大きく外れている栄養素はありません ✅</div>';
     return;
   }
 
-  container.innerHTML = '<div class="bulk-alert-title">不足・過剰アラート（' + alerts.length + '件）</div>' +
-    alerts.map(a => {
-      const tags = a.desc.split('、').map(t => `<span class="alert-tag">${t}</span>`).join('');
-      return `<div class="alert-item ${a.type}">
+  container.innerHTML = '<div class="bulk-alert-title">栄養バランス参考表示（' + alerts.length + '件）</div>' +
+    alerts.map(a =>
+      `<div class="alert-item ${a.type}">
         <span class="alert-icon">${a.icon}</span>
         <div class="alert-body">
-          <div class="alert-title">${a.title}</div>
-          <div class="alert-tags">${tags}</div>
+          <div class="alert-title">${esc(a.title)}</div>
+          <div class="alert-sub">${esc(a.pctText)} — ${esc(a.note)}</div>
         </div>
-      </div>`;
-    }).join('');
+      </div>`
+    ).join('') +
+    '<div class="alert-footer-note">摂取傾向の参考表示です。食事の見直しや健康管理については専門職にご相談ください。</div>';
 }
 
 // --- 食事内訳 + 解釈選択 ---
