@@ -166,7 +166,7 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
         <div class="legend-item"><span class="color-dot" style="background:#fff;border:2px dashed #c62828"></span>限定的</div>
       </div>
     </div>
-    <div class="disclaimer">※ 食品成分値は日本食品標準成分表等を参考にした概算値です。エビデンスレベルは主要な学術機関の評価に基づきます。</div>
+    <div class="disclaimer">※ 食品成分値は日本食品標準成分表等を参考にした概算値です。エビデンスレベルは主要な学術機関の評価に基づきます。掲載情報は一般的な参考情報であり、診断・治療・疾病予防を目的としません。</div>
   </div>
   <div class="right-panel" id="detailPanel">
     <button class="detail-close" id="detailClose">&times;</button>
@@ -583,6 +583,10 @@ function showDetail(nodeId){
     <div class="detail-section">
       <h4>関連栄養素 (${relations.length})</h4>
       ${relHtml}
+    </div>
+    <div style="font-size:10px;color:#aaa;padding:10px 16px;line-height:1.5;border-top:1px solid #f0f0f0">
+      ※ 欠乏・過剰に関する情報は一般的な参考情報です。診断・治療・疾病予防を目的とするものではありません。個別の判断は専門職にご相談ください。<br>
+      <!-- TODO Phase 1b: 相関エッジの根拠レベル・出典を個別レビューする -->
     </div>
   `;
   detailPanel.classList.add('open');

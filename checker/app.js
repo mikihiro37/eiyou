@@ -700,7 +700,7 @@ suggestBtn.addEventListener('click', async () => {
   if (!checkApiKey()) return;
   const data = window._lastAlerts;
   if (!data || !data.alerts.length) {
-    showToast('不足・過剰栄養素がありません', 'info');
+    showToast('参考表示する栄養素がありません', 'info');
     return;
   }
 
@@ -866,6 +866,26 @@ document.getElementById('factoryResetBtn').addEventListener('click', () => {
   renderAll();
 });
 
+// --- APIキー削除 ---
+document.getElementById('deleteApiKeyBtn').addEventListener('click', () => {
+  if (!confirm('Gemini APIキーをこの端末から削除します。よろしいですか？')) return;
+  localStorage.removeItem('eiyou_apikey');
+  document.getElementById('apiKeyInput').value = '';
+  showToast('APIキーを削除しました', 'info');
+});
+
+// --- プロフィール削除 ---
+document.getElementById('deleteProfileBtn').addEventListener('click', () => {
+  if (!confirm('プロフィール情報（年齢・性別・活動量・体重）を削除します。よろしいですか？')) return;
+  localStorage.removeItem('eiyou_profile');
+  const defaults = {age:35, sex:'male', activityLevel:'normal', bodyWeight:65};
+  document.getElementById('profileAge').value = defaults.age;
+  document.getElementById('profileSex').value = defaults.sex;
+  document.getElementById('profileActivity').value = defaults.activityLevel;
+  document.getElementById('profileWeight').value = defaults.bodyWeight;
+  showToast('プロフィール情報を削除しました', 'info');
+});
+
 // ============================================================
 // RENDER ALL
 // ============================================================
@@ -886,6 +906,18 @@ function renderAll() {
     cancelGemini();
     hideLoading();
   });
+
+  // About modal button
+  document.getElementById('aboutBtn').addEventListener('click', () => {
+    openModal('aboutModal');
+  });
+
+  // 初回訪問時に注意事項モーダルを表示
+  // TODO Phase 1b: sessionStorage / 保存しない選択肢を検討
+  if (!localStorage.getItem('eiyou_notice_v1')) {
+    openModal('aboutModal');
+    localStorage.setItem('eiyou_notice_v1', '1');
+  }
 
   // Set default dates
   const today = new Date().toISOString().split('T')[0];

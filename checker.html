@@ -14,6 +14,7 @@
   <h1>栄養バランスチェッカー<small>Balance Checker</small></h1>
   <div class="header-nav">
     <a href="index.html">栄養素DB</a>
+    <button class="btn-icon" id="aboutBtn">このアプリについて</button>
     <button class="btn-icon" id="settingsBtn">設定</button>
   </div>
 </div>
@@ -150,7 +151,7 @@
             </select>
           </div>
         </div>
-        <button class="btn btn-success btn-block" id="bulkAnalyzeBtn">まとめて解析 → 不足栄養素レポート</button>
+        <button class="btn btn-success btn-block" id="bulkAnalyzeBtn">まとめて解析 → 栄養バランスレポート</button>
       </div>
     </div>
   </div>
@@ -195,20 +196,20 @@
     </div>
   </div>
 
-  <!-- 4. Alerts — 問題の発見 -->
+  <!-- 4. Alerts — 栄養バランス参考表示 -->
   <div class="card" id="alertCard" style="display:none">
     <div class="card-header">
-      <h2>不足・過剰アラート</h2>
+      <h2>栄養バランス参考表示</h2>
       <span class="badge" id="alertCount">0</span>
       <span class="card-toggle">▼</span>
     </div>
     <div class="card-body" id="alertContent"></div>
   </div>
 
-  <!-- 5. AI Suggestions — 改善アクション -->
+  <!-- 5. AI Suggestions — 献立アイデア -->
   <div class="card" id="suggestCard" style="display:none">
     <div class="card-header">
-      <h2>AI献立提案</h2>
+      <h2>AI献立アイデア</h2>
       <span class="card-toggle">▼</span>
     </div>
     <div class="card-body">
@@ -220,7 +221,7 @@
         </select>
         <button class="btn btn-sm btn-primary" id="suggestBtn">提案を生成</button>
       </div>
-      <div id="suggestContent" class="empty-state">不足栄養素に基づくAI献立提案</div>
+      <div id="suggestContent" class="empty-state">栄養バランスを参考にしたAI献立アイデア</div>
     </div>
   </div>
 
@@ -346,8 +347,14 @@
         </div>
       </div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" style="flex-direction:column;gap:8px;align-items:stretch">
       <button class="btn btn-primary" id="saveSettings">保存</button>
+      <hr style="border:none;border-top:1px solid #eee;margin:4px 0">
+      <div style="font-size:11px;color:#999;margin-bottom:2px">データの個別削除</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="btn btn-sm btn-outline" id="deleteApiKeyBtn" style="color:#c0392b;border-color:#c0392b;font-size:11px">APIキーを削除</button>
+        <button class="btn btn-sm btn-outline" id="deleteProfileBtn" style="color:#c0392b;border-color:#c0392b;font-size:11px">プロフィールを削除</button>
+      </div>
     </div>
   </div>
 </div>
@@ -394,7 +401,7 @@
         </div>
         <div class="apikey-feature">
           <span class="apikey-feature-icon">&#x1f372;</span>
-          <span>不足栄養素を補うAI献立提案</span>
+          <span>栄養バランスを意識したAI献立アイデア</span>
         </div>
       </div>
       <div class="apikey-privacy">キーはこの端末にのみ保存されます。外部サーバーには送信されません。</div>
@@ -422,6 +429,71 @@
     <div class="modal-footer">
       <button class="btn btn-outline" data-close="bulkReportModal">閉じる</button>
       <button class="btn btn-success" id="bulkReportSave">この記録を保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== About / Notice Modal ======== -->
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <h3>このアプリについて・利用上の注意</h3>
+      <button class="modal-close" data-close="aboutModal">&times;</button>
+    </div>
+    <div class="modal-body" style="font-size:13px;line-height:1.7">
+
+      <div style="background:#f0f7ff;border-left:3px solid #5b9bd5;padding:10px 12px;border-radius:4px;margin-bottom:14px">
+        <strong>このアプリの目的</strong><br>
+        食事内容の見える化・摂取傾向の参考表示・食生活の振り返りを支援します。<br>
+        <strong>医療・診断・治療・疾病予防・栄養指導を目的としません。</strong>
+      </div>
+
+      <details style="margin-bottom:10px">
+        <summary style="cursor:pointer;font-weight:bold;padding:4px 0">&#x1f4ca; 表示される数値について</summary>
+        <ul style="margin:8px 0 4px 16px;color:#555">
+          <li>AIによる概算・推定値です。厳密な栄養計算ではありません。</li>
+          <li>実際の摂取量は食材の産地・調理法・個人差により異なります。</li>
+          <li>健康上の判断は、管理栄養士・医師などの専門職にご相談ください。</li>
+        </ul>
+      </details>
+
+      <details style="margin-bottom:10px">
+        <summary style="cursor:pointer;font-weight:bold;padding:4px 0">&#x1f511; AI解析とAPIキーについて</summary>
+        <ul style="margin:8px 0 4px 16px;color:#555">
+          <li>食事内容を解析する際、入力内容が <strong>Google Gemini API</strong> へ送信されます。</li>
+          <li>APIキーはご自身のGoogle アカウントで取得したものをご使用ください（BYOK構成）。</li>
+          <li>APIキーはこの端末のブラウザ内（localStorage）にのみ保存されます。外部サーバーには送信されません。</li>
+          <li><strong>共用端末での使用は避けてください。</strong>使用後は設定画面の「APIキーを削除」から削除できます。</li>
+          <li>Googleの利用規約・プライバシーポリシーが適用されます。</li>
+        </ul>
+        <!-- TODO Phase 1b: sessionStorage / 保存しない選択肢を検討 -->
+      </details>
+
+      <details style="margin-bottom:10px">
+        <summary style="cursor:pointer;font-weight:bold;padding:4px 0">&#x1f4f7; 写真・個人情報について</summary>
+        <ul style="margin:8px 0 4px 16px;color:#555">
+          <li>食事写真には、<strong>本人以外の顔・氏名・住所・職場名・書類・容器ラベル等が写らないよう</strong>ご注意ください。</li>
+          <li>他人の食事写真や健康情報を、<strong>本人の同意なく</strong>入力しないでください。</li>
+          <li>未成年・高齢者・判断能力に不安がある方の情報を扱う場合は、本人または適切な支援者の理解を得てから使用してください。</li>
+        </ul>
+      </details>
+
+      <details style="margin-bottom:10px">
+        <summary style="cursor:pointer;font-weight:bold;padding:4px 0">&#x1f5d1;&#xfe0f; データの削除方法</summary>
+        <ul style="margin:8px 0 4px 16px;color:#555">
+          <li><strong>食事履歴</strong>：食事履歴カードの「全データリセット」から削除できます。</li>
+          <li><strong>Gemini APIキー</strong>：設定の「APIキーを削除」から削除できます。</li>
+          <li><strong>プロフィール情報</strong>：設定の「プロフィールを削除」から削除できます。</li>
+          <li><strong>すべて削除</strong>：食事履歴カードの「初期状態に戻す」で全データを削除できます。</li>
+        </ul>
+      </details>
+
+      <div style="font-size:11px;color:#999;border-top:1px solid #eee;padding-top:10px;margin-top:4px">
+        表示される栄養バランスは参考指標です。個別の栄養管理や健康上の判断は専門職にご相談ください。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" data-close="aboutModal">確認しました</button>
     </div>
   </div>
 </div>
