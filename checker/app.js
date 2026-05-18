@@ -465,6 +465,10 @@ function handleApiError(err) {
     showToast('リクエストエラー: ' + msg.replace('BAD_REQUEST:', ''), 'error');
   } else if (msg.startsWith('BLOCKED:')) {
     showToast('安全フィルタでブロックされました', 'error');
+  } else if (msg.startsWith('API_ERROR_503')) {
+    showToast('現在、AI解析サービスが混み合っています。少し時間をおいて再度お試しください。', 'error');
+  } else if (msg.startsWith('API_ERROR_')) {
+    showToast('AIサービスへの接続でエラーが発生しました。しばらくしてから再試行してください。', 'error');
   } else {
     showToast('解析エラー: ' + msg, 'error');
   }
@@ -542,8 +546,12 @@ function showConfirmModal(data) {
     </div>`;
   }
 
-  // 5. 免責表示
-  const disclaimerHtml = `<div class="confirm-disclaimer">${esc(REFERENCE_METADATA.versionCaution)}</div>`;
+  // 5. 免責表示（REFERENCE_METADATA が旧キャッシュで未定義の場合でも落ちないよう防御的に参照）
+  const _refMeta = typeof REFERENCE_METADATA !== 'undefined' ? REFERENCE_METADATA : null;
+  const _versionCaution = _refMeta?.versionCaution ||
+    '参考基準値と食品成分値は資料の版や算定方法が異なる場合があります。' +
+    '本アプリの栄養素推定値はAIによる概算であり、厳密な充足判定・診断・医療的判断を目的としたものではありません。';
+  const disclaimerHtml = `<div class="confirm-disclaimer">${esc(_versionCaution)}</div>`;
 
   body.innerHTML = `
     <div class="confirm-section">
@@ -751,6 +759,7 @@ function renderAlerts(daily, rda) {
       if (pct > 150) {
         alerts.push({key:k, pct, type:'excess',
           icon: pct > 200 ? '🔴' : '🟠',
+          label: '多めに推定',
           title: info.name,
           pctText: `参考値の${pct}%`,
           note: '食塩（ナトリウム）の多い食事傾向があります'
@@ -760,6 +769,7 @@ function renderAlerts(daily, rda) {
       // 病名・症状名は表示せず、傾向のみ表示
       alerts.push({key:k, pct, type: pct < 50 ? 'danger' : 'warning',
         icon: pct < 50 ? '🔴' : '🟡',
+        label: pct < 50 ? 'かなり少なめに推定' : '少なめに推定',
         title: info.name,
         pctText: `参考値の${pct}%`,
         note: pct < 50 ? '摂取量が参考値を大きく下回っています' : '摂取量が参考値をやや下回っています'
@@ -779,7 +789,10 @@ function renderAlerts(daily, rda) {
     `<div class="alert-item ${a.type}">
       <span class="alert-icon">${a.icon}</span>
       <div class="alert-body">
-        <div class="alert-title">${esc(a.title)}</div>
+        <div class="alert-title-row">
+          <span class="alert-title">${esc(a.title)}</span>
+          <span class="alert-label ${a.type}">${esc(a.label)}</span>
+        </div>
         <div class="alert-sub">${esc(a.pctText)} — ${esc(a.note)}</div>
       </div>
     </div>`

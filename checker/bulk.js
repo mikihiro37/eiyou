@@ -195,6 +195,7 @@ function renderAlertSection(daily, rda) {
       // ナトリウムは参考値超過を表示（病名・症状名は表示しない）
       if (pct > 150) {
         alerts.push({ icon: pct > 200 ? '🔴' : '🟠', type: 'excess',
+          label: '多めに推定',
           title: info.name,
           pctText: `参考値の${pct}%`,
           note: '食塩（ナトリウム）の多い食事傾向があります'
@@ -203,6 +204,7 @@ function renderAlertSection(daily, rda) {
     } else if (pct < 80 && info.deficiency) {
       // 病名・症状名は表示せず、傾向のみ表示
       alerts.push({ icon: pct < 50 ? '🔴' : '🟡', type: pct < 50 ? 'danger' : 'warning',
+        label: pct < 50 ? 'かなり少なめに推定' : '少なめに推定',
         title: info.name,
         pctText: `参考値の${pct}%`,
         note: pct < 50 ? '摂取量が参考値を大きく下回っています' : '摂取量が参考値をやや下回っています'
@@ -220,7 +222,10 @@ function renderAlertSection(daily, rda) {
       `<div class="alert-item ${a.type}">
         <span class="alert-icon">${a.icon}</span>
         <div class="alert-body">
-          <div class="alert-title">${esc(a.title)}</div>
+          <div class="alert-title-row">
+            <span class="alert-title">${esc(a.title)}</span>
+            <span class="alert-label ${a.type}">${esc(a.label)}</span>
+          </div>
           <div class="alert-sub">${esc(a.pctText)} — ${esc(a.note)}</div>
         </div>
       </div>`
