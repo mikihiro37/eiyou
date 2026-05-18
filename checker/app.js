@@ -23,7 +23,13 @@ function saveProfile(p) {
 }
 
 // --- API Key Helpers ---
-// getApiKey() は gemini.js で定義（同ファイルが先に読み込まれるため利用可能）
+// getApiKey() は gemini.js で定義済み。ブラウザのキャッシュ等で gemini.js が
+// 古いバージョンだった場合のフォールバックとしてここにも定義しておく。
+if (typeof getApiKey !== 'function') {
+  window.getApiKey = function getApiKey() {
+    return sessionStorage.getItem('eiyou_apikey_session') || localStorage.getItem('eiyou_apikey') || '';
+  };
+}
 // mode: 'local'=localStorage, 'session'=sessionStorage
 function saveApiKey(key, mode) {
   localStorage.removeItem('eiyou_apikey');
