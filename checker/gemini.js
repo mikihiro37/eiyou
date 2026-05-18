@@ -16,7 +16,8 @@ function cancelGemini() {
 
 // Gemini API呼び出し
 async function callGemini(prompt, imageBase64) {
-  const apiKey = localStorage.getItem('eiyou_apikey');
+  // sessionStorage（セッション限定）→ localStorage（端末保存）の順で取得
+  const apiKey = sessionStorage.getItem('eiyou_apikey_session') || localStorage.getItem('eiyou_apikey');
   if (!apiKey) throw new Error('API_KEY_MISSING');
 
   const parts = [];

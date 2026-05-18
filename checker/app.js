@@ -22,6 +22,36 @@ function saveProfile(p) {
   localStorage.setItem('eiyou_profile', JSON.stringify(p));
 }
 
+// --- API Key Helpers ---
+// sessionStorage（セッション限定）→ localStorage（端末保存）の順で取得
+function getApiKey() {
+  return sessionStorage.getItem('eiyou_apikey_session') || localStorage.getItem('eiyou_apikey') || '';
+}
+// mode: 'local'=localStorage, 'session'=sessionStorage
+function saveApiKey(key, mode) {
+  localStorage.removeItem('eiyou_apikey');
+  sessionStorage.removeItem('eiyou_apikey_session');
+  if (!key) { localStorage.removeItem('eiyou_apikey_mode'); return; }
+  if (mode === 'session') {
+    sessionStorage.setItem('eiyou_apikey_session', key);
+  } else {
+    localStorage.setItem('eiyou_apikey', key);
+  }
+  localStorage.setItem('eiyou_apikey_mode', mode || 'local');
+}
+function deleteApiKey() {
+  localStorage.removeItem('eiyou_apikey');
+  sessionStorage.removeItem('eiyou_apikey_session');
+  localStorage.removeItem('eiyou_apikey_mode');
+}
+
+// --- CSV Injection 対策 ---
+// Excelで数式として解釈されうる先頭文字をエスケープする
+function csvSanitize(val) {
+  const s = String(val ?? '');
+  return /^[=+\-@\t\r\n]/.test(s) ? "'" + s : s;
+}
+
 // --- 栄養豆知識（ローディング中に表示） ---
 const NUTRITION_TIPS = [
   'ビタミンCは鉄の吸収を高めます。レモンやピーマンと一緒に！',
@@ -156,8 +186,13 @@ const profileActivity = document.getElementById('profileActivity');
 const profileWeight = document.getElementById('profileWeight');
 
 settingsBtn.addEventListener('click', () => {
-  apiKeyInput.value = localStorage.getItem('eiyou_apikey') || '';
+  apiKeyInput.value = getApiKey();
   document.getElementById('modelSelect').value = localStorage.getItem('eiyou_model') || 'gemini-2.5-flash';
+  const savedMode = localStorage.getItem('eiyou_apikey_mode') || 'local';
+  const modeLocal = document.getElementById('modeLocal');
+  const modeSession = document.getElementById('modeSession');
+  if (modeLocal) modeLocal.checked = savedMode !== 'session';
+  if (modeSession) modeSession.checked = savedMode === 'session';
   const p = loadProfile();
   profileAge.value = p.age;
   profileSex.value = p.sex;
@@ -182,8 +217,9 @@ toggleApiKey.addEventListener('click', () => {
 
 saveSettingsBtn.addEventListener('click', () => {
   const key = apiKeyInput.value.trim();
-  if (key) localStorage.setItem('eiyou_apikey', key);
-  else localStorage.removeItem('eiyou_apikey');
+  const modeSession = document.getElementById('modeSession');
+  const mode = modeSession?.checked ? 'session' : 'local';
+  saveApiKey(key, mode);
 
   localStorage.setItem('eiyou_model', document.getElementById('modelSelect').value);
 
@@ -269,6 +305,7 @@ function addFood() {
 
 function renderFoodList() {
   foodList.innerHTML = '';
+  // TODO Phase 1b-2: インラインイベントハンドラを addEventListener に置き換える
   foodItems.forEach((item, i) => {
     const li = document.createElement('li');
     li.innerHTML = `
@@ -368,7 +405,7 @@ textAnalyzeBtn.addEventListener('click', async () => {
 
 // --- API Key Check ---
 function checkApiKey() {
-  if (!localStorage.getItem('eiyou_apikey')) {
+  if (!getApiKey()) {
     openModal('apiKeyModal');
     return false;
   }
@@ -382,8 +419,13 @@ document.getElementById('apiKeySetupBtn').addEventListener('click', () => {
   const btn = document.getElementById('toggleGuide');
   guide.style.display = '';
   btn.textContent = 'ガイドを閉じる';
-  apiKeyInput.value = localStorage.getItem('eiyou_apikey') || '';
+  apiKeyInput.value = getApiKey();
   document.getElementById('modelSelect').value = localStorage.getItem('eiyou_model') || 'gemini-2.5-flash';
+  const savedMode = localStorage.getItem('eiyou_apikey_mode') || 'local';
+  const modeLocal = document.getElementById('modeLocal');
+  const modeSession = document.getElementById('modeSession');
+  if (modeLocal) modeLocal.checked = savedMode !== 'session';
+  if (modeSession) modeSession.checked = savedMode === 'session';
   const p = loadProfile();
   profileAge.value = p.age;
   profileSex.value = p.sex;
@@ -743,7 +785,8 @@ suggestBtn.addEventListener('click', async () => {
         return `<div class="sg-meal"><div class="sg-meal-header">${ml.icon} ${ml.label}</div>${dishes}</div>`;
       }).join('');
       const point = day.point ? `<div class="sg-point">${esc(day.point)}</div>` : '';
-      return `<div class="sg-day"><div class="sg-day-title">${day.day}日目</div>${mealsHtml}${point}</div>`;
+      // day.day はGemini出力のため esc() でエスケープ
+      return `<div class="sg-day"><div class="sg-day-title">${esc(String(day.day ?? ''))}日目</div>${mealsHtml}${point}</div>`;
     }).join('');
   } catch (err) {
     hideLoading();
@@ -783,12 +826,13 @@ function renderHistory() {
     const foods = (m.items || []).map(i => esc(i.name)).join(', ') || '(詳細なし)';
     const cal = Math.round(m.nutrients?.calories || 0);
     const demo = m.isDemo ? '<span class="history-demo">DEMO</span>' : '';
+    // m.date は localStorage 由来のため esc() でエスケープ
     return `<div class="history-item">
-      <span class="history-date">${m.date}</span>
-      <span class="history-type" title="${mt.label}">${mt.icon}</span>
+      <span class="history-date">${esc(m.date)}</span>
+      <span class="history-type" title="${esc(mt.label)}">${mt.icon}</span>
       <span class="history-foods">${foods}${demo}</span>
       <span class="history-cal">${cal}kcal</span>
-      <button class="history-del" data-id="${m.id}" title="削除">×</button>
+      <button class="history-del" data-id="${esc(m.id)}" title="削除">×</button>
     </div>`;
   }).join('');
 
@@ -816,9 +860,10 @@ document.getElementById('csvBtn').addEventListener('click', () => {
   const rows = [headers.join(',')];
   meals.sort((a, b) => a.date.localeCompare(b.date)).forEach(m => {
     const mt = MEAL_TYPES[m.mealType]?.label || m.mealType;
-    const foods = (m.items || []).map(i => i.name).join('/');
+    // CSVインジェクション対策: 各フィールドを csvSanitize() に通す
+    const foods = (m.items || []).map(i => csvSanitize(i.name)).join('/');
     const csvFoods = '"' + foods.replace(/"/g, '""') + '"';
-    const vals = [m.date, mt, csvFoods, Math.round(m.nutrients?.calories || 0)];
+    const vals = [csvSanitize(m.date), csvSanitize(mt), csvFoods, Math.round(m.nutrients?.calories || 0)];
     nutrientCols.forEach(k => vals.push(Math.round((m.nutrients?.[k] || 0) * 10) / 10));
     rows.push(vals.join(','));
   });
@@ -860,16 +905,16 @@ document.getElementById('factoryResetBtn').addEventListener('click', () => {
   if (!confirm('全データ・設定・APIキーを含め初期状態に戻します。よろしいですか？')) return;
   localStorage.removeItem('eiyou_meals');
   localStorage.removeItem('eiyou_profile');
-  localStorage.removeItem('eiyou_apikey');
   localStorage.removeItem('eiyou_model');
+  deleteApiKey(); // localStorageとsessionStorageの両方をクリア
   showToast('初期状態に戻しました', 'info');
   renderAll();
 });
 
 // --- APIキー削除 ---
 document.getElementById('deleteApiKeyBtn').addEventListener('click', () => {
-  if (!confirm('Gemini APIキーをこの端末から削除します。よろしいですか？')) return;
-  localStorage.removeItem('eiyou_apikey');
+  if (!confirm('Gemini APIキーをこの端末・このセッションから削除します。よろしいですか？')) return;
+  deleteApiKey();
   document.getElementById('apiKeyInput').value = '';
   showToast('APIキーを削除しました', 'info');
 });

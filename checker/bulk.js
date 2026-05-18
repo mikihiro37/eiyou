@@ -196,9 +196,11 @@ function renderMealBreakdown() {
   let html = '<div class="bulk-meals-title">食事内訳</div>';
 
   _bulkResult.days.forEach((day, di) => {
-    html += `<div class="bulk-day-header">${day.date}</div>`;
+    // day.date はGemini出力のため esc() でエスケープ
+    html += `<div class="bulk-day-header">${esc(day.date)}</div>`;
     (day.meals || []).forEach((meal, mi) => {
-      const label = mealLabels[meal.mealType] || meal.mealType;
+      // meal.mealType はGemini出力。内部マップにない値は '不明' にフォールバック（生文字列使用禁止）
+      const label = mealLabels[meal.mealType] || '不明';
       const icon = mealIcons[meal.mealType] || '🍽️';
 
       if (meal.skipped) {
