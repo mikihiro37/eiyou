@@ -210,8 +210,7 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
         <div class="legend-item"><span class="border-dotted-icon"></span>点線 = 限定的</div>
         <div id="htrSymptomNote" class="htr-mode-note">
           <div class="lp-sub-label htr-mode-label">症状検索中の表示</div>
-          <div class="legend-item"><span class="state-icon si-dim"></span>斜線 = 少なめ傾向に関連</div>
-          <div class="legend-item"><span class="state-icon si-emph"></span>点 = 多め傾向に関連</div>
+          <div class="legend-item"><span style="display:inline-block;width:13px;height:13px;border-radius:2px;background:#5b9bd5;border:2px solid #2980b9;flex-shrink:0"></span>青枠 = 関連する可能性あり</div>
           <div class="legend-item"><span class="si-nonmatch"></span>薄い = 今回は非該当</div>
           <div class="htr-mode-disclaimer">症状の原因を判定するものではありません</div>
         </div>
@@ -486,14 +485,10 @@ const cy = cytoscape({
     {selector:'node.searchMatch',style:{
       'border-color':'#e74c3c','border-style':'solid','border-width':3,'width':42,'height':42,'opacity':1
     }},
-    // Symptom search: 少なめ傾向=斜線(stripe), 多め傾向=ドット(dot)
-    {selector:'node.deficiencyMatch',style:{
-      'border-color':'#e65100','border-style':'solid','border-width':4,'width':44,'height':44,'opacity':1,
-      'background-image':_stripeImgSrc,'background-fit':'none','background-repeat':'repeat'
-    }},
-    {selector:'node.excessMatch',style:{
-      'border-color':'#c62828','border-style':'dashed','border-width':4,'width':44,'height':44,'opacity':1,
-      'background-image':_dotImgSrc,'background-fit':'none','background-repeat':'repeat'
+    // Symptom search: 関連栄養素を単一スタイルでハイライト（deficiency/excessの区別はグラフ上では非表示）
+    {selector:'node.symptomHighlight',style:{
+      'border-color':'#2980b9','border-style':'solid','border-width':4,'width':44,'height':44,'opacity':1,
+      'background-image':'none'
     }},
     {selector:'node.hidden',style:{
       'display':'none'
@@ -723,7 +718,7 @@ function showDetail(nodeId){
 }
 
 function highlightNode(nodeId){
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
   symptomHighlightBtn.style.display = 'none';
   const node = cy.getElementById(nodeId);
   const neighborhood = node.closedNeighborhood();
@@ -740,7 +735,7 @@ cy.on('tap','node', e=>{
 
 cy.on('tap', e=>{
   if(e.target === cy){
-    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
     detailPanel.classList.remove('open');
     symptomHighlightBtn.style.display = 'none';
   }
@@ -752,7 +747,7 @@ cy.on('tap', e=>{
 const searchInput = document.getElementById('searchInput');
 searchInput.addEventListener('input', ()=>{
   const q = searchInput.value.trim().toLowerCase();
-  cy.nodes().removeClass('searchMatch dimmed deficiencyMatch excessMatch');
+  cy.nodes().removeClass('searchMatch dimmed deficiencyMatch excessMatch symptomHighlight');
   symptomHighlightBtn.style.display = 'none';
   if(!q){return;}
   const matches = cy.nodes().filter(n=>{
@@ -812,7 +807,7 @@ document.querySelectorAll('#catFilters input, #subFilters input, #evidenceFilter
 // REVERSE LOOKUP: Shared Utilities
 // ============================================================
 function highlightMultipleNodes(nodeIds){
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
   if(nodeIds.length === 0) return;
   const matchNodes = cy.nodes().filter(n=>nodeIds.includes(n.id()));
   cy.elements().not(matchNodes).addClass('dimmed');
@@ -934,7 +929,7 @@ foodSearchBtn.addEventListener('click', ()=>{
     foodHighlightBtn.style.display='none';
     lastFoodMatches=[];
     document.querySelectorAll('#foodTags .tag-chip').forEach(c=>c.classList.remove('active'));
-    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
   } else {
     foodSearchInput.focus();
   }
@@ -1056,7 +1051,7 @@ function resetSymptomSearch(){
   symptomHighlightBtn.style.display = 'none';
   lastSymptomMatches = [];
   document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
   exitSymptomSearchMode();
 }
 
@@ -1080,7 +1075,7 @@ function doSymptomSearch(){
   symptomHighlightBtn.style.display = 'none';
 
   // 前の検索ハイライトを必ずクリア
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
 
   if(!q){
     document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
@@ -1104,15 +1099,12 @@ function doSymptomSearch(){
     return;
   }
 
-  // 自動ハイライト（ボタン不要）
-  const defIds = [...new Set(defMatches.map(m=>m.nutrient.id))];
-  const exIds  = [...new Set(exMatches.map(m=>m.nutrient.id))];
-  const allIds = [...new Set(allMatches.map(m=>m.nutrient.id))];
+  // 自動ハイライト（関連栄養素を単色でハイライト、摂取量由来の区別は表示しない）
+  const allIds     = [...new Set(allMatches.map(m=>m.nutrient.id))];
   const matchNodes = cy.nodes().filter(n=>allIds.includes(n.id()));
   cy.elements().not(matchNodes).addClass('dimmed');
-  matchNodes.forEach(n=>n.removeClass('dimmed'));
-  defIds.forEach(id=>cy.getElementById(id).addClass('deficiencyMatch'));
-  exIds.forEach(id=>cy.getElementById(id).addClass('excessMatch'));
+  matchNodes.removeClass('dimmed');
+  matchNodes.addClass('symptomHighlight');
   cy.fit(matchNodes, 40);
   enterSymptomSearchMode(q);
 
@@ -1121,9 +1113,7 @@ function doSymptomSearch(){
   renderGrouped(symptomResults, sorted, symptomSortSelect.value, 'nutrient', m=>{
     const div = document.createElement('div');
     div.className = 'result-item';
-    const label = m.matchType === 'deficiency' ? '関連の可能性あり（少なめ傾向）' : '関連の可能性あり（多め傾向）';
-    const color = m.matchType === 'deficiency' ? '#e65100' : '#c62828';
-    div.innerHTML = `<span style="color:${COLORS[m.nutrient.subCategory].bg}">●</span> <strong>${m.nutrient.name}</strong> <span class="result-type-badge" style="background:${color}">${label}</span>`;
+    div.innerHTML = `<span style="color:${COLORS[m.nutrient.subCategory].bg}">●</span> <strong>${m.nutrient.name}</strong> <span class="result-type-badge" style="background:#2980b9">関連する可能性あり</span>`;
     div.addEventListener('click', ()=>{
       const node = cy.getElementById(m.nutrient.id);
       node.select();
@@ -1155,7 +1145,7 @@ symptomSearchInput.addEventListener('keydown', e=>{
 
 // 「ハイライト解除」ボタン → クリアのみ（パネルは閉じない）
 symptomHighlightBtn.addEventListener('click', ()=>{
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
   symptomHighlightBtn.style.display = 'none';
   exitSymptomSearchMode();
 });
@@ -1166,7 +1156,7 @@ symptomHighlightBtn.addEventListener('click', ()=>{
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     detailPanel.classList.remove('open');
-    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
     exitSymptomSearchMode();
   }
 });
