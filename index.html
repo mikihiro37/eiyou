@@ -120,8 +120,14 @@ details.how-to-read summary{font-size:12px;color:#888;text-transform:uppercase;l
 details.how-to-read summary::-webkit-details-marker{display:none}
 details.how-to-read summary::after{content:'▶';font-size:9px;color:#bbb;transition:transform .15s}
 details.how-to-read[open] summary::after{transform:rotate(90deg)}
-.htr-body{padding:0 0 8px;display:flex;flex-direction:column;gap:3px}
-.htr-body .legend-item{font-size:12px;display:flex;align-items:center;gap:6px;padding:2px 0;color:#555}
+.htr-body{padding:0 0 8px;display:flex;flex-direction:column;gap:2px}
+.htr-body .legend-item{font-size:11px;display:flex;align-items:center;gap:5px;padding:2px 0;color:#555;white-space:nowrap}
+/* State indicator icons (症状検索の表示状態) */
+.state-icon{width:13px;height:13px;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:8px;font-weight:700;line-height:1}
+.si-dim{background:repeating-linear-gradient(135deg,rgba(230,126,34,.5) 0,rgba(230,126,34,.5) 2px,rgba(255,255,255,.8) 2px,rgba(255,255,255,.8) 5px);border:1.5px solid #e65100}
+.si-std{background:#e67e22;border:1.5px solid rgba(0,0,0,.2)}
+.si-emph{background-color:#c62828;background-image:radial-gradient(circle,rgba(255,255,255,.45) 1px,transparent 1px);background-size:4px 4px;border:1.5px dashed #8b0000}
+.si-unknown{border:1.5px dotted #aaa;color:#aaa;background:#f8f8f8}
 /* Hide graph-overlay legend (content moved to sidebar) */
 .legend{display:none !important}
 </style>
@@ -153,11 +159,11 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
     </div>
     <div class="lp-sub-label">サブカテゴリ</div>
     <div class="filter-group" id="subFilters">
-      <label><input type="checkbox" checked data-sub="脂溶性"><span class="color-dot" style="background:#e67e22"></span>脂溶性ビタミン</label>
-      <label><input type="checkbox" checked data-sub="水溶性"><span class="color-dot" style="background:#3498db"></span>水溶性ビタミン</label>
-      <label><input type="checkbox" checked data-sub="主要ミネラル"><span class="color-dot" style="background:#27ae60"></span>主要ミネラル</label>
-      <label><input type="checkbox" checked data-sub="微量ミネラル"><span class="color-dot" style="background:#16a085"></span>微量ミネラル</label>
-      <label><input type="checkbox" checked data-sub="必須アミノ酸"><span class="color-dot" style="background:#8e44ad"></span>必須アミノ酸</label>
+      <label><input type="checkbox" checked data-sub="脂溶性"><span class="shape-circle-icon" style="background:#e67e22"></span>脂溶性ビタミン</label>
+      <label><input type="checkbox" checked data-sub="水溶性"><span class="shape-circle-icon" style="background:#3498db"></span>水溶性ビタミン</label>
+      <label><input type="checkbox" checked data-sub="主要ミネラル"><span class="shape-triangle-icon"></span>主要ミネラル</label>
+      <label><input type="checkbox" checked data-sub="微量ミネラル"><span class="shape-triangle-icon" style="border-bottom-color:#16a085"></span>微量ミネラル</label>
+      <label><input type="checkbox" checked data-sub="必須アミノ酸"><span class="shape-square-icon"></span>必須アミノ酸</label>
     </div>
     <div class="lp-sub-label">エビデンス</div>
     <div class="filter-group" id="evidenceFilters">
@@ -176,21 +182,29 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
       <summary>見方・凡例</summary>
       <div class="htr-body">
         <div class="lp-sub-label">形状（カテゴリ）</div>
-        <div class="legend-item"><span class="shape-circle-icon"></span>ビタミン</div>
-        <div class="legend-item"><span class="shape-triangle-icon"></span>ミネラル</div>
-        <div class="legend-item"><span class="shape-square-icon"></span>アミノ酸</div>
+        <div class="legend-item"><span class="shape-circle-icon"></span>○ ビタミン</div>
+        <div class="legend-item"><span class="shape-triangle-icon"></span>△ ミネラル</div>
+        <div class="legend-item"><span class="shape-square-icon"></span>□ アミノ酸</div>
+        <div class="lp-sub-label">色（サブカテゴリ）</div>
+        <div class="legend-item"><span class="shape-circle-icon" style="background:#e67e22"></span>脂溶性ビタミン</div>
+        <div class="legend-item"><span class="shape-circle-icon" style="background:#3498db"></span>水溶性ビタミン</div>
+        <div class="legend-item"><span class="shape-triangle-icon"></span>主要ミネラル</div>
+        <div class="legend-item"><span class="shape-triangle-icon" style="border-bottom-color:#16a085"></span>微量ミネラル</div>
+        <div class="legend-item"><span class="shape-square-icon"></span>必須アミノ酸</div>
         <div class="lp-sub-label">枠線（エビデンス）</div>
-        <div class="legend-item"><span class="border-solid-icon"></span>確立</div>
-        <div class="legend-item"><span class="border-dashed-icon"></span>有力</div>
-        <div class="legend-item"><span class="border-dotted-icon"></span>限定的</div>
+        <div class="legend-item"><span class="border-solid-icon"></span>実線 = 確立</div>
+        <div class="legend-item"><span class="border-dashed-icon"></span>破線 = 有力</div>
+        <div class="legend-item"><span class="border-dotted-icon"></span>点線 = 限定的</div>
+        <div class="lp-sub-label">症状検索の表示</div>
+        <div class="legend-item"><span class="state-icon si-dim"></span>薄い = 少なめ傾向</div>
+        <div class="legend-item"><span class="state-icon si-std"></span>標準 = 参考値付近</div>
+        <div class="legend-item"><span class="state-icon si-emph"></span>濃い = 多め傾向</div>
+        <div class="legend-item"><span class="state-icon si-unknown">?</span>? = 判断が難しい</div>
         <div class="lp-sub-label">線（エッジ）</div>
         <div class="legend-item"><span class="legend-line" style="background:#4caf50"></span>相乗</div>
         <div class="legend-item"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</div>
         <div class="legend-item"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</div>
-        <div class="lp-sub-label">枠色（状態検索）</div>
-        <div class="legend-item"><span class="color-dot" style="background:#e65100;border:2px solid #e65100"></span>少なめ傾向</div>
-        <div class="legend-item"><span class="color-dot" style="background:#c62828;border:2px dashed #c62828"></span>多め傾向</div>
-        <div class="legend-disclaimer">診断・治療・疾病予防を目的としません</div>
+        <div class="legend-disclaimer">食品成分値・エビデンスレベルは主要な学術機関・資料を参考にした概算値です。掲載情報は一般的な参考情報であり、診断・治療・疾病予防を目的としません。</div>
       </div>
     </details>
     <!-- C. 逆引き検索 -->
@@ -213,7 +227,6 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
   </div>
   <div class="graph-container">
     <div id="cy"></div>
-    <div class="disclaimer">※ 食品成分値は日本食品標準成分表等を参考にした概算値です。エビデンスレベルは主要な学術機関の評価に基づきます。掲載情報は一般的な参考情報であり、診断・治療・疾病予防を目的としません。</div>
   </div>
   <div class="right-panel" id="detailPanel">
     <button class="detail-close" id="detailClose">&times;</button>
@@ -579,6 +592,7 @@ function applyLayout(name){
 // Initial layout
 applyLayout('subcategory');
 sizeByDegree();
+setTimeout(()=>cy.fit(null,40), 750);
 
 document.getElementById('layoutSelect').addEventListener('change', e => applyLayout(e.target.value));
 document.getElementById('fitBtn').addEventListener('click', ()=> cy.fit(null,30));
