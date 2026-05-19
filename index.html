@@ -128,6 +128,19 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
 .si-std{background:#e67e22;border:1.5px solid rgba(0,0,0,.2)}
 .si-emph{background-color:#c62828;background-image:radial-gradient(circle,rgba(255,255,255,.45) 1px,transparent 1px);background-size:4px 4px;border:1.5px dashed #8b0000}
 .si-unknown{border:1.5px dotted #aaa;color:#aaa;background:#f8f8f8}
+/* Symptom search mode: graph banner */
+.symptom-mode-banner{position:absolute;top:0;left:0;right:0;background:rgba(41,128,185,.9);color:#fff;z-index:10;padding:5px 12px;font-size:11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.smb-label{font-weight:700;flex-shrink:0;white-space:nowrap}
+.smb-query{font-weight:600;background:rgba(255,255,255,.2);padding:1px 8px;border-radius:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.smb-note{font-size:10px;opacity:.88;flex:1;min-width:100px;line-height:1.4}
+.smb-clear{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:4px;padding:2px 9px;font-size:10px;cursor:pointer;flex-shrink:0;transition:background .15s}
+.smb-clear:hover{background:rgba(255,255,255,.4)}
+/* Symptom search mode: legend note (shown only when active) */
+.htr-mode-note{display:none;border-top:1px solid #e8f4fd;margin-top:4px;padding-top:4px}
+.htr-mode-note.active{display:block}
+.htr-mode-label{color:#2980b9 !important}
+.htr-mode-disclaimer{font-size:9px;color:#bbb;padding:3px 0;line-height:1.4}
+.si-nonmatch{width:13px;height:13px;border-radius:2px;display:inline-block;flex-shrink:0;background:rgba(50,50,50,.08);border:1px solid #ddd}
 /* Hide graph-overlay legend (content moved to sidebar) */
 .legend{display:none !important}
 </style>
@@ -195,11 +208,13 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
         <div class="legend-item"><span class="border-solid-icon"></span>実線 = 確立</div>
         <div class="legend-item"><span class="border-dashed-icon"></span>破線 = 有力</div>
         <div class="legend-item"><span class="border-dotted-icon"></span>点線 = 限定的</div>
-        <div class="lp-sub-label">症状検索の表示</div>
-        <div class="legend-item"><span class="state-icon si-dim"></span>薄い = 少なめ傾向</div>
-        <div class="legend-item"><span class="state-icon si-std"></span>標準 = 参考値付近</div>
-        <div class="legend-item"><span class="state-icon si-emph"></span>濃い = 多め傾向</div>
-        <div class="legend-item"><span class="state-icon si-unknown">?</span>? = 判断が難しい</div>
+        <div id="htrSymptomNote" class="htr-mode-note">
+          <div class="lp-sub-label htr-mode-label">症状検索中の表示</div>
+          <div class="legend-item"><span class="state-icon si-dim"></span>斜線 = 少なめ傾向に関連</div>
+          <div class="legend-item"><span class="state-icon si-emph"></span>点 = 多め傾向に関連</div>
+          <div class="legend-item"><span class="si-nonmatch"></span>薄い = 今回は非該当</div>
+          <div class="htr-mode-disclaimer">症状の原因を判定するものではありません</div>
+        </div>
         <div class="lp-sub-label">線（エッジ）</div>
         <div class="legend-item"><span class="legend-line" style="background:#4caf50"></span>相乗</div>
         <div class="legend-item"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</div>
@@ -227,6 +242,12 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
   </div>
   <div class="graph-container">
     <div id="cy"></div>
+    <div id="symptomModeBanner" class="symptom-mode-banner" style="display:none">
+      <span class="smb-label">症状検索中：</span>
+      <span id="smbQuery" class="smb-query"></span>
+      <span class="smb-note">関連する可能性のある栄養素をハイライトしています。この表示は症状の原因を判定するものではありません。</span>
+      <button id="smbClear" class="smb-clear">解除</button>
+    </div>
   </div>
   <div class="right-panel" id="detailPanel">
     <button class="detail-close" id="detailClose">&times;</button>
@@ -1011,6 +1032,23 @@ const symptomHighlightBtn = document.getElementById('symptomHighlightBtn');
 
 let lastSymptomMatches = [];
 
+// 症状検索モードの開始・終了（バナーと凡例ノートを制御）
+function enterSymptomSearchMode(query) {
+  const banner  = document.getElementById('symptomModeBanner');
+  const smbQ    = document.getElementById('smbQuery');
+  const htrNote = document.getElementById('htrSymptomNote');
+  if (banner)  banner.style.display = 'flex';
+  if (smbQ)    smbQ.textContent = query;
+  if (htrNote) htrNote.classList.add('active');
+}
+
+function exitSymptomSearchMode() {
+  const banner  = document.getElementById('symptomModeBanner');
+  const htrNote = document.getElementById('htrSymptomNote');
+  if (banner)  banner.style.display = 'none';
+  if (htrNote) htrNote.classList.remove('active');
+}
+
 // 症状検索の状態をすべてリセットする（パネルは閉じない）
 function resetSymptomSearch(){
   symptomSearchInput.value = '';
@@ -1019,6 +1057,7 @@ function resetSymptomSearch(){
   lastSymptomMatches = [];
   document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
   cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+  exitSymptomSearchMode();
 }
 
 symptomSearchBtn.addEventListener('click', ()=>{
@@ -1045,6 +1084,7 @@ function doSymptomSearch(){
 
   if(!q){
     document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
+    exitSymptomSearchMode();
     return;
   }
 
@@ -1060,6 +1100,7 @@ function doSymptomSearch(){
 
   if(allMatches.length === 0){
     symptomResults.innerHTML = '<div style="padding:6px 4px;color:#999;font-size:11px">一致する参考情報が見つかりませんでした</div>';
+    exitSymptomSearchMode();
     return;
   }
 
@@ -1073,6 +1114,7 @@ function doSymptomSearch(){
   defIds.forEach(id=>cy.getElementById(id).addClass('deficiencyMatch'));
   exIds.forEach(id=>cy.getElementById(id).addClass('excessMatch'));
   cy.fit(matchNodes, 40);
+  enterSymptomSearchMode(q);
 
   // 結果リスト描画（「欠乏」「過剰」は内部判定のみ、表示は安全な表現）
   const sorted = sortResults(allMatches, symptomSortSelect.value, 'nutrient');
@@ -1115,6 +1157,7 @@ symptomSearchInput.addEventListener('keydown', e=>{
 symptomHighlightBtn.addEventListener('click', ()=>{
   cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
   symptomHighlightBtn.style.display = 'none';
+  exitSymptomSearchMode();
 });
 
 // ============================================================
@@ -1124,7 +1167,20 @@ document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     detailPanel.classList.remove('open');
     cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch');
+    exitSymptomSearchMode();
   }
+});
+
+// ============================================================
+// SYMPTOM SEARCH BANNER: 解除ボタン
+// ============================================================
+document.getElementById('smbClear').addEventListener('click', ()=>{
+  resetSymptomSearch();
+  // パネルも閉じる
+  symptomSearchInput.classList.remove('show');
+  symptomTags.classList.remove('show');
+  symptomSort.classList.remove('show');
+  symptomSearchBtn.classList.remove('active');
 });
 
 // ============================================================
