@@ -717,12 +717,26 @@ function renderDashboard() {
       const barWidth = Math.min(pct, 200);
       const displayVal = val >= 100 ? Math.round(val) : Math.round(val * 10) / 10;
 
+      // 摂取傾向バッジ（濃淡だけに頼らず一目で判断できるよう）
+      let badgeClass, badgeText;
+      if (val === 0) {
+        badgeClass = 'zero'; badgeText = '?';
+      } else if (k === 'na') {
+        badgeClass = pct > 150 ? 'high' : 'normal';
+        badgeText  = pct > 150 ? '多' : '目安';
+      } else {
+        badgeClass = pct < 80 ? 'low' : pct > 120 ? 'high' : 'normal';
+        badgeText  = pct < 80 ? '少' : pct > 120 ? '多' : '目安';
+      }
+      const badgeHtml = `<span class="bar-intake-badge ${badgeClass}">${badgeText}</span>`;
+
       html += `<div class="bar-row">
         <span class="bar-label">${info.name}</span>
         <div class="bar-track" style="--max-pct:200">
           <div class="bar-fill" style="width:${barWidth / 2}%;background:${barColor}"></div>
         </div>
         <span class="bar-value"><span class="bar-pct" style="color:${barColor}">${pct}%</span> <span style="font-size:10px">${displayVal}</span></span>
+        ${badgeHtml}
       </div>`;
     }
     html += '</div>';
@@ -736,6 +750,41 @@ function renderDashboard() {
 
   // Render alerts
   renderAlerts(daily, rda);
+
+  // index.html グラフ表示用に摂取傾向要約を localStorage へ書き出し
+  writeIntakeSummary(daily, rda, { numDays, mealCount: meals.length, profile });
+}
+
+// ============================================================
+// INTAKE SUMMARY (index.html のグラフバッジ用)
+// ============================================================
+function writeIntakeSummary(daily, rda, ctx = {}) {
+  const nutrients = {};
+  NUTRIENT_KEYS.forEach(k => {
+    const rdaVal = rda[k];
+    if (!rdaVal) { nutrients[k] = 'no-ref'; return; }
+    const val = daily[k];
+    if (val === 0) { nutrients[k] = 'zero'; return; }
+    const pct = Math.round((val / rdaVal) * 100);
+    if (k === 'na') {
+      nutrients[k] = pct > 150 ? 'high' : pct > 120 ? 'slightly-high' : 'normal';
+    } else {
+      nutrients[k] = pct < 80 ? 'low' : pct > 120 ? 'high' : 'normal';
+    }
+  });
+
+  // プロフィールがデフォルト値かどうかを確認（登録済みかどうかの判定）
+  const hasStoredProfile = !!localStorage.getItem('eiyou_profile');
+
+  try {
+    localStorage.setItem('eiyou_intake_summary', JSON.stringify({
+      timestamp: Date.now(),
+      numDays: ctx.numDays || 1,
+      mealCount: ctx.mealCount || 0,
+      hasStoredProfile,
+      nutrients
+    }));
+  } catch {}
 }
 
 // ============================================================

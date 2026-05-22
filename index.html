@@ -141,6 +141,31 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
 .htr-mode-label{color:#2980b9 !important}
 .htr-mode-disclaimer{font-size:9px;color:#bbb;padding:3px 0;line-height:1.4}
 .si-nonmatch{width:13px;height:13px;border-radius:2px;display:inline-block;flex-shrink:0;background:rgba(50,50,50,.08);border:1px solid #ddd}
+/* Symptom search: direction badges in sidebar results */
+.dir-badge{font-size:9px;padding:1px 6px;border-radius:8px;color:#fff;margin-left:3px;white-space:nowrap;display:inline-block;vertical-align:middle;font-weight:600}
+.dir-badge-low{background:#2980b9}
+.dir-badge-high{background:#e67e22}
+.dir-badge-both{background:#7f8c8d}
+/* Symptom search: legend direction indicator icons */
+.si-dir-low{width:13px;height:13px;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:7px;font-weight:700;color:#fff;background:#2980b9}
+.si-dir-high{width:13px;height:13px;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:7px;font-weight:700;color:#fff;background:#e67e22}
+.si-dir-both{width:13px;height:13px;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:7px;font-weight:700;color:#fff;background:#7f8c8d}
+/* Intake tendency panel (left sidebar, primary display) */
+#intakeTendencySection{margin-top:10px;padding:10px 0 6px;border-top:2px solid #dff0d8}
+.it-title{font-size:11px;font-weight:700;color:#27ae60;letter-spacing:.4px;margin-bottom:8px}
+.it-group{margin-bottom:8px}
+.it-label{font-size:10px;font-weight:700;margin-bottom:3px}
+.it-label-low{color:#2980b9}
+.it-label-normal{color:#27ae60}
+.it-label-high{color:#e67e22}
+.it-label-unknown{color:#95a5a6}
+.it-list{list-style:none;padding:0 0 0 8px;margin:0}
+.it-list li{font-size:11px;color:#555;padding:1px 0;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it-empty{font-size:11px;color:#bbb;padding:4px 0;text-align:center}
+.it-disclaimer{font-size:9px;color:#bbb;line-height:1.4;margin-top:6px;padding-top:4px;border-top:1px solid #f0f0f0}
+/* Intake legend note in how-to-read panel */
+#htrIntakeNote{display:none;border-top:1px solid #dff0d8;margin-top:4px;padding-top:4px}
+#htrIntakeNote.active{display:block}
 /* Hide graph-overlay legend (content moved to sidebar) */
 .legend{display:none !important}
 </style>
@@ -190,6 +215,12 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
       <label><input type="checkbox" checked data-edge="absorption"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</label>
       <label><input type="checkbox" checked data-edge="antagonist"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</label>
     </div>
+    <!-- D. 今回の摂取傾向（食事解析結果・主表示） -->
+    <div id="intakeTendencySection" style="display:none">
+      <div class="it-title">今回の摂取傾向</div>
+      <div id="intakeTendencyContent"></div>
+      <div class="it-disclaimer">AIによる推定値を参考基準と比較した目安です。診断・医療判断を目的としません。</div>
+    </div>
     <!-- B. 見方・凡例 -->
     <details class="how-to-read">
       <summary>見方・凡例</summary>
@@ -208,11 +239,24 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
         <div class="legend-item"><span class="border-solid-icon"></span>実線 = 確立</div>
         <div class="legend-item"><span class="border-dashed-icon"></span>破線 = 有力</div>
         <div class="legend-item"><span class="border-dotted-icon"></span>点線 = 限定的</div>
+        <div id="htrIntakeNote">
+          <div class="lp-sub-label" style="color:#27ae60">食事解析結果の見方</div>
+          <div style="font-size:10px;color:#555;line-height:1.8;margin-top:4px">
+            <div><span style="color:#2980b9;font-weight:600">参考基準より少なめ</span>：入力内容から推定した摂取量が参考基準値より少なめと表示された項目</div>
+            <div><span style="color:#27ae60;font-weight:600">参考基準付近</span>：入力内容から推定した摂取量が参考基準値付近と表示された項目</div>
+            <div><span style="color:#e67e22;font-weight:600">参考基準より多め</span>：入力内容から推定した摂取量が参考基準値より多めと表示された項目</div>
+            <div><span style="color:#95a5a6;font-weight:600">比較保留</span>：プロフィール情報・基準値・指標種別・推定精度などの理由で比較を保留した項目</div>
+          </div>
+          <div style="font-size:9px;color:#bbb;padding:3px 0;line-height:1.4">摂取傾向の参考表示です。不足・過剰の判定を目的としません。診断・医療判断には使用しないでください</div>
+        </div>
         <div id="htrSymptomNote" class="htr-mode-note">
           <div class="lp-sub-label htr-mode-label">症状検索中の表示</div>
-          <div class="legend-item"><span style="display:inline-block;width:13px;height:13px;border-radius:2px;background:#5b9bd5;border:2px solid #2980b9;flex-shrink:0"></span>青枠 = 関連する可能性あり</div>
-          <div class="legend-item"><span class="si-nonmatch"></span>薄い = 今回は非該当</div>
-          <div class="htr-mode-disclaimer">症状の原因を判定するものではありません</div>
+          <div class="legend-item"><span style="display:inline-block;width:13px;height:13px;border-radius:2px;background:#eee;border:2px solid #555;flex-shrink:0"></span>強調表示 = 症状と関連する可能性のある栄養素</div>
+          <div class="legend-item"><span class="si-dir-low">低</span>一般的に少ない状態との関連情報</div>
+          <div class="legend-item"><span class="si-dir-high">高</span>一般的に多い状態との関連情報</div>
+          <div class="legend-item"><span class="si-dir-both">?</span>関連方向は要確認</div>
+          <div class="legend-item"><span class="si-nonmatch"></span>薄い = 症状と非該当</div>
+          <div class="htr-mode-disclaimer">この表示は症状の原因を判定するものではありません</div>
         </div>
         <div class="lp-sub-label">線（エッジ）</div>
         <div class="legend-item"><span class="legend-line" style="background:#4caf50"></span>相乗</div>
@@ -244,7 +288,7 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
     <div id="symptomModeBanner" class="symptom-mode-banner" style="display:none">
       <span class="smb-label">症状検索中：</span>
       <span id="smbQuery" class="smb-query"></span>
-      <span class="smb-note">関連する可能性のある栄養素をハイライトしています。この表示は症状の原因を判定するものではありません。</span>
+      <span class="smb-note">関連栄養素をハイライト中。低(青)=少ない状態との関連 / 高(橙)=多い状態との関連 / ?(灰)=要確認。症状の原因を判定するものではありません。</span>
       <button id="smbClear" class="smb-clear">解除</button>
     </div>
   </div>
@@ -485,10 +529,20 @@ const cy = cytoscape({
     {selector:'node.searchMatch',style:{
       'border-color':'#e74c3c','border-style':'solid','border-width':3,'width':42,'height':42,'opacity':1
     }},
-    // Symptom search: 関連栄養素を単一スタイルでハイライト（deficiency/excessの区別はグラフ上では非表示）
+    // Intake: 食事解析結果による枠色（補助表示 — 一覧パネルが主表示）
+    {selector:'node.intakeLow',    style:{'border-color':'#2980b9','border-width':3,'opacity':1}},
+    {selector:'node.intakeNormal', style:{'border-color':'#27ae60','border-width':3,'opacity':1}},
+    {selector:'node.intakeHigh',   style:{'border-color':'#e67e22','border-width':3,'opacity':1}},
+    // Symptom search: 関連方向に応じた枠色ハイライト（低=青、高=橙、両=灰）
     {selector:'node.symptomHighlight',style:{
-      'border-color':'#2980b9','border-style':'solid','border-width':4,'width':44,'height':44,'opacity':1,
+      'border-color':'#7f8c8d','border-style':'solid','border-width':4,'width':44,'height':44,'opacity':1,
       'background-image':'none'
+    }},
+    {selector:'node.symptomHighlight.symptomDef:not(.symptomEx)',style:{
+      'border-color':'#2980b9'
+    }},
+    {selector:'node.symptomHighlight.symptomEx:not(.symptomDef)',style:{
+      'border-color':'#e67e22'
     }},
     {selector:'node.hidden',style:{
       'display':'none'
@@ -718,7 +772,7 @@ function showDetail(nodeId){
 }
 
 function highlightNode(nodeId){
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
   symptomHighlightBtn.style.display = 'none';
   const node = cy.getElementById(nodeId);
   const neighborhood = node.closedNeighborhood();
@@ -735,7 +789,7 @@ cy.on('tap','node', e=>{
 
 cy.on('tap', e=>{
   if(e.target === cy){
-    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
     detailPanel.classList.remove('open');
     symptomHighlightBtn.style.display = 'none';
   }
@@ -747,7 +801,7 @@ cy.on('tap', e=>{
 const searchInput = document.getElementById('searchInput');
 searchInput.addEventListener('input', ()=>{
   const q = searchInput.value.trim().toLowerCase();
-  cy.nodes().removeClass('searchMatch dimmed deficiencyMatch excessMatch symptomHighlight');
+  cy.nodes().removeClass('searchMatch dimmed deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
   symptomHighlightBtn.style.display = 'none';
   if(!q){return;}
   const matches = cy.nodes().filter(n=>{
@@ -807,7 +861,7 @@ document.querySelectorAll('#catFilters input, #subFilters input, #evidenceFilter
 // REVERSE LOOKUP: Shared Utilities
 // ============================================================
 function highlightMultipleNodes(nodeIds){
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
   if(nodeIds.length === 0) return;
   const matchNodes = cy.nodes().filter(n=>nodeIds.includes(n.id()));
   cy.elements().not(matchNodes).addClass('dimmed');
@@ -929,7 +983,7 @@ foodSearchBtn.addEventListener('click', ()=>{
     foodHighlightBtn.style.display='none';
     lastFoodMatches=[];
     document.querySelectorAll('#foodTags .tag-chip').forEach(c=>c.classList.remove('active'));
-    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
   } else {
     foodSearchInput.focus();
   }
@@ -1027,6 +1081,120 @@ const symptomHighlightBtn = document.getElementById('symptomHighlightBtn');
 
 let lastSymptomMatches = [];
 
+// ============================================================
+// INTAKE TENDENCY: checker.html の食事解析結果を localStorage 経由で表示
+// 一覧パネルが主表示、ノード枠色は補助表示
+// ============================================================
+let _intakeSummary = null;
+let _intakeContext = null; // { numDays, mealCount, hasStoredProfile }
+
+function _applyIntakeNodeClasses() {
+  cy.nodes().removeClass('intakeLow intakeNormal intakeHigh');
+  if (!_intakeSummary) return;
+  cy.nodes().forEach(n => {
+    const lv = _intakeSummary[n.id()];
+    if (lv === 'low')                              n.addClass('intakeLow');
+    else if (lv === 'normal')                      n.addClass('intakeNormal');
+    else if (lv === 'high' || lv === 'slightly-high') n.addClass('intakeHigh');
+  });
+}
+
+function renderIntakeTendencyPanel() {
+  const section = document.getElementById('intakeTendencySection');
+  const content = document.getElementById('intakeTendencyContent');
+  if (!section || !content || !_intakeSummary) return;
+
+  // index.html の nutrients 配列から ID→表示名マップを作成
+  const nameMap = {};
+  nutrients.forEach(n => { nameMap[n.id] = n.name; });
+
+  const groups = { low: [], normal: [], high: [], unknown: [] };
+  Object.entries(_intakeSummary).forEach(([id, lv]) => {
+    const name = nameMap[id];
+    if (!name) return;
+    if (lv === 'low')                              groups.low.push(name);
+    else if (lv === 'normal')                      groups.normal.push(name);
+    else if (lv === 'high' || lv === 'slightly-high') groups.high.push(name);
+    else                                           groups.unknown.push(name);
+  });
+
+  const defs = [
+    { key:'low',     label:'参考基準より少なめ', cls:'it-label-low' },
+    { key:'normal',  label:'参考基準付近',       cls:'it-label-normal' },
+    { key:'high',    label:'参考基準より多め',   cls:'it-label-high' },
+    { key:'unknown', label:'比較保留',           cls:'it-label-unknown' },
+  ];
+
+  let html = '';
+  defs.forEach(d => {
+    if (!groups[d.key].length) return;
+    html += '<div class="it-group"><div class="it-label ' + d.cls + '">' + d.label + '</div>' +
+      '<ul class="it-list">' + groups[d.key].map(n => '<li>' + n + '</li>').join('') + '</ul></div>';
+  });
+  content.innerHTML = html || '<div class="it-empty">表示できる項目がありません</div>';
+
+  // 文脈情報をもとに免責テキストを更新（DOM操作で安全に構築）
+  const ctx = _intakeContext || {};
+  const numDays    = ctx.numDays || 1;
+  const hasProfile = ctx.hasStoredProfile;
+
+  const rangeNote = numDays === 1
+    ? '入力された1日分の食事内容についての参考表示です。'
+    : numDays + '日間の食事記録をもとにした1日平均値についての参考表示です。';
+
+  const profileNote = hasProfile
+    ? '参考基準値は、ご登録の年齢・性別等をもとにした目安です。'
+    : '参考基準値は、プロフィール未登録のため成人の標準的な参考値を使用しています。';
+
+  const estimateNote = '栄養素量は写真・テキストからの概算推定であり、実測値ではありません。分量や調理方法により実際の値と異なる場合があります。';
+
+  const disclaimer = section.querySelector('.it-disclaimer');
+  if (disclaimer) {
+    disclaimer.textContent = '';
+    [rangeNote, profileNote, estimateNote, 'AIによる推定値を参考基準と比較した目安です。診断・医療判断を目的としません。'].forEach(text => {
+      const d = document.createElement('div');
+      d.textContent = text;
+      d.style.marginBottom = '3px';
+      disclaimer.appendChild(d);
+    });
+  }
+
+  section.style.display = '';
+}
+
+function applyIntakeBadges() {
+  try {
+    const raw = localStorage.getItem('eiyou_intake_summary');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data || !data.nutrients) return;
+    _intakeSummary = data.nutrients;
+    _intakeContext = { numDays: data.numDays, mealCount: data.mealCount, hasStoredProfile: data.hasStoredProfile };
+  } catch { return; }
+
+  _applyIntakeNodeClasses();       // 補助：ノード枠色
+  renderIntakeTendencyPanel();     // 主表示：一覧パネル
+  const note = document.getElementById('htrIntakeNote');
+  if (note) note.classList.add('active');
+}
+
+function _hideIntakeBadges() {
+  cy.nodes().removeClass('intakeLow intakeNormal intakeHigh');
+  const section = document.getElementById('intakeTendencySection');
+  if (section) section.style.display = 'none';
+  const note = document.getElementById('htrIntakeNote');
+  if (note) note.classList.remove('active');
+}
+
+function _restoreIntakeBadges() {
+  if (!_intakeSummary) return;
+  _applyIntakeNodeClasses();
+  const section = document.getElementById('intakeTendencySection');
+  if (section) section.style.display = '';
+  const note = document.getElementById('htrIntakeNote');
+  if (note) note.classList.add('active');
+}
+
 // 症状検索モードの開始・終了（バナーと凡例ノートを制御）
 function enterSymptomSearchMode(query) {
   const banner  = document.getElementById('symptomModeBanner');
@@ -1035,6 +1203,7 @@ function enterSymptomSearchMode(query) {
   if (banner)  banner.style.display = 'flex';
   if (smbQ)    smbQ.textContent = query;
   if (htrNote) htrNote.classList.add('active');
+  _hideIntakeBadges(); // 食事解析バッジを一時退避（症状検索中は非表示）
 }
 
 function exitSymptomSearchMode() {
@@ -1042,6 +1211,7 @@ function exitSymptomSearchMode() {
   const htrNote = document.getElementById('htrSymptomNote');
   if (banner)  banner.style.display = 'none';
   if (htrNote) htrNote.classList.remove('active');
+  _restoreIntakeBadges(); // 食事解析バッジを復元
 }
 
 // 症状検索の状態をすべてリセットする（パネルは閉じない）
@@ -1051,7 +1221,7 @@ function resetSymptomSearch(){
   symptomHighlightBtn.style.display = 'none';
   lastSymptomMatches = [];
   document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
   exitSymptomSearchMode();
 }
 
@@ -1075,7 +1245,7 @@ function doSymptomSearch(){
   symptomHighlightBtn.style.display = 'none';
 
   // 前の検索ハイライトを必ずクリア
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
 
   if(!q){
     document.querySelectorAll('#symptomTags .tag-chip').forEach(c=>c.classList.remove('active'));
@@ -1083,14 +1253,20 @@ function doSymptomSearch(){
     return;
   }
 
-  const defMatches = [];
-  const exMatches  = [];
-  nutrients.forEach(n=>{
-    if(n.deficiency.toLowerCase().includes(q)) defMatches.push({nutrient:n, matchType:'deficiency'});
-    if(n.excess.toLowerCase().includes(q))     exMatches.push({nutrient:n, matchType:'excess'});
+  // 一致栄養素を「少ない状態との関連（def）」「多い状態との関連（ex）」で分類（重複なく集約）
+  const matchMap = new Map();
+  nutrients.forEach(n => {
+    const defHit = n.deficiency.toLowerCase().includes(q);
+    const exHit  = n.excess.toLowerCase().includes(q);
+    if (defHit || exHit) matchMap.set(n.id, {nutrient: n, def: defHit, ex: exHit});
   });
 
-  const allMatches = [...defMatches, ...exMatches];
+  const allMatches = [...matchMap.values()].map(m => ({
+    nutrient: m.nutrient,
+    def: m.def,
+    ex: m.ex,
+    matchType: (m.def && m.ex) ? 'both' : m.def ? 'deficiency' : 'excess'
+  }));
   lastSymptomMatches = allMatches;
 
   if(allMatches.length === 0){
@@ -1099,21 +1275,34 @@ function doSymptomSearch(){
     return;
   }
 
-  // 自動ハイライト（関連栄養素を単色でハイライト、摂取量由来の区別は表示しない）
-  const allIds     = [...new Set(allMatches.map(m=>m.nutrient.id))];
-  const matchNodes = cy.nodes().filter(n=>allIds.includes(n.id()));
+  // グラフハイライト（関連方向に応じた枠色：低=青、高=橙、両=灰）
+  const allIds     = allMatches.map(m => m.nutrient.id);
+  const matchNodes = cy.nodes().filter(n => allIds.includes(n.id()));
   cy.elements().not(matchNodes).addClass('dimmed');
   matchNodes.removeClass('dimmed');
   matchNodes.addClass('symptomHighlight');
+  allMatches.forEach(m => {
+    const node = cy.getElementById(m.nutrient.id);
+    if (m.def) node.addClass('symptomDef');
+    if (m.ex)  node.addClass('symptomEx');
+  });
   cy.fit(matchNodes, 40);
   enterSymptomSearchMode(q);
 
-  // 結果リスト描画（「欠乏」「過剰」は内部判定のみ、表示は安全な表現）
+  // 結果リスト描画（関連方向バッジを表示。摂取量由来の少なめ/多めとは別の情報）
   const sorted = sortResults(allMatches, symptomSortSelect.value, 'nutrient');
-  renderGrouped(symptomResults, sorted, symptomSortSelect.value, 'nutrient', m=>{
+  renderGrouped(symptomResults, sorted, symptomSortSelect.value, 'nutrient', m => {
     const div = document.createElement('div');
     div.className = 'result-item';
-    div.innerHTML = `<span style="color:${COLORS[m.nutrient.subCategory].bg}">●</span> <strong>${m.nutrient.name}</strong> <span class="result-type-badge" style="background:#2980b9">関連する可能性あり</span>`;
+    let dirBadge;
+    if (m.matchType === 'deficiency') {
+      dirBadge = '<span class="dir-badge dir-badge-low" title="少ない状態との関連情報">低</span>';
+    } else if (m.matchType === 'excess') {
+      dirBadge = '<span class="dir-badge dir-badge-high" title="多い状態との関連情報">高</span>';
+    } else {
+      dirBadge = '<span class="dir-badge dir-badge-both" title="関連方向：要確認">?</span>';
+    }
+    div.innerHTML = `<span style="color:${COLORS[m.nutrient.subCategory].bg}">●</span> <strong>${m.nutrient.name}</strong> ${dirBadge}`;
     div.addEventListener('click', ()=>{
       const node = cy.getElementById(m.nutrient.id);
       node.select();
@@ -1124,10 +1313,10 @@ function doSymptomSearch(){
     return div;
   });
 
-  // 免責・参考案内
+  // 参考案内・免責（症状の原因判定ではない旨を明記）
   const note = document.createElement('div');
   note.className = 'symptom-search-note';
-  note.textContent = '※ 症状との関連は一般的な参考情報です。掲載情報を診断・治療・症状改善の根拠としないでください。';
+  note.textContent = 'この表示は、症状の原因を判定するものではありません。栄養素の少ない状態・多い状態との一般的な関連情報を示しています。';
   symptomResults.appendChild(note);
 
   // 解除ボタンを表示
@@ -1145,7 +1334,7 @@ symptomSearchInput.addEventListener('keydown', e=>{
 
 // 「ハイライト解除」ボタン → クリアのみ（パネルは閉じない）
 symptomHighlightBtn.addEventListener('click', ()=>{
-  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
+  cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
   symptomHighlightBtn.style.display = 'none';
   exitSymptomSearchMode();
 });
@@ -1156,7 +1345,7 @@ symptomHighlightBtn.addEventListener('click', ()=>{
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     detailPanel.classList.remove('open');
-    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight');
+    cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
     exitSymptomSearchMode();
   }
 });
@@ -1187,6 +1376,11 @@ mobileOverlay.addEventListener('click', ()=>{
   leftPanel.classList.remove('open');
   mobileOverlay.classList.remove('show');
 });
+
+// ============================================================
+// INIT: 食事解析結果バッジを読み込んで表示（checker.htmlで解析済みの場合）
+// ============================================================
+applyIntakeBadges();
 </script>
 </body>
 </html>
