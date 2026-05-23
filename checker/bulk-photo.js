@@ -36,6 +36,9 @@ function initBulkPhoto() {
     _bpCancelled = true;
     cancelGemini();
   });
+
+  const saveBtn = document.getElementById('bpSaveBtn');
+  if (saveBtn) saveBtn.addEventListener('click', saveBpResults);
 }
 
 // ============================================================
@@ -117,6 +120,7 @@ function renderBpList() {
 
   if (actions) actions.style.display = 'flex';
   updateAnalyzeBtnState();
+  updateBpSaveBtn();
 }
 
 function buildBpCard(item) {
@@ -221,6 +225,36 @@ function updateAnalyzeBtnState() {
   analyzeBtn.disabled = !hasPending || _bpAnalyzing;
 }
 
+function updateBpSaveBtn() {
+  const saveBtn  = document.getElementById('bpSaveBtn');
+  const saveInfo = document.getElementById('bpSaveInfo');
+  if (!saveBtn) return;
+
+  const doneCount    = _bpItems.filter(i => i.status === 'done').length;
+  const skippedCount = _bpItems.filter(i => i.status === 'error' || i.status === 'pending').length;
+
+  if (_bpItems.length === 0) {
+    saveBtn.style.display = 'none';
+    if (saveInfo) saveInfo.style.display = 'none';
+    return;
+  }
+
+  saveBtn.style.display = '';
+  saveBtn.disabled = doneCount === 0 || _bpAnalyzing;
+  saveBtn.textContent = doneCount > 0
+    ? '解析済みをまとめて保存（' + doneCount + '件）'
+    : '解析済みをまとめて保存';
+
+  if (saveInfo && !saveInfo.classList.contains('bp-save-success')) {
+    if (doneCount > 0 && skippedCount > 0) {
+      saveInfo.textContent = '※ エラー・未解析の写真（' + skippedCount + '件）は保存対象外です';
+      saveInfo.style.display = '';
+    } else {
+      saveInfo.style.display = 'none';
+    }
+  }
+}
+
 function setBpAnalyzing(analyzing) {
   _bpAnalyzing = analyzing;
 
@@ -238,6 +272,8 @@ function setBpAnalyzing(analyzing) {
   document.querySelectorAll('.bp-card-remove').forEach(btn => { btn.disabled = analyzing; });
   document.querySelectorAll('.bp-card-fields input, .bp-card-fields select').forEach(el => { el.disabled = analyzing; });
   document.querySelectorAll('.bp-food-add-btn, .bp-food-remove-btn').forEach(btn => { btn.disabled = analyzing; });
+
+  updateBpSaveBtn();
 }
 
 function updateBpProgress(current, total) {
@@ -266,7 +302,7 @@ function updateBpCardStatus(item) {
   const badge = card.querySelector('[data-bp-status="' + item.id + '"]');
   if (badge) {
     badge.className = 'bp-status-badge ' + item.status;
-    const labels = { pending: '未解析', analyzing: '解析中…', done: '完了', error: 'エラー' };
+    const labels = { pending: '未解析', analyzing: '解析中…', done: '完了', error: 'エラー', saved: '保存済み' };
     badge.textContent = labels[item.status] || item.status;
   }
 
@@ -629,6 +665,60 @@ async function retrySingleBpItem(item) {
 }
 
 // ============================================================
+// Step 7: まとめて保存
+// ============================================================
+function saveBpResults() {
+  const toSave = _bpItems.filter(i => i.status === 'done');
+  if (toSave.length === 0) return;
+
+  // 二重保存防止：保存中は即座に無効化
+  const saveBtn = document.getElementById('bpSaveBtn');
+  if (saveBtn) saveBtn.disabled = true;
+
+  const now = new Date().toISOString();
+  const meals = loadMeals();
+
+  toSave.forEach(item => {
+    const meal = {
+      id: crypto.randomUUID(),
+      date: item.date || new Date().toISOString().split('T')[0],
+      mealType: item.mealType || 'lunch',
+      inputMethod: 'bulk-photo',
+      items: item.result.estimatedFoods || [],
+      nutrients: item.result.nutrients || {},
+      isDemo: false,
+      createdAt: now
+    };
+    if (item.memo) meal.memo = item.memo;
+    meals.push(meal);
+  });
+
+  saveMeals(meals);
+
+  // 保存済みカードをマーク・URLを解放
+  toSave.forEach(item => {
+    if (item.previewUrl) {
+      URL.revokeObjectURL(item.previewUrl);
+      item.previewUrl = '';
+    }
+    item.status = 'saved';
+    updateBpCardStatus(item);
+  });
+
+  // 保存済みメッセージを表示
+  const saveInfo = document.getElementById('bpSaveInfo');
+  if (saveInfo) {
+    saveInfo.textContent = toSave.length + '件の食事記録を保存しました';
+    saveInfo.className = 'bp-save-info bp-save-success';
+    saveInfo.style.display = '';
+  }
+
+  showToast(toSave.length + '件の食事記録を保存しました', 'success');
+  updateBpSaveBtn();
+  renderAll();
+}
+
+// ============================================================
 // リセット
 // ============================================================
 function resetBpState() {
@@ -639,4 +729,9 @@ function resetBpState() {
   renderBpList();
   const progressEl = document.getElementById('bpProgress');
   if (progressEl) progressEl.style.display = 'none';
+  const saveInfo = document.getElementById('bpSaveInfo');
+  if (saveInfo) {
+    saveInfo.style.display = 'none';
+    saveInfo.className = 'bp-save-info';
+  }
 }

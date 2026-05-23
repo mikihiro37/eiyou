@@ -322,7 +322,10 @@ textarea{resize:vertical;min-height:80px}
 .bp-status-badge.analyzing{background:#e3f2fd;color:#1565c0}
 .bp-status-badge.done{background:#e8f5e9;color:#2e7d32}
 .bp-status-badge.error{background:#ffebee;color:#c62828}
-.bp-actions{display:flex;gap:10px;margin:12px 0}
+.bp-status-badge.saved{background:#e3f2fd;color:#1565c0}
+.bp-actions{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
+.bp-save-info{font-size:12px;color:#666;margin:-6px 0 10px;padding:4px 0}
+.bp-save-info.bp-save-success{color:#2e7d32;font-weight:600}
 /* 4タブ時: 375px以下でタブ文字をひと回り小さくする */
 @media(max-width:375px){.tab-btn{font-size:10px;padding:8px 2px}}
 /* まとめて写真タブ: 375px以下で1列表示 */
