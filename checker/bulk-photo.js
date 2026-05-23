@@ -1,6 +1,6 @@
 // ============================================================
-// まとめて写真解析 — 複数写真プレビューUI + 逐次Gemini解析
-// Phase 2b Step 1-5
+// まとめて写真解析 — 複数写真プレビューUI + 逐次Gemini解析 + 結果確認
+// Phase 2b Step 1-6
 // ============================================================
 
 const MAX_BULK_PHOTOS = 5;
@@ -9,6 +9,16 @@ const BULK_DELAY_MS = 1500;
 let _bpItems = [];
 let _bpAnalyzing = false;
 let _bpCancelled = false;
+
+// Step 6: 表示する栄養素グループ定義（data.js の NUTRIENT_INFO を参照）
+const BP_MACRO_KEYS = ['calories', 'protein', 'fat', 'carbs', 'fiber'];
+const BP_DETAIL_GROUPS = [
+  { label: 'ビタミン（脂溶性）',  keys: ['vitA','vitD','vitE','vitK'] },
+  { label: 'ビタミン（水溶性）',  keys: ['vitB1','vitB2','vitB3','vitB5','vitB6','vitB7','vitB9','vitB12','vitC'] },
+  { label: 'ミネラル（主要）',    keys: ['ca','p','mg','na','k'] },
+  { label: 'ミネラル（微量）',    keys: ['fe','zn','cu','mn','iodine','se','mo'] },
+  { label: '必須アミノ酸',        keys: ['ile','leu','lys','met','phe','thr','trp','val'] }
+];
 
 // ============================================================
 // 初期化
@@ -196,6 +206,11 @@ function isFatalBpError(msg) {
   );
 }
 
+function _normalizeFoodItem(food) {
+  if (typeof food === 'string') return { name: food, quantity: '', grams: 0 };
+  return { name: String(food.name || ''), quantity: String(food.quantity || ''), grams: Number(food.grams) || 0 };
+}
+
 // ============================================================
 // UI 状態制御
 // ============================================================
@@ -217,20 +232,12 @@ function setBpAnalyzing(analyzing) {
     analyzeBtn.disabled = analyzing;
     analyzeBtn.style.display = analyzing ? 'none' : '';
   }
-  if (cancelBtn) {
-    cancelBtn.style.display = analyzing ? '' : 'none';
-  }
-  if (fileInput) {
-    fileInput.disabled = analyzing;
-  }
+  if (cancelBtn) cancelBtn.style.display = analyzing ? '' : 'none';
+  if (fileInput) fileInput.disabled = analyzing;
 
-  // カードの削除ボタン・入力欄を無効化
-  document.querySelectorAll('.bp-card-remove').forEach(btn => {
-    btn.disabled = analyzing;
-  });
-  document.querySelectorAll('.bp-card-fields input, .bp-card-fields select').forEach(el => {
-    el.disabled = analyzing;
-  });
+  document.querySelectorAll('.bp-card-remove').forEach(btn => { btn.disabled = analyzing; });
+  document.querySelectorAll('.bp-card-fields input, .bp-card-fields select').forEach(el => { el.disabled = analyzing; });
+  document.querySelectorAll('.bp-food-add-btn, .bp-food-remove-btn').forEach(btn => { btn.disabled = analyzing; });
 }
 
 function updateBpProgress(current, total) {
@@ -245,7 +252,7 @@ function updateBpProgress(current, total) {
   }
   progressEl.style.display = '';
   const pct = Math.round((current / total) * 100);
-  if (fillEl) fillEl.style.width = pct + '%';
+  if (fillEl)  fillEl.style.width = pct + '%';
   if (labelEl) labelEl.textContent = current + ' / ' + total + ' 枚解析済み';
 }
 
@@ -263,58 +270,231 @@ function updateBpCardStatus(item) {
     badge.textContent = labels[item.status] || item.status;
   }
 
-  // 既存の結果・エラーエリアを削除
-  const existing = card.querySelector('.bp-card-result, .bp-card-error');
+  const existing = card.querySelector('.bp-result-area, .bp-card-error');
   if (existing) existing.remove();
 
   if (item.status === 'done' && item.result) {
-    card.querySelector('.bp-card-fields').appendChild(buildBpResultSummary(item));
+    card.querySelector('.bp-card-fields').appendChild(buildBpResultArea(item));
   } else if (item.status === 'error' && item.error) {
     card.querySelector('.bp-card-fields').appendChild(buildBpErrorArea(item));
   }
 }
 
-function buildBpResultSummary(item) {
+// ============================================================
+// Step 6: 結果確認エリア
+// ============================================================
+function buildBpResultArea(item) {
   const r = item.result;
-  const div = document.createElement('div');
-  div.className = 'bp-card-result';
+  // estimatedFoods を編集可能なオブジェクト配列に正規化（再描画でも安全）
+  if (Array.isArray(r.estimatedFoods)) {
+    r.estimatedFoods = r.estimatedFoods.map(_normalizeFoodItem);
+  } else {
+    r.estimatedFoods = [];
+  }
 
-  const conf = (r.confidence || '').toLowerCase();
+  const area = document.createElement('div');
+  area.className = 'bp-result-area';
+
+  // 推定精度バッジ
+  const confRow = document.createElement('div');
+  confRow.className = 'bp-result-conf-row';
+  const conf = r.confidence || '中';
   const confBadge = document.createElement('span');
-  confBadge.className = 'bp-conf-badge ' + (conf === 'high' ? 'conf-high' : conf === 'medium' ? 'conf-mid' : 'conf-low');
-  const confLabels = { high: '信頼度：高', medium: '信頼度：中', low: '信頼度：低' };
-  confBadge.textContent = confLabels[conf] || '信頼度：不明';
-  div.appendChild(confBadge);
+  confBadge.className = 'bp-conf-badge ' + (conf === '高' ? 'conf-high' : conf === '低' ? 'conf-low' : 'conf-mid');
+  confBadge.textContent = '推定精度：' + conf;
+  confRow.appendChild(confBadge);
+  area.appendChild(confRow);
 
-  const cal = r.nutrients && r.nutrients.calories != null ? r.nutrients.calories : null;
-  if (cal !== null) {
-    const calEl = document.createElement('div');
-    calEl.className = 'bp-result-calories';
-    calEl.textContent = '推定エネルギー：約 ' + Math.round(cal) + ' kcal';
-    div.appendChild(calEl);
-  }
+  area.appendChild(_buildFoodSection(item));
+  area.appendChild(_buildMacroSection(item));
+  area.appendChild(_buildDetailSection(item));
 
-  const foods = Array.isArray(r.estimatedFoods) ? r.estimatedFoods : [];
-  if (foods.length > 0) {
-    const foodsEl = document.createElement('div');
-    foodsEl.className = 'bp-result-foods';
-    const show = foods.slice(0, 3);
-    show.forEach(food => {
-      const tag = document.createElement('span');
-      tag.className = 'bp-result-food-tag';
-      tag.textContent = food;
-      foodsEl.appendChild(tag);
+  return area;
+}
+
+function _buildFoodSection(item) {
+  const sec = document.createElement('div');
+  sec.className = 'bp-result-section';
+
+  const head = document.createElement('div');
+  head.className = 'bp-result-section-head';
+  head.textContent = '推定食品';
+  sec.appendChild(head);
+
+  const listEl = document.createElement('div');
+  listEl.className = 'bp-food-list';
+  sec.appendChild(listEl);
+  _renderFoodList(item, listEl);
+
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'bp-food-add-btn';
+  addBtn.textContent = '+ 食品を追加';
+  addBtn.addEventListener('click', () => {
+    item.result.estimatedFoods.push({ name: '', quantity: '', grams: 0 });
+    _renderFoodList(item, listEl);
+  });
+  sec.appendChild(addBtn);
+
+  return sec;
+}
+
+function _renderFoodList(item, listEl) {
+  while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+
+  item.result.estimatedFoods.forEach((food, idx) => {
+    const row = document.createElement('div');
+    row.className = 'bp-food-item';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'bp-food-name-input';
+    nameInput.placeholder = '食品名';
+    nameInput.value = food.name;
+    nameInput.addEventListener('input', e => { food.name = e.target.value; });
+
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'text';
+    qtyInput.className = 'bp-food-qty-input';
+    qtyInput.placeholder = '量（例：1杯）';
+    qtyInput.value = food.quantity;
+    qtyInput.addEventListener('input', e => { food.quantity = e.target.value; });
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'bp-food-remove-btn';
+    removeBtn.textContent = '×';
+    removeBtn.setAttribute('aria-label', '削除');
+    removeBtn.addEventListener('click', () => {
+      item.result.estimatedFoods.splice(idx, 1);
+      _renderFoodList(item, listEl);
     });
-    if (foods.length > 3) {
-      const more = document.createElement('span');
-      more.className = 'bp-result-food-more';
-      more.textContent = '他' + (foods.length - 3) + '品';
-      foodsEl.appendChild(more);
-    }
-    div.appendChild(foodsEl);
-  }
 
-  return div;
+    row.appendChild(nameInput);
+    row.appendChild(qtyInput);
+    row.appendChild(removeBtn);
+    listEl.appendChild(row);
+  });
+}
+
+function _buildMacroSection(item) {
+  const r = item.result;
+  const sec = document.createElement('div');
+  sec.className = 'bp-result-section';
+
+  const head = document.createElement('div');
+  head.className = 'bp-result-section-head';
+  head.textContent = '主要栄養素（推定）';
+  sec.appendChild(head);
+
+  const grid = document.createElement('div');
+  grid.className = 'bp-macro-grid';
+
+  BP_MACRO_KEYS.forEach(key => {
+    const info = NUTRIENT_INFO[key];
+    if (!info) return;
+
+    const macroItem = document.createElement('div');
+    macroItem.className = 'bp-macro-item';
+
+    const label = document.createElement('div');
+    label.className = 'bp-macro-label';
+    label.textContent = info.name;
+
+    const valRow = document.createElement('div');
+    valRow.className = 'bp-macro-value-row';
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'bp-macro-input';
+    input.min = '0';
+    input.value = r.nutrients && r.nutrients[key] != null ? r.nutrients[key] : 0;
+    input.addEventListener('input', e => {
+      if (!r.nutrients) r.nutrients = {};
+      r.nutrients[key] = Math.max(0, Number(e.target.value) || 0);
+    });
+
+    const unit = document.createElement('span');
+    unit.className = 'bp-macro-unit';
+    unit.textContent = info.unit;
+
+    valRow.appendChild(input);
+    valRow.appendChild(unit);
+    macroItem.appendChild(label);
+    macroItem.appendChild(valRow);
+    grid.appendChild(macroItem);
+  });
+
+  sec.appendChild(grid);
+  return sec;
+}
+
+function _buildDetailSection(item) {
+  const r = item.result;
+  const sec = document.createElement('div');
+  sec.className = 'bp-detail-section';
+
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'bp-detail-toggle';
+  toggle.textContent = '詳細栄養素を見る ▼';
+
+  const body = document.createElement('div');
+  body.className = 'bp-detail-body';
+  body.style.display = 'none';
+
+  toggle.addEventListener('click', () => {
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : '';
+    toggle.textContent = isOpen ? '詳細栄養素を見る ▼' : '詳細栄養素を閉じる ▲';
+  });
+
+  BP_DETAIL_GROUPS.forEach(group => {
+    const groupEl = document.createElement('div');
+    groupEl.className = 'bp-detail-group';
+
+    const groupTitle = document.createElement('div');
+    groupTitle.className = 'bp-detail-group-title';
+    groupTitle.textContent = group.label;
+    groupEl.appendChild(groupTitle);
+
+    group.keys.forEach(key => {
+      const info = NUTRIENT_INFO[key];
+      if (!info) return;
+
+      const row = document.createElement('div');
+      row.className = 'bp-detail-row';
+
+      const label = document.createElement('span');
+      label.className = 'bp-detail-label';
+      label.textContent = info.name;
+
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.className = 'bp-detail-input';
+      input.min = '0';
+      input.value = r.nutrients && r.nutrients[key] != null ? r.nutrients[key] : 0;
+      input.addEventListener('input', e => {
+        if (!r.nutrients) r.nutrients = {};
+        r.nutrients[key] = Math.max(0, Number(e.target.value) || 0);
+      });
+
+      const unit = document.createElement('span');
+      unit.className = 'bp-detail-unit';
+      unit.textContent = info.unit;
+
+      row.appendChild(label);
+      row.appendChild(input);
+      row.appendChild(unit);
+      groupEl.appendChild(row);
+    });
+
+    body.appendChild(groupEl);
+  });
+
+  sec.appendChild(toggle);
+  sec.appendChild(body);
+  return sec;
 }
 
 function buildBpErrorArea(item) {
@@ -395,14 +575,11 @@ async function startBpAnalysis() {
       item.error = errCode;
       updateBpCardStatus(item);
 
-      if (_bpCancelled || errCode === 'CANCELLED') {
-        break;
-      }
+      if (_bpCancelled || errCode === 'CANCELLED') break;
       if (isFatalBpError(errCode)) {
         showToast(_humanizeBpError(errCode), 'error');
         break;
       }
-      // 個別エラーはそのまま次へ
     }
 
     if (i < pendingItems.length - 1 && !_bpCancelled) {
@@ -413,16 +590,13 @@ async function startBpAnalysis() {
   setBpAnalyzing(false);
   updateAnalyzeBtnState();
 
-  // プログレスバーを最終状態のまま残す（完了時のみ非表示）
   const allDone = _bpItems.every(i => i.status === 'done' || i.status === 'error');
   if (allDone) {
     const progressEl = document.getElementById('bpProgress');
     if (progressEl) progressEl.style.display = 'none';
   }
 
-  if (_bpCancelled) {
-    showToast('解析を中断しました', 'info');
-  }
+  if (_bpCancelled) showToast('解析を中断しました', 'info');
 }
 
 // ============================================================
@@ -444,9 +618,7 @@ async function retrySingleBpItem(item) {
     item.status = 'error';
     item.error = errCode;
     updateBpCardStatus(item);
-    if (isFatalBpError(errCode)) {
-      showToast(_humanizeBpError(errCode), 'error');
-    }
+    if (isFatalBpError(errCode)) showToast(_humanizeBpError(errCode), 'error');
   }
 
   setBpAnalyzing(false);

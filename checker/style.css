@@ -350,3 +350,40 @@ textarea{resize:vertical;min-height:80px}
 .bp-error-msg{font-size:11px;color:#c62828;margin-bottom:6px;word-break:break-all}
 .bp-retry-btn{font-size:11px;padding:3px 10px;border:1px solid #ef9a9a;border-radius:4px;background:#fff;color:#c62828;cursor:pointer}
 .bp-retry-btn:hover{background:#ffebee}
+
+/* --- Bulk Photo: Result Area (Step 6) --- */
+.bp-result-area{margin-top:8px;border:1px solid #c8e6c9;border-radius:6px;background:#f8fff8;overflow:hidden}
+.bp-result-conf-row{padding:6px 10px;display:flex;align-items:center;gap:6px}
+.bp-result-section{padding:8px 10px;border-top:1px solid #e8f5e9}
+.bp-result-section-head{font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:6px}
+
+/* Foods */
+.bp-food-list{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
+.bp-food-item{display:flex;gap:4px;align-items:center}
+.bp-food-name-input{flex:2;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;min-width:0}
+.bp-food-qty-input{flex:1;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;min-width:0}
+.bp-food-remove-btn{width:22px;height:22px;border:none;border-radius:50%;background:#ef9a9a;color:#c62828;font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
+.bp-food-remove-btn:hover{background:#e57373}
+.bp-food-add-btn{font-size:11px;padding:4px 10px;border:1px dashed #a5d6a7;border-radius:4px;background:#f1f8e9;color:#388e3c;cursor:pointer;margin-top:2px}
+.bp-food-add-btn:hover{background:#e8f5e9}
+
+/* Macro grid */
+.bp-macro-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bp-macro-item{display:flex;flex-direction:column;gap:2px}
+.bp-macro-label{font-size:10px;color:#666}
+.bp-macro-value-row{display:flex;align-items:center;gap:3px}
+.bp-macro-input{width:64px;font-size:12px;padding:3px 5px;border:1px solid #ddd;border-radius:4px}
+.bp-macro-unit{font-size:10px;color:#999}
+
+/* Detail section */
+.bp-detail-section{border-top:1px solid #e8f5e9}
+.bp-detail-toggle{width:100%;text-align:left;font-size:11px;padding:6px 10px;background:#f1f8e9;border:none;color:#388e3c;cursor:pointer}
+.bp-detail-toggle:hover{background:#e8f5e9}
+.bp-detail-body{padding:8px 10px}
+.bp-detail-group{margin-bottom:8px}
+.bp-detail-group:last-child{margin-bottom:0}
+.bp-detail-group-title{font-size:10px;font-weight:700;color:#888;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:2px}
+.bp-detail-row{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.bp-detail-label{font-size:11px;color:#555;flex:1}
+.bp-detail-input{width:64px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px}
+.bp-detail-unit{font-size:10px;color:#999;width:45px;flex-shrink:0}
