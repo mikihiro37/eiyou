@@ -303,3 +303,27 @@ textarea{resize:vertical;min-height:80px}
   .tab-btn{font-size:12px;padding:8px 4px}
   .history-date{width:60px;font-size:11px}
 }
+
+/* ============================================================
+   Bulk Photo Upload (Phase 2b)
+   ============================================================ */
+.bp-warning{background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;font-size:12px;color:#5d4037;margin-bottom:14px}
+.bp-file-note{font-size:11px;color:#999;margin-top:4px}
+.bp-list{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.bp-card{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:8px;padding:10px;width:calc(50% - 5px);box-sizing:border-box;position:relative}
+.bp-card-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;margin-bottom:8px;background:#ddd}
+.bp-card-remove{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.bp-card-remove:hover{background:rgba(0,0,0,.7)}
+.bp-card-fields{display:flex;flex-direction:column;gap:6px}
+.bp-card-fields label{font-size:11px;color:#666;font-weight:600;margin-bottom:0}
+.bp-card-fields input[type="date"],.bp-card-fields select,.bp-card-fields input[type="text"]{font-size:12px;padding:5px 8px}
+.bp-status-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;margin-top:6px}
+.bp-status-badge.pending{background:#eceff1;color:#546e7a}
+.bp-status-badge.analyzing{background:#e3f2fd;color:#1565c0}
+.bp-status-badge.done{background:#e8f5e9;color:#2e7d32}
+.bp-status-badge.error{background:#ffebee;color:#c62828}
+.bp-actions{display:flex;gap:10px;margin:12px 0}
+/* 4タブ時: 375px以下でタブ文字をひと回り小さくする */
+@media(max-width:375px){.tab-btn{font-size:10px;padding:8px 2px}}
+/* まとめて写真タブ: 375px以下で1列表示 */
+@media(max-width:375px){.bp-card{width:100%}}
