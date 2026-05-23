@@ -158,7 +158,7 @@
       <!-- Tab: Bulk Photo -->
       <div class="tab-content" id="tab-bulk-photo">
         <div class="bp-warning">
-          ⚠ 最大5枚まで選択できます。写真を選ぶと日付・食事区分・メモを設定できます。解析・保存は後のステップで実装予定です。
+          ⚠ 写真は最大5枚まで選択できます。解析は1枚ずつ順番に行います。無料枠では件数の上限があります。
         </div>
         <div class="form-group">
           <label>食事の写真（複数可）</label>
@@ -167,9 +167,15 @@
         </div>
         <!-- プレビューカード一覧（bulk-photo.js が動的に生成） -->
         <div id="bpList" class="bp-list"></div>
-        <!-- 操作ボタン（写真選択後に bulk-photo.js が表示。解析ボタンは次ステップで有効化） -->
+        <!-- 進捗バー -->
+        <div id="bpProgress" class="bp-progress" style="display:none">
+          <div class="bp-progress-bar"><div class="bp-progress-fill" id="bpProgressFill"></div></div>
+          <div class="bp-progress-label" id="bpProgressLabel"></div>
+        </div>
+        <!-- 操作ボタン（写真選択後に bulk-photo.js が表示） -->
         <div id="bpActions" class="bp-actions" style="display:none">
-          <button class="btn btn-primary" id="bpAnalyzeBtn" disabled>まとめて解析（準備中）</button>
+          <button class="btn btn-primary" id="bpAnalyzeBtn">まとめて解析</button>
+          <button class="btn btn-outline" id="bpCancelBtn" style="display:none">中断</button>
         </div>
       </div>
     </div>
@@ -552,7 +558,7 @@
 <script src="checker/gemini.js?v=4"></script>
 <script src="checker/demo.js?v=4"></script>
 <script src="checker/bulk.js?v=4"></script>
-<script src="checker/bulk-photo.js?v=1"></script>
+<script src="checker/bulk-photo.js?v=2"></script>
 <script src="checker/app.js?v=4"></script>
 
 </body>

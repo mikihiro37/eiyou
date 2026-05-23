@@ -327,3 +327,26 @@ textarea{resize:vertical;min-height:80px}
 @media(max-width:375px){.tab-btn{font-size:10px;padding:8px 2px}}
 /* まとめて写真タブ: 375px以下で1列表示 */
 @media(max-width:375px){.bp-card{width:100%}}
+
+/* --- Bulk Photo: Progress (Step 5) --- */
+.bp-progress{margin:10px 0}
+.bp-progress-bar{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.bp-progress-fill{height:100%;background:#5b9bd5;border-radius:4px;transition:width .3s ease}
+.bp-progress-label{font-size:12px;color:#666;margin-top:4px;text-align:center}
+
+/* --- Bulk Photo: Result Summary (Step 5) --- */
+.bp-card-result{margin-top:8px;padding:8px;background:#f0f8f0;border-radius:6px;border:1px solid #c8e6c9}
+.bp-conf-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600;margin-bottom:4px}
+.bp-conf-badge.conf-high{background:#e8f5e9;color:#2e7d32}
+.bp-conf-badge.conf-mid{background:#fff8e1;color:#f57f17}
+.bp-conf-badge.conf-low{background:#ffebee;color:#c62828}
+.bp-result-calories{font-size:12px;color:#333;font-weight:600;margin-bottom:4px}
+.bp-result-foods{display:flex;flex-wrap:wrap;gap:3px}
+.bp-result-food-tag{font-size:11px;background:#fff;border:1px solid #c8e6c9;border-radius:10px;padding:1px 7px;color:#2e7d32}
+.bp-result-food-more{font-size:11px;color:#999;align-self:center}
+
+/* --- Bulk Photo: Error Area (Step 5) --- */
+.bp-card-error{margin-top:8px;padding:8px;background:#fff3f3;border-radius:6px;border:1px solid #ffcdd2}
+.bp-error-msg{font-size:11px;color:#c62828;margin-bottom:6px;word-break:break-all}
+.bp-retry-btn{font-size:11px;padding:3px 10px;border:1px solid #ef9a9a;border-radius:4px;background:#fff;color:#c62828;cursor:pointer}
+.bp-retry-btn:hover{background:#ffebee}
