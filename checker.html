@@ -39,6 +39,7 @@
         <button class="tab-btn active" data-tab="form">フォーム</button>
         <button class="tab-btn" data-tab="photo">写真</button>
         <button class="tab-btn" data-tab="text">テキスト</button>
+        <button class="tab-btn" data-tab="bulk-photo">まとめて写真</button>
       </div>
 
       <!-- Tab: Form -->
@@ -152,6 +153,32 @@
           </div>
         </div>
         <button class="btn btn-success btn-block" id="bulkAnalyzeBtn">まとめて解析 → 栄養バランスレポート</button>
+      </div>
+
+      <!-- Tab: Bulk Photo -->
+      <div class="tab-content" id="tab-bulk-photo">
+        <div class="bp-warning">
+          ⚠ 写真は最大5枚まで選択できます。解析は1枚ずつ順番に行います。無料枠では件数の上限があります。
+        </div>
+        <div class="form-group">
+          <label>食事の写真（複数可）</label>
+          <input type="file" id="bpFileInput" accept="image/*" multiple style="font-size:13px">
+          <div class="bp-file-note">複数の写真を一度に選択できます（最大5枚）。画像はこの端末内でのみ使用します。</div>
+        </div>
+        <!-- プレビューカード一覧（bulk-photo.js が動的に生成） -->
+        <div id="bpList" class="bp-list"></div>
+        <!-- 進捗バー -->
+        <div id="bpProgress" class="bp-progress" style="display:none">
+          <div class="bp-progress-bar"><div class="bp-progress-fill" id="bpProgressFill"></div></div>
+          <div class="bp-progress-label" id="bpProgressLabel"></div>
+        </div>
+        <!-- 操作ボタン（写真選択後に bulk-photo.js が表示） -->
+        <div id="bpActions" class="bp-actions" style="display:none">
+          <button class="btn btn-primary" id="bpAnalyzeBtn">まとめて解析</button>
+          <button class="btn btn-outline" id="bpCancelBtn" style="display:none">中断</button>
+          <button class="btn btn-success" id="bpSaveBtn" style="display:none" disabled>解析済みをまとめて保存</button>
+        </div>
+        <div id="bpSaveInfo" class="bp-save-info" style="display:none"></div>
       </div>
     </div>
   </div>
@@ -533,6 +560,7 @@
 <script src="checker/gemini.js?v=4"></script>
 <script src="checker/demo.js?v=4"></script>
 <script src="checker/bulk.js?v=4"></script>
+<script src="checker/bulk-photo.js?v=4"></script>
 <script src="checker/app.js?v=4"></script>
 
 </body>

@@ -303,3 +303,90 @@ textarea{resize:vertical;min-height:80px}
   .tab-btn{font-size:12px;padding:8px 4px}
   .history-date{width:60px;font-size:11px}
 }
+
+/* ============================================================
+   Bulk Photo Upload (Phase 2b)
+   ============================================================ */
+.bp-warning{background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;font-size:12px;color:#5d4037;margin-bottom:14px}
+.bp-file-note{font-size:11px;color:#999;margin-top:4px}
+.bp-list{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.bp-card{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:8px;padding:10px;width:calc(50% - 5px);box-sizing:border-box;position:relative}
+.bp-card-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;margin-bottom:8px;background:#ddd}
+.bp-card-remove{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.bp-card-remove:hover{background:rgba(0,0,0,.7)}
+.bp-card-fields{display:flex;flex-direction:column;gap:6px}
+.bp-card-fields label{font-size:11px;color:#666;font-weight:600;margin-bottom:0}
+.bp-card-fields input[type="date"],.bp-card-fields select,.bp-card-fields input[type="text"]{font-size:12px;padding:5px 8px}
+.bp-status-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;margin-top:6px}
+.bp-status-badge.pending{background:#eceff1;color:#546e7a}
+.bp-status-badge.analyzing{background:#e3f2fd;color:#1565c0}
+.bp-status-badge.done{background:#e8f5e9;color:#2e7d32}
+.bp-status-badge.error{background:#ffebee;color:#c62828}
+.bp-status-badge.saved{background:#e3f2fd;color:#1565c0}
+.bp-actions{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
+.bp-save-info{font-size:12px;color:#666;margin:-6px 0 10px;padding:4px 0}
+.bp-save-info.bp-save-success{color:#2e7d32;font-weight:600}
+/* 4タブ時: 375px以下でタブ文字をひと回り小さくする */
+@media(max-width:375px){.tab-btn{font-size:10px;padding:8px 2px}}
+/* まとめて写真タブ: 375px以下で1列表示 */
+@media(max-width:375px){.bp-card{width:100%}}
+
+/* --- Bulk Photo: Progress (Step 5) --- */
+.bp-progress{margin:10px 0}
+.bp-progress-bar{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.bp-progress-fill{height:100%;background:#5b9bd5;border-radius:4px;transition:width .3s ease}
+.bp-progress-label{font-size:12px;color:#666;margin-top:4px;text-align:center}
+
+/* --- Bulk Photo: Result Summary (Step 5) --- */
+.bp-card-result{margin-top:8px;padding:8px;background:#f0f8f0;border-radius:6px;border:1px solid #c8e6c9}
+.bp-conf-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600;margin-bottom:4px}
+.bp-conf-badge.conf-high{background:#e8f5e9;color:#2e7d32}
+.bp-conf-badge.conf-mid{background:#fff8e1;color:#f57f17}
+.bp-conf-badge.conf-low{background:#ffebee;color:#c62828}
+.bp-result-calories{font-size:12px;color:#333;font-weight:600;margin-bottom:4px}
+.bp-result-foods{display:flex;flex-wrap:wrap;gap:3px}
+.bp-result-food-tag{font-size:11px;background:#fff;border:1px solid #c8e6c9;border-radius:10px;padding:1px 7px;color:#2e7d32}
+.bp-result-food-more{font-size:11px;color:#999;align-self:center}
+
+/* --- Bulk Photo: Error Area (Step 5) --- */
+.bp-card-error{margin-top:8px;padding:8px;background:#fff3f3;border-radius:6px;border:1px solid #ffcdd2}
+.bp-error-msg{font-size:11px;color:#c62828;margin-bottom:6px;word-break:break-all}
+.bp-retry-btn{font-size:11px;padding:3px 10px;border:1px solid #ef9a9a;border-radius:4px;background:#fff;color:#c62828;cursor:pointer}
+.bp-retry-btn:hover{background:#ffebee}
+
+/* --- Bulk Photo: Result Area (Step 6) --- */
+.bp-result-area{margin-top:8px;border:1px solid #c8e6c9;border-radius:6px;background:#f8fff8;overflow:hidden}
+.bp-result-conf-row{padding:6px 10px;display:flex;align-items:center;gap:6px}
+.bp-result-section{padding:8px 10px;border-top:1px solid #e8f5e9}
+.bp-result-section-head{font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:6px}
+
+/* Foods */
+.bp-food-list{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
+.bp-food-item{display:flex;gap:4px;align-items:center}
+.bp-food-name-input{flex:2;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;min-width:0}
+.bp-food-qty-input{flex:1;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;min-width:0}
+.bp-food-remove-btn{width:22px;height:22px;border:none;border-radius:50%;background:#ef9a9a;color:#c62828;font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
+.bp-food-remove-btn:hover{background:#e57373}
+.bp-food-add-btn{font-size:11px;padding:4px 10px;border:1px dashed #a5d6a7;border-radius:4px;background:#f1f8e9;color:#388e3c;cursor:pointer;margin-top:2px}
+.bp-food-add-btn:hover{background:#e8f5e9}
+
+/* Macro grid */
+.bp-macro-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bp-macro-item{display:flex;flex-direction:column;gap:2px}
+.bp-macro-label{font-size:10px;color:#666}
+.bp-macro-value-row{display:flex;align-items:center;gap:3px}
+.bp-macro-input{width:64px;font-size:12px;padding:3px 5px;border:1px solid #ddd;border-radius:4px}
+.bp-macro-unit{font-size:10px;color:#999}
+
+/* Detail section */
+.bp-detail-section{border-top:1px solid #e8f5e9}
+.bp-detail-toggle{width:100%;text-align:left;font-size:11px;padding:6px 10px;background:#f1f8e9;border:none;color:#388e3c;cursor:pointer}
+.bp-detail-toggle:hover{background:#e8f5e9}
+.bp-detail-body{padding:8px 10px}
+.bp-detail-group{margin-bottom:8px}
+.bp-detail-group:last-child{margin-bottom:0}
+.bp-detail-group-title{font-size:10px;font-weight:700;color:#888;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:2px}
+.bp-detail-row{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.bp-detail-label{font-size:11px;color:#555;flex:1}
+.bp-detail-input{width:64px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px}
+.bp-detail-unit{font-size:10px;color:#999;width:45px;flex-shrink:0}
