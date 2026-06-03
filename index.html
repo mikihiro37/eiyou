@@ -5,40 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>栄養素データベース | Nutrition Database</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="checker/food-dict.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.4/cytoscape.min.js" integrity="sha512-xpXUCbrkyJCwC5noJXZqec9rSXdRgFfDoL7Q9/pCPe54Y04OlqwPobMcNuA5NPJ7DRR51OIr6xcOH2wUspyKDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:#f8f9fa;color:#333;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-header{background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10}
-header h1{font-size:16px;font-weight:700;white-space:nowrap;color:#2c3e50}
-header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
+header{background:#1a3d2e;border-bottom:none;padding:8px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10}
+header h1{font-size:16px;font-weight:700;white-space:nowrap;color:#ffffff}
+header h1 span{color:rgba(255,255,255,0.6);font-weight:400;font-size:12px;margin-left:4px}
 .search-box{flex:1;max-width:360px;position:relative}
 .search-box input{width:100%;padding:6px 12px 6px 32px;border:1px solid #ddd;border-radius:20px;font-size:13px;outline:none;transition:border-color .2s}
-.search-box input:focus{border-color:#5b9bd5}
+.search-box input:focus{border-color:#2E8B57}
 .search-box::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px}
 .header-controls{display:flex;gap:8px;align-items:center;margin-left:auto}
 .header-controls select,.header-controls button{padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px;background:#fff;cursor:pointer}
 .header-controls button:hover{background:#f0f0f0}
-.header-controls button.active{background:#5b9bd5;color:#fff;border-color:#5b9bd5}
+.header-controls button.active{background:#2E8B57;color:#fff;border-color:#2E8B57}
+.intake-toggle-btn{padding:6px 14px;border:2px solid #2E8B57;border-radius:20px;font-size:13px;font-weight:700;background:#fff;color:#2E8B57;cursor:pointer;transition:all .25s}
+.intake-toggle-btn.active{background:#2E8B57;color:#fff;box-shadow:0 2px 8px rgba(46,139,87,0.4)}
+.intake-toggle-btn:disabled{opacity:0.35;cursor:not-allowed;border-color:#aaa;color:#aaa}
 .main{display:flex;flex:1;overflow:hidden;position:relative}
-.left-panel{width:220px;background:#fff;border-right:1px solid #e0e0e0;padding:12px;overflow-y:auto;flex-shrink:0}
+.left-panel{width:220px;background:#f0f7f4;border-right:1px solid #e0e0e0;padding:12px;overflow-y:auto;flex-shrink:0}
 .left-panel h3{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid #eee}
 .left-panel h3:first-child{margin-top:0}
 .filter-group label{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:13px;cursor:pointer}
-.filter-group label:hover{color:#5b9bd5}
-.filter-group input[type=checkbox]{accent-color:#5b9bd5}
+.filter-group label:hover{color:#2E8B57}
+.filter-group input[type=checkbox]{accent-color:#2E8B57}
 .color-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
 .reverse-section{margin-top:16px}
 .reverse-btn{width:100%;padding:8px;margin:4px 0;border:1px solid #ddd;border-radius:6px;font-size:12px;background:#fff;cursor:pointer;text-align:left;transition:all .2s}
-.reverse-btn:hover{background:#f0f7ff;border-color:#5b9bd5}
-.reverse-btn.active{background:#5b9bd5;color:#fff;border-color:#5b9bd5}
+.reverse-btn:hover{background:#f0f7ff;border-color:#2E8B57}
+.reverse-btn.active{background:#2E8B57;color:#fff;border-color:#2E8B57}
 .reverse-input{width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin:4px 0;outline:none;display:none}
 .reverse-input.show{display:block}
 .tag-chips{display:none;flex-wrap:wrap;gap:3px;margin:4px 0;max-height:100px;overflow-y:auto}
 .tag-chips.show{display:flex}
 .tag-chip{font-size:10px;padding:2px 6px;border-radius:10px;background:#f5f5f5;color:#666;cursor:pointer;white-space:nowrap;border:1px solid #e0e0e0;transition:all .15s}
 .tag-chip:hover{background:#e3f2fd;border-color:#90caf9;color:#1565c0}
-.tag-chip.active{background:#5b9bd5;color:#fff;border-color:#5b9bd5}
+.tag-chip.active{background:#2E8B57;color:#fff;border-color:#2E8B57}
 .tag-group-label{font-size:9px;color:#aaa;padding:2px 4px;width:100%;flex-shrink:0}
 .reverse-sort{display:none;align-items:center;gap:4px;margin:4px 0}
 .reverse-sort.show{display:flex}
@@ -48,10 +52,36 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
 .reverse-results .result-item{padding:4px 6px;border-radius:4px;cursor:pointer;margin:2px 0}
 .reverse-results .result-item:hover{background:#f0f7ff}
 .reverse-results .result-group{font-size:9px;color:#999;font-weight:600;margin:6px 0 2px;padding:2px 0;border-bottom:1px solid #eee}
-.reverse-highlight-btn{font-size:10px;padding:2px 8px;border:1px solid #5b9bd5;border-radius:4px;background:#fff;color:#5b9bd5;cursor:pointer;margin:4px 0;width:100%;transition:all .15s}
-.reverse-highlight-btn:hover{background:#5b9bd5;color:#fff}
+.reverse-highlight-btn{font-size:10px;padding:2px 8px;border:1px solid #2E8B57;border-radius:4px;background:#fff;color:#2E8B57;cursor:pointer;margin:4px 0;width:100%;transition:all .15s}
+.reverse-highlight-btn:hover{background:#2E8B57;color:#fff}
 .graph-container{flex:1;position:relative;background:#fafbfc}
 #cy{width:100%;height:100%}
+#cardView{position:absolute;inset:0;overflow-y:auto;}
+.nutrient-category-section{margin-bottom:28px}
+.nutrient-category-title{font-size:16px;font-weight:700;color:#1a3d2e;padding:8px 0 8px;border-bottom:2px solid #2E8B57;margin-bottom:14px}
+.nutrient-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.nutrient-card{background:#fff;border-radius:16px;padding:16px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:box-shadow .2s,transform .2s;border-left:4px solid #2E8B57}
+.nutrient-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.12);transform:translateY(-1px)}
+.card-actions{display:flex;gap:8px;margin-top:10px}
+.card-btn-detail{background:#2E8B57;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:14px;font-weight:600;cursor:pointer;flex:1;transition:all .2s}
+.card-btn-detail:hover{background:#236b42}
+.card-btn-relation{background:#fff;color:#2E8B57;border:1.5px solid #2E8B57;border-radius:8px;padding:10px 0;font-size:14px;font-weight:600;cursor:pointer;flex:1;transition:all .2s}
+.card-btn-relation:hover{background:#2E8B57;color:#fff}
+.nutrient-card .card-name{font-size:20px;font-weight:800;color:#1a3d2e;line-height:1.25;margin-bottom:6px}
+.nutrient-card .card-desc{font-size:16px;color:#374151;line-height:1.55;margin-bottom:12px}
+.nutrient-card .card-foods{font-size:16px;color:#2E8B57;line-height:1.45;margin-bottom:14px}
+.card-detail-btn{width:100%;min-height:44px;border:none;border-radius:12px;background:#2E8B57;color:#fff;font-size:16px;font-weight:700;cursor:pointer;padding:10px 12px}
+.card-detail-btn:hover{background:#267349}
+.intake-banner{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;margin-bottom:8px;display:inline-block}
+.intake-low{background:#e3f2fd;color:#1565c0}
+.intake-high{background:#fff8e1;color:#e65100}
+.intake-normal{background:#e8f5e9;color:#2e7d32}
+.category-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;margin-bottom:6px}
+.badge-vitamin-fat{background:#fff3e0;color:#e65100}
+.badge-vitamin-water{background:#e3f2fd;color:#1565c0}
+.badge-mineral-major{background:#e8f5e9;color:#2e7d32}
+.badge-mineral-trace{background:#f3e5f5;color:#6a1b9a}
+.badge-amino{background:#fce4ec;color:#880e4f}
 .legend{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.92);border-radius:8px;padding:8px 12px;font-size:11px;box-shadow:0 1px 4px rgba(0,0,0,.1);display:flex;gap:12px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:4px}
 .legend-line{width:24px;height:2px;display:inline-block}
@@ -84,18 +114,29 @@ header h1 span{color:#888;font-weight:400;font-size:12px;margin-left:4px}
 .stat-fill{height:100%;border-radius:2px;transition:width .3s}
 .tooltip{position:absolute;background:rgba(44,62,80,.9);color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:100;white-space:nowrap;display:none}
 @media(max-width:900px){.left-panel{width:180px}.right-panel{width:260px}}
-.evidence-badge{display:inline-block;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;font-weight:600}
+.evidence-badge{font-size:12px;padding:3px 8px;border-radius:10px;display:inline-block;margin-left:4px;font-weight:600}
 .evidence-badge.established{background:#e8f5e9;color:#2e7d32}
 .evidence-badge.probable{background:#fff8e1;color:#f57f17}
 .evidence-badge.limited{background:#fce4ec;color:#c62828;border:1px dashed #e57373}
+.ev-established{background:#e8f5e9;color:#2e7d32}
+.ev-probable{background:#fff8e1;color:#f57f17}
+.ev-limited{background:#fce4ec;color:#880e4f}
 .evidence-note{font-size:10px;color:#999;line-height:1.4;margin-top:6px;padding-top:6px;border-top:1px solid #eee}
 .disclaimer{position:absolute;bottom:12px;right:12px;background:rgba(255,255,255,.92);border-radius:8px;padding:6px 10px;font-size:10px;color:#999;box-shadow:0 1px 4px rgba(0,0,0,.1);max-width:280px;line-height:1.4}
 .legend-evidence{display:flex;gap:8px;margin-left:12px;padding-left:12px;border-left:1px solid #ddd}
-.mobile-toggle{display:none;position:fixed;bottom:16px;left:16px;z-index:20;width:44px;height:44px;border-radius:50%;background:#5b9bd5;color:#fff;border:none;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+.mobile-toggle{display:none;position:fixed;bottom:16px;left:16px;z-index:20;width:44px;height:44px;border-radius:50%;background:#2E8B57;color:#fff;border:none;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 @media(max-width:640px){.left-panel{position:fixed;left:-260px;top:0;bottom:0;width:240px;z-index:25;box-shadow:2px 0 8px rgba(0,0,0,.15);transition:left .25s ease}.left-panel.open{left:0}.right-panel{width:100%}.mobile-toggle{display:block}.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:24}.mobile-overlay.show{display:block}}
+@media(max-width:767px){.nutrient-cards{grid-template-columns:1fr}}
+@media(768px <= width <= 1024px){
+  .nutrient-cards{grid-template-columns:repeat(2,1fr)}
+  .left-panel{width:180px}
+  .right-panel{width:100%;position:relative;transform:none !important;border-left:none;border-top:1px solid #e0e0e0;max-height:360px}
+  .right-panel.open{transform:none !important}
+  .graph-container{flex-direction:column}
+}
 /* ---- Legend (enhanced) ---- */
 .legend{flex-direction:column;align-items:flex-start;cursor:default;min-width:90px;max-width:240px;padding:8px 10px}
-.legend-toggle-btn{font-size:11px;background:none;border:none;cursor:pointer;color:#5b9bd5;padding:0;font-weight:600;margin-bottom:2px;line-height:1.4}
+.legend-toggle-btn{font-size:11px;background:none;border:none;cursor:pointer;color:#2E8B57;padding:0;font-weight:600;margin-bottom:2px;line-height:1.4}
 .legend-body{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:4px}
 .legend-body.collapsed{display:none}
 .legend-section{display:flex;flex-direction:column;gap:3px}
@@ -181,8 +222,10 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
       <option value="subcategory" selected>サブカテゴリ</option>
       <option value="force">フォース</option>
     </select>
+    <button id="viewToggleBtn" onclick="toggleView()" style="white-space:nowrap">一覧で見る</button>
     <button id="fitBtn" title="全体表示">全体表示</button>
     <a href="checker.html" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px;background:#fff;color:#555;text-decoration:none;white-space:nowrap">バランスチェッカー</a>
+    <button id="intakeToggleBtn" onclick="toggleIntakeDisplay()" class="intake-toggle-btn">摂取傾向を見る</button>
   </div>
 </header>
 <div class="main">
@@ -192,29 +235,24 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
     <div class="lp-sub-label">カテゴリ</div>
     <div class="filter-group" id="catFilters">
       <label><input type="checkbox" checked data-cat="vitamin"><span class="shape-circle-icon"></span>ビタミン (18)</label>
-      <label><input type="checkbox" checked data-cat="mineral"><span class="shape-triangle-icon"></span>ミネラル (20)</label>
-      <label><input type="checkbox" checked data-cat="aminoAcid"><span class="shape-square-icon"></span>アミノ酸 (8)</label>
+      <label><input type="checkbox" checked data-cat="mineral"><span class="color-dot" style="background:#27ae60"></span>ミネラル (20)</label>
+      <label><input type="checkbox" checked data-cat="aminoAcid"><span class="color-dot" style="background:#8e44ad"></span>アミノ酸 (8)</label>
     </div>
     <div class="lp-sub-label">サブカテゴリ</div>
     <div class="filter-group" id="subFilters">
       <label><input type="checkbox" checked data-sub="脂溶性"><span class="shape-circle-icon" style="background:#e67e22"></span>脂溶性ビタミン</label>
       <label><input type="checkbox" checked data-sub="水溶性"><span class="shape-circle-icon" style="background:#3498db"></span>水溶性ビタミン</label>
-      <label><input type="checkbox" checked data-sub="主要ミネラル"><span class="shape-triangle-icon"></span>主要ミネラル</label>
-      <label><input type="checkbox" checked data-sub="微量ミネラル"><span class="shape-triangle-icon" style="border-bottom-color:#16a085"></span>微量ミネラル</label>
-      <label><input type="checkbox" checked data-sub="必須アミノ酸"><span class="shape-square-icon"></span>必須アミノ酸</label>
+      <label><input type="checkbox" checked data-sub="主要ミネラル"><span class="color-dot" style="background:#27ae60"></span>主要ミネラル</label>
+      <label><input type="checkbox" checked data-sub="微量ミネラル"><span class="color-dot" style="background:#16a085"></span>微量ミネラル</label>
+      <label><input type="checkbox" checked data-sub="必須アミノ酸"><span class="color-dot" style="background:#8e44ad"></span>必須アミノ酸</label>
     </div>
     <div class="lp-sub-label">エビデンス</div>
     <div class="filter-group" id="evidenceFilters">
-      <label><input type="checkbox" checked data-ev="established"><span class="border-solid-icon"></span>確立 (36)</label>
-      <label><input type="checkbox" checked data-ev="probable"><span class="border-dashed-icon"></span>有力 (2)</label>
-      <label><input type="checkbox" checked data-ev="limited"><span class="border-dotted-icon"></span>限定的 (8)</label>
+      <label><input type="checkbox" checked data-ev="established"><span class="color-dot" style="background:#666;opacity:1.0"></span>確立 (36)</label>
+      <label><input type="checkbox" checked data-ev="probable"><span class="color-dot" style="background:#666;opacity:0.72"></span>有力 (2)</label>
+      <label><input type="checkbox" checked data-ev="limited"><span class="color-dot" style="background:#666;opacity:0.45"></span>限定的 (8)</label>
     </div>
-    <div class="lp-sub-label">エッジ</div>
-    <div class="filter-group" id="edgeFilters">
-      <label><input type="checkbox" checked data-edge="synergy"><span class="legend-line" style="background:#4caf50"></span>相乗</label>
-      <label><input type="checkbox" checked data-edge="absorption"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</label>
-      <label><input type="checkbox" checked data-edge="antagonist"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</label>
-    </div>
+    <div class="lp-sub-label" style="color:#bbb;font-size:10px">関係線はノードをタップすると表示</div>
     <!-- D. 今回の摂取傾向（食事解析結果・主表示） -->
     <div id="intakeTendencySection" style="display:none">
       <div class="it-title">今回の摂取傾向</div>
@@ -225,29 +263,25 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
     <details class="how-to-read">
       <summary>見方・凡例</summary>
       <div class="htr-body">
-        <div class="lp-sub-label">形状（カテゴリ）</div>
-        <div class="legend-item"><span class="shape-circle-icon"></span>○ ビタミン</div>
-        <div class="legend-item"><span class="shape-triangle-icon"></span>△ ミネラル</div>
-        <div class="legend-item"><span class="shape-square-icon"></span>□ アミノ酸</div>
-        <div class="lp-sub-label">色（サブカテゴリ）</div>
-        <div class="legend-item"><span class="shape-circle-icon" style="background:#e67e22"></span>脂溶性ビタミン</div>
-        <div class="legend-item"><span class="shape-circle-icon" style="background:#3498db"></span>水溶性ビタミン</div>
-        <div class="legend-item"><span class="shape-triangle-icon"></span>主要ミネラル</div>
-        <div class="legend-item"><span class="shape-triangle-icon" style="border-bottom-color:#16a085"></span>微量ミネラル</div>
-        <div class="legend-item"><span class="shape-square-icon"></span>必須アミノ酸</div>
-        <div class="lp-sub-label">枠線（エビデンス）</div>
-        <div class="legend-item"><span class="border-solid-icon"></span>実線 = 確立</div>
-        <div class="legend-item"><span class="border-dashed-icon"></span>破線 = 有力</div>
-        <div class="legend-item"><span class="border-dotted-icon"></span>点線 = 限定的</div>
+        <div class="lp-sub-label">摂取傾向の見方</div>
+        <div class="legend-item"><span class="si-dir-low"></span>少なめの傾向</div>
+        <div class="legend-item"><span class="si-dir-low" style="background:#27ae60"></span>参考基準付近</div>
+        <div class="legend-item"><span class="si-dir-high"></span>多めの傾向</div>
+        <div class="legend-item"><span class="si-dir-both"></span>比較保留</div>
+        <div class="lp-sub-label">根拠レベル</div>
+        <div class="legend-item"><span class="evidence-badge ev-established">根拠：高</span></div>
+        <div class="legend-item"><span class="evidence-badge ev-probable">根拠：中</span></div>
+        <div class="legend-item"><span class="evidence-badge ev-limited">根拠：参考</span></div>
+        <div class="legend-disclaimer">【注意】摂取傾向は参考表示です。診断・医療判断を目的としません</div>
         <div id="htrIntakeNote">
           <div class="lp-sub-label" style="color:#27ae60">食事解析結果の見方</div>
           <div style="font-size:10px;color:#555;line-height:1.8;margin-top:4px">
-            <div><span style="color:#2980b9;font-weight:600">参考基準より少なめ</span>：入力内容から推定した摂取量が参考基準値より少なめと表示された項目</div>
+            <div><span style="color:#2980b9;font-weight:600">少なめの傾向</span>：入力内容から推定した摂取量が参考基準値より少なめに見える項目</div>
             <div><span style="color:#27ae60;font-weight:600">参考基準付近</span>：入力内容から推定した摂取量が参考基準値付近と表示された項目</div>
-            <div><span style="color:#e67e22;font-weight:600">参考基準より多め</span>：入力内容から推定した摂取量が参考基準値より多めと表示された項目</div>
+            <div><span style="color:#e67e22;font-weight:600">多めの傾向</span>：入力内容から推定した摂取量が参考基準値より多めに見える項目</div>
             <div><span style="color:#95a5a6;font-weight:600">比較保留</span>：プロフィール情報・基準値・指標種別・推定精度などの理由で比較を保留した項目</div>
           </div>
-          <div style="font-size:9px;color:#bbb;padding:3px 0;line-height:1.4">摂取傾向の参考表示です。不足・過剰の判定を目的としません。診断・医療判断には使用しないでください</div>
+          <div style="font-size:9px;color:#bbb;padding:3px 0;line-height:1.4">摂取傾向の参考表示です。診断・医療判断を目的としません。</div>
         </div>
         <div id="htrSymptomNote" class="htr-mode-note">
           <div class="lp-sub-label htr-mode-label">症状検索中の表示</div>
@@ -258,11 +292,6 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
           <div class="legend-item"><span class="si-nonmatch"></span>薄い = 症状と非該当</div>
           <div class="htr-mode-disclaimer">この表示は症状の原因を判定するものではありません</div>
         </div>
-        <div class="lp-sub-label">線（エッジ）</div>
-        <div class="legend-item"><span class="legend-line" style="background:#4caf50"></span>相乗</div>
-        <div class="legend-item"><span class="legend-line" style="background:#2196f3;border-top:2px dashed #2196f3;height:0"></span>吸収促進</div>
-        <div class="legend-item"><span class="legend-line" style="background:#f44336;border-top:2px dotted #f44336;height:0"></span>拮抗</div>
-        <div class="legend-disclaimer">食品成分値・エビデンスレベルは主要な学術機関・資料を参考にした概算値です。掲載情報は一般的な参考情報であり、診断・治療・疾病予防を目的としません。</div>
       </div>
     </details>
     <!-- C. 逆引き検索 -->
@@ -284,7 +313,10 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
     </div>
   </div>
   <div class="graph-container">
-    <div id="cy"></div>
+    <div id="cardView" style="display:none;padding:16px;background:#f0f7f4">
+      <!-- JS で動的生成 -->
+    </div>
+    <div id="cy" style="width:100%;height:100%"></div>
     <div id="symptomModeBanner" class="symptom-mode-banner" style="display:none">
       <span class="smb-label">症状検索中：</span>
       <span id="smbQuery" class="smb-query"></span>
@@ -302,65 +334,81 @@ details.how-to-read[open] summary::after{transform:rotate(90deg)}
 <div class="mobile-overlay" id="mobileOverlay"></div>
 
 <script>
+function loadIntakeSummary() {
+  try {
+    const data = JSON.parse(localStorage.getItem('eiyou_intake_summary'));
+    if (!data || Date.now() - data.timestamp > 7 * 24 * 60 * 60 * 1000) return null;
+    return data;
+  } catch { return null; }
+}
+let intakeSummary = loadIntakeSummary();
+
+if (intakeSummary) {
+  const badge = document.createElement('span');
+  badge.style = 'font-size:11px;background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:10px;margin-left:8px';
+  badge.textContent = 'チェッカー結果を反映中';
+  document.querySelector('header h1').appendChild(badge);
+}
+
 // ============================================================
 // DATA: 46 Essential Nutrients
 // ============================================================
 const nutrients = [
   // === VITAMINS: Fat-soluble (脂溶性) ===
-  {id:"vitA",name:"ビタミンA",nameEn:"Vitamin A",category:"vitamin",subCategory:"脂溶性",unit:"μgRAE",rda:"650〜900",deficiency:"夜盲症、角膜乾燥症、皮膚乾燥、免疫力低下、成長障害",excess:"頭痛、吐き気、肝障害、骨粗鬆症リスク、催奇形性",foods:[{name:"鶏レバー",amount:"14,000μg/100g"},{name:"うなぎ蒲焼",amount:"1,500μg/100g"},{name:"にんじん",amount:"720μg/100g"},{name:"ほうれん草",amount:"350μg/100g"},{name:"かぼちゃ",amount:"330μg/100g"}],description:"視覚・皮膚・粘膜の健康維持に必須。β-カロテンから体内変換される。抗酸化作用、免疫機能の維持に重要。"},
-  {id:"vitD",name:"ビタミンD",nameEn:"Vitamin D",category:"vitamin",subCategory:"脂溶性",unit:"μg",rda:"8.5",deficiency:"くる病（小児）、骨軟化症、骨粗鬆症、免疫力低下",excess:"高カルシウム血症、腎障害、食欲不振、嘔吐",foods:[{name:"しらす干し",amount:"61μg/100g"},{name:"紅鮭",amount:"33μg/100g"},{name:"さんま",amount:"16μg/100g"},{name:"干し椎茸",amount:"17μg/100g"},{name:"卵黄",amount:"5.9μg/100g"}],description:"カルシウム・リンの吸収を促進し骨の健康を維持。日光浴で皮膚から合成される。免疫調節作用も注目されている。"},
-  {id:"vitE",name:"ビタミンE",nameEn:"Vitamin E",category:"vitamin",subCategory:"脂溶性",unit:"mg",rda:"5.0〜7.0",deficiency:"溶血性貧血、神経障害、筋力低下、不妊",excess:"出血傾向（稀）、筋力低下",foods:[{name:"アーモンド",amount:"31mg/100g"},{name:"ひまわり油",amount:"39mg/100g"},{name:"かぼちゃ",amount:"5.1mg/100g"},{name:"ほうれん草",amount:"2.1mg/100g"},{name:"アボカド",amount:"3.3mg/100g"}],description:"強力な抗酸化作用で細胞膜を酸化ストレスから保護。血行促進、老化防止。ビタミンCにより再生される。"},
-  {id:"vitK",name:"ビタミンK",nameEn:"Vitamin K",category:"vitamin",subCategory:"脂溶性",unit:"μg",rda:"150",deficiency:"出血傾向、骨粗鬆症、新生児出血症",excess:"報告はほとんどない",foods:[{name:"納豆",amount:"600μg/100g"},{name:"モロヘイヤ",amount:"640μg/100g"},{name:"小松菜",amount:"210μg/100g"},{name:"ほうれん草",amount:"270μg/100g"},{name:"ブロッコリー",amount:"160μg/100g"}],description:"血液凝固に必須の因子。骨へのカルシウム定着を促進するオステオカルシンの活性化にも関与。腸内細菌でも産生される。"},
+  {id:"vitA",name:"ビタミンA",nameEn:"Vitamin A",category:"vitamin",subCategory:"脂溶性",unit:"μgRAE",rda:"650〜900",deficiency:"夜盲症、角膜乾燥症、皮膚乾燥、免疫力低下、成長障害",excess:"頭痛、吐き気、肝障害、骨粗鬆症リスク、催奇形性",foods:[{name:"鶏レバー",amount:"14,000μg/100g"},{name:"うなぎ蒲焼",amount:"1,500μg/100g"},{name:"にんじん",amount:"720μg/100g"},{name:"ほうれん草",amount:"350μg/100g"},{name:"かぼちゃ",amount:"330μg/100g"},{name:"豚レバー",amount:"13,000μg/100g"},{name:"牛レバー",amount:"1,100μg/100g"},{name:"あなご",amount:"500μg/100g"},{name:"モロヘイヤ",amount:"840μg/100g"},{name:"春菊",amount:"380μg/100g"},{name:"小松菜",amount:"260μg/100g"},{name:"卵黄",amount:"480μg/100g"}],description:"視覚・皮膚・粘膜の健康維持に必須。β-カロテンから体内変換される。抗酸化作用、免疫機能の維持に重要。"},
+  {id:"vitD",name:"ビタミンD",nameEn:"Vitamin D",category:"vitamin",subCategory:"脂溶性",unit:"μg",rda:"8.5",deficiency:"くる病（小児）、骨軟化症、骨粗鬆症、免疫力低下",excess:"高カルシウム血症、腎障害、食欲不振、嘔吐",foods:[{name:"しらす干し",amount:"61μg/100g"},{name:"紅鮭",amount:"33μg/100g"},{name:"さんま",amount:"16μg/100g"},{name:"干し椎茸",amount:"17μg/100g"},{name:"卵黄",amount:"5.9μg/100g"},{name:"まいわし",amount:"32μg/100g"},{name:"さば",amount:"11μg/100g"},{name:"ぶり",amount:"8.0μg/100g"},{name:"しろさけ",amount:"32μg/100g"},{name:"きくらげ乾",amount:"85μg/100g"},{name:"まいたけ",amount:"4.9μg/100g"},{name:"全卵",amount:"3.8μg/100g"}],description:"カルシウム・リンの吸収を促進し骨の健康を維持。日光浴で皮膚から合成される。免疫調節作用も注目されている。"},
+  {id:"vitE",name:"ビタミンE",nameEn:"Vitamin E",category:"vitamin",subCategory:"脂溶性",unit:"mg",rda:"5.0〜7.0",deficiency:"溶血性貧血、神経障害、筋力低下、不妊",excess:"出血傾向（稀）、筋力低下",foods:[{name:"アーモンド",amount:"31mg/100g"},{name:"ひまわり油",amount:"39mg/100g"},{name:"かぼちゃ",amount:"5.1mg/100g"},{name:"ほうれん草",amount:"2.1mg/100g"},{name:"アボカド",amount:"3.3mg/100g"},{name:"ヘーゼルナッツ",amount:"18mg/100g"},{name:"落花生",amount:"10mg/100g"},{name:"たらこ",amount:"7.1mg/100g"},{name:"すじこ",amount:"10.6mg/100g"},{name:"オリーブ油",amount:"7.4mg/100g"},{name:"赤ピーマン",amount:"4.3mg/100g"},{name:"ブロッコリー",amount:"2.4mg/100g"}],description:"強力な抗酸化作用で細胞膜を酸化ストレスから保護。血行促進、老化防止。ビタミンCにより再生される。"},
+  {id:"vitK",name:"ビタミンK",nameEn:"Vitamin K",category:"vitamin",subCategory:"脂溶性",unit:"μg",rda:"150",deficiency:"出血傾向、骨粗鬆症、新生児出血症",excess:"報告はほとんどない",foods:[{name:"納豆",amount:"600μg/100g"},{name:"モロヘイヤ",amount:"640μg/100g"},{name:"小松菜",amount:"210μg/100g"},{name:"ほうれん草",amount:"270μg/100g"},{name:"ブロッコリー",amount:"160μg/100g"},{name:"春菊",amount:"250μg/100g"},{name:"にら",amount:"180μg/100g"},{name:"サニーレタス",amount:"160μg/100g"},{name:"キャベツ",amount:"78μg/100g"},{name:"わかめ",amount:"140μg/100g"},{name:"鶏もも肉",amount:"29μg/100g"},{name:"卵",amount:"13μg/100g"}],description:"血液凝固に必須の因子。骨へのカルシウム定着を促進するオステオカルシンの活性化にも関与。腸内細菌でも産生される。"},
 
   // === VITAMINS: Water-soluble (水溶性) ===
-  {id:"vitB1",name:"ビタミンB1",nameEn:"Vitamin B1 (Thiamine)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"1.1〜1.4",deficiency:"脚気、ウェルニッケ脳症、倦怠感、食欲不振、神経障害",excess:"過剰症の報告は稀",foods:[{name:"豚ヒレ肉",amount:"1.32mg/100g"},{name:"うなぎ蒲焼",amount:"0.75mg/100g"},{name:"玄米",amount:"0.41mg/100g"},{name:"大豆",amount:"0.83mg/100g"},{name:"落花生",amount:"0.85mg/100g"}],description:"糖質代謝に不可欠な補酵素。エネルギー産生、神経機能の維持に重要。アルコール多飲で消耗が増加。"},
-  {id:"vitB2",name:"ビタミンB2",nameEn:"Vitamin B2 (Riboflavin)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"1.2〜1.6",deficiency:"口角炎、口内炎、舌炎、皮膚炎、成長障害",excess:"過剰症の報告は稀（尿が黄色くなる）",foods:[{name:"豚レバー",amount:"3.60mg/100g"},{name:"うなぎ蒲焼",amount:"0.74mg/100g"},{name:"納豆",amount:"0.56mg/100g"},{name:"牛乳",amount:"0.15mg/100g"},{name:"卵",amount:"0.43mg/100g"}],description:"脂質・タンパク質・糖質の代謝に関与する補酵素。皮膚・粘膜の健康維持。「発育のビタミン」とも呼ばれる。"},
-  {id:"vitB3",name:"ナイアシン",nameEn:"Niacin (Vitamin B3)",category:"vitamin",subCategory:"水溶性",unit:"mgNE",rda:"11〜15",deficiency:"ペラグラ（皮膚炎・下痢・認知症の3D症状）、口内炎",excess:"皮膚紅潮（フラッシング）、肝障害",foods:[{name:"たらこ",amount:"49mg/100g"},{name:"鶏むね肉",amount:"12mg/100g"},{name:"まぐろ赤身",amount:"14mg/100g"},{name:"落花生",amount:"17mg/100g"},{name:"エリンギ",amount:"6.1mg/100g"}],description:"エネルギー代謝に関わる補酵素NAD/NADPの構成成分。トリプトファンから体内合成も可能。500以上の酵素反応に関与。"},
-  {id:"vitB5",name:"パントテン酸",nameEn:"Pantothenic Acid (Vitamin B5)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"5〜6",deficiency:"疲労感、手足のしびれ、頭痛、不眠（欠乏は稀）",excess:"下痢（大量摂取時）",foods:[{name:"鶏レバー",amount:"10.1mg/100g"},{name:"納豆",amount:"3.6mg/100g"},{name:"卵黄",amount:"4.3mg/100g"},{name:"アボカド",amount:"1.6mg/100g"},{name:"干し椎茸",amount:"7.9mg/100g"}],description:"補酵素Aの構成成分として脂肪酸代謝・エネルギー産生に必須。副腎皮質ホルモンの合成にも関与。広く食品に含まれる。"},
-  {id:"vitB6",name:"ビタミンB6",nameEn:"Vitamin B6 (Pyridoxine)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"1.1〜1.4",deficiency:"皮膚炎、貧血、免疫力低下、神経障害、口角炎",excess:"末梢神経障害（大量長期摂取時）",foods:[{name:"にんにく",amount:"1.53mg/100g"},{name:"まぐろ赤身",amount:"0.85mg/100g"},{name:"鶏ささみ",amount:"0.66mg/100g"},{name:"バナナ",amount:"0.38mg/100g"},{name:"さんま",amount:"0.54mg/100g"}],description:"アミノ酸代謝の補酵素として100以上の酵素反応に関与。神経伝達物質の合成、ヘモグロビン合成にも重要。"},
-  {id:"vitB7",name:"ビオチン",nameEn:"Biotin (Vitamin B7)",category:"vitamin",subCategory:"水溶性",unit:"μg",rda:"50",deficiency:"脱毛、皮膚炎、結膜炎、筋肉痛、うつ症状",excess:"過剰症の報告なし",foods:[{name:"鶏レバー",amount:"232μg/100g"},{name:"落花生",amount:"92μg/100g"},{name:"卵黄",amount:"65μg/100g"},{name:"大豆",amount:"28μg/100g"},{name:"玉ねぎ",amount:"16μg/100g"}],description:"糖新生・脂肪酸合成・アミノ酸代謝に関与するカルボキシラーゼの補酵素。皮膚・毛髪の健康維持。腸内細菌でも合成。"},
-  {id:"vitB9",name:"葉酸",nameEn:"Folic Acid (Vitamin B9)",category:"vitamin",subCategory:"水溶性",unit:"μg",rda:"240（妊婦480）",deficiency:"巨赤芽球性貧血、胎児神経管閉鎖障害、動脈硬化リスク上昇",excess:"ビタミンB12欠乏の隠蔽（大量摂取時）",foods:[{name:"鶏レバー",amount:"1,300μg/100g"},{name:"枝豆",amount:"260μg/100g"},{name:"ほうれん草",amount:"210μg/100g"},{name:"ブロッコリー",amount:"210μg/100g"},{name:"いちご",amount:"90μg/100g"}],description:"DNA合成・細胞分裂に不可欠。妊娠初期の摂取が特に重要。ビタミンB12と協働して赤血球を形成。"},
-  {id:"vitB12",name:"ビタミンB12",nameEn:"Vitamin B12 (Cobalamin)",category:"vitamin",subCategory:"水溶性",unit:"μg",rda:"2.4",deficiency:"悪性貧血、末梢神経障害、認知機能低下、舌炎",excess:"過剰症の報告は稀",foods:[{name:"しじみ",amount:"62μg/100g"},{name:"牛レバー",amount:"53μg/100g"},{name:"あさり",amount:"52μg/100g"},{name:"さんま",amount:"16μg/100g"},{name:"海苔",amount:"58μg/100g"}],description:"赤血球形成・神経機能維持に必須。コバルトを含む唯一のビタミン。動物性食品にのみ含まれ、菜食主義者は欠乏リスクあり。"},
-  {id:"vitC",name:"ビタミンC",nameEn:"Vitamin C (Ascorbic Acid)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"100",deficiency:"壊血病、歯肉出血、倦怠感、免疫力低下、傷の治りが遅い",excess:"下痢、腹痛、尿路結石（大量摂取時）",foods:[{name:"赤ピーマン",amount:"170mg/100g"},{name:"キウイ",amount:"140mg/100g"},{name:"ブロッコリー",amount:"140mg/100g"},{name:"いちご",amount:"62mg/100g"},{name:"レモン",amount:"100mg/100g"}],description:"強力な抗酸化作用。コラーゲン合成に必須。非ヘム鉄の吸収促進、免疫機能の強化、ビタミンEの再生にも関与。"},
-  {id:"choline",name:"コリン",nameEn:"Choline",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"400〜550",deficiency:"脂肪肝、筋障害、記憶力低下",excess:"低血圧、発汗、魚臭様体臭",foods:[{name:"卵黄",amount:"680mg/100g"},{name:"牛レバー",amount:"420mg/100g"},{name:"大豆",amount:"120mg/100g"},{name:"鶏むね肉",amount:"78mg/100g"},{name:"ブロッコリー",amount:"40mg/100g"}],description:"神経伝達物質アセチルコリンの前駆体。細胞膜の構成成分レシチンの材料。肝臓の脂肪代謝を補助。"},
-  {id:"inositol",name:"イノシトール",nameEn:"Inositol",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"公的基準なし",deficiency:"脂肪肝、動脈硬化（動物実験ベース、ヒトでの欠乏報告は稀）",excess:"胃腸障害（大量摂取時）",foods:[{name:"オレンジ",amount:"210mg/100g"},{name:"グレープフルーツ",amount:"199mg/100g"},{name:"すいか",amount:"46mg/100g"},{name:"桃",amount:"21mg/100g"},{name:"メロン",amount:"25mg/100g"}],description:"ビタミン様物質。細胞膜リン脂質の構成成分で、体内でグルコースから合成可能なため必須栄養素には分類されない。脂質代謝への関与が研究されている。"},
-  {id:"rutin",name:"ルチン",nameEn:"Rutin (Vitamin P)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"公的基準なし",deficiency:"毛細血管の脆弱化（動物実験ベース）",excess:"報告はほとんどない",foods:[{name:"そば",amount:"15mg/100g"},{name:"柑橘類の皮",amount:"高含有"},{name:"アスパラガス",amount:"含有"},{name:"いちじく",amount:"含有"},{name:"トマト",amount:"含有"}],description:"ビタミン様物質（フラボノイド）。かつて「ビタミンP」と呼ばれたが、現在はビタミンとして公式には認められていない。毛細血管への作用やビタミンCとの関連が研究されている。"},
-  {id:"paba",name:"PABA",nameEn:"Para-Aminobenzoic Acid",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"公的基準なし",deficiency:"ヒトでの欠乏症は確認されていない",excess:"吐き気、下痢（大量摂取時）",foods:[{name:"レバー",amount:"高含有"},{name:"全粒穀物",amount:"含有"},{name:"卵",amount:"含有"},{name:"ほうれん草",amount:"含有"},{name:"きのこ類",amount:"含有"}],description:"ビタミン様物質。葉酸の化学構造の一部だが、ヒトが食事から摂取する必要性は確立されていない。かつてビタミンBxと呼ばれた時期があるが、現在その分類は撤回されている。"},
-  {id:"lipoicAcid",name:"α-リポ酸",nameEn:"Alpha-Lipoic Acid",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"公的基準なし",deficiency:"体内合成されるため食事性欠乏の報告なし",excess:"胃腸障害、皮膚発疹（稀）",foods:[{name:"レバー",amount:"含有"},{name:"ほうれん草",amount:"含有"},{name:"ブロッコリー",amount:"含有"},{name:"トマト",amount:"含有"},{name:"じゃがいも",amount:"含有"}],description:"ビタミン様物質。体内でミトコンドリアにおいて合成されるため、必須栄養素には分類されない。抗酸化作用に関する研究が進められているが、サプリメントとしての有効性は確立途上。"},
+  {id:"vitB1",name:"ビタミンB1",nameEn:"Vitamin B1 (Thiamine)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"1.1〜1.4",deficiency:"脚気、ウェルニッケ脳症、倦怠感、食欲不振、神経障害",excess:"過剰症の報告は稀",foods:[{name:"豚ヒレ肉",amount:"1.32mg/100g"},{name:"うなぎ蒲焼",amount:"0.75mg/100g"},{name:"玄米",amount:"0.41mg/100g"},{name:"大豆",amount:"0.83mg/100g"},{name:"落花生",amount:"0.85mg/100g"},{name:"豚もも肉",amount:"0.90mg/100g"},{name:"豚ロース肉",amount:"0.69mg/100g"},{name:"たらこ",amount:"0.71mg/100g"},{name:"ごま",amount:"0.95mg/100g"},{name:"えだまめ",amount:"0.31mg/100g"},{name:"そば",amount:"0.19mg/100g"},{name:"絹ごし豆腐",amount:"0.10mg/100g"}],description:"糖質代謝に不可欠な補酵素。エネルギー産生、神経機能の維持に重要。アルコール多飲で消耗が増加。"},
+  {id:"vitB2",name:"ビタミンB2",nameEn:"Vitamin B2 (Riboflavin)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"1.2〜1.6",deficiency:"口角炎、口内炎、舌炎、皮膚炎、成長障害",excess:"過剰症の報告は稀（尿が黄色くなる）",foods:[{name:"豚レバー",amount:"3.60mg/100g"},{name:"うなぎ蒲焼",amount:"0.74mg/100g"},{name:"納豆",amount:"0.56mg/100g"},{name:"牛乳",amount:"0.15mg/100g"},{name:"卵",amount:"0.43mg/100g"},{name:"鶏レバー",amount:"1.80mg/100g"},{name:"牛レバー",amount:"3.00mg/100g"},{name:"さば",amount:"0.31mg/100g"},{name:"ぶり",amount:"0.36mg/100g"},{name:"まいたけ",amount:"0.49mg/100g"},{name:"アーモンド",amount:"1.06mg/100g"},{name:"ヨーグルト",amount:"0.14mg/100g"}],description:"脂質・タンパク質・糖質の代謝に関与する補酵素。皮膚・粘膜の健康維持。「発育のビタミン」とも呼ばれる。"},
+  {id:"vitB3",name:"ナイアシン",nameEn:"Niacin (Vitamin B3)",category:"vitamin",subCategory:"水溶性",unit:"mgNE",rda:"11〜15",deficiency:"ペラグラ（皮膚炎・下痢・認知症の3D症状）、口内炎",excess:"皮膚紅潮（フラッシング）、肝障害",foods:[{name:"たらこ",amount:"49mg/100g"},{name:"鶏むね肉",amount:"12mg/100g"},{name:"まぐろ赤身",amount:"14mg/100g"},{name:"落花生",amount:"17mg/100g"},{name:"エリンギ",amount:"6.1mg/100g"},{name:"かつお",amount:"19mg/100g"},{name:"さば",amount:"10mg/100g"},{name:"豚レバー",amount:"14mg/100g"},{name:"鶏ささみ",amount:"11mg/100g"},{name:"まいたけ",amount:"9.1mg/100g"},{name:"干し椎茸",amount:"16mg/100g"},{name:"玄米",amount:"6.3mg/100g"}],description:"エネルギー代謝に関わる補酵素NAD/NADPの構成成分。トリプトファンから体内合成も可能。500以上の酵素反応に関与。"},
+  {id:"vitB5",name:"パントテン酸",nameEn:"Pantothenic Acid (Vitamin B5)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"5〜6",deficiency:"疲労感、手足のしびれ、頭痛、不眠（欠乏は稀）",excess:"下痢（大量摂取時）",foods:[{name:"鶏レバー",amount:"10.1mg/100g"},{name:"納豆",amount:"3.6mg/100g"},{name:"卵黄",amount:"4.3mg/100g"},{name:"アボカド",amount:"1.6mg/100g"},{name:"干し椎茸",amount:"7.9mg/100g"},{name:"豚レバー",amount:"7.2mg/100g"},{name:"牛レバー",amount:"6.4mg/100g"},{name:"鶏ささみ",amount:"2.1mg/100g"},{name:"たらこ",amount:"3.7mg/100g"},{name:"まいたけ",amount:"1.9mg/100g"},{name:"ブロッコリー",amount:"1.1mg/100g"},{name:"玄米",amount:"1.4mg/100g"}],description:"補酵素Aの構成成分として脂肪酸代謝・エネルギー産生に必須。副腎皮質ホルモンの合成にも関与。広く食品に含まれる。"},
+  {id:"vitB6",name:"ビタミンB6",nameEn:"Vitamin B6 (Pyridoxine)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"1.1〜1.4",deficiency:"皮膚炎、貧血、免疫力低下、神経障害、口角炎",excess:"末梢神経障害（大量長期摂取時）",foods:[{name:"にんにく",amount:"1.53mg/100g"},{name:"まぐろ赤身",amount:"0.85mg/100g"},{name:"鶏ささみ",amount:"0.66mg/100g"},{name:"バナナ",amount:"0.38mg/100g"},{name:"さんま",amount:"0.54mg/100g"},{name:"かつお",amount:"0.76mg/100g"},{name:"鮭",amount:"0.64mg/100g"},{name:"鶏むね肉",amount:"0.57mg/100g"},{name:"牛レバー",amount:"0.89mg/100g"},{name:"ピスタチオ",amount:"1.22mg/100g"},{name:"じゃがいも",amount:"0.20mg/100g"},{name:"玄米",amount:"0.45mg/100g"}],description:"アミノ酸代謝の補酵素として100以上の酵素反応に関与。神経伝達物質の合成、ヘモグロビン合成にも重要。"},
+  {id:"vitB7",name:"ビオチン",nameEn:"Biotin (Vitamin B7)",category:"vitamin",subCategory:"水溶性",unit:"μg",rda:"50",deficiency:"脱毛、皮膚炎、結膜炎、筋肉痛、うつ症状",excess:"過剰症の報告なし",foods:[{name:"鶏レバー",amount:"232μg/100g"},{name:"落花生",amount:"92μg/100g"},{name:"卵黄",amount:"65μg/100g"},{name:"大豆",amount:"28μg/100g"},{name:"玉ねぎ",amount:"16μg/100g"},{name:"豚レバー",amount:"80μg/100g"},{name:"牛レバー",amount:"76μg/100g"},{name:"まいたけ",amount:"24μg/100g"},{name:"ししゃも",amount:"18μg/100g"},{name:"アーモンド",amount:"60μg/100g"},{name:"くるみ",amount:"19μg/100g"},{name:"ブロッコリー",amount:"9.3μg/100g"}],description:"糖新生・脂肪酸合成・アミノ酸代謝に関与するカルボキシラーゼの補酵素。皮膚・毛髪の健康維持。腸内細菌でも合成。"},
+  {id:"vitB9",name:"葉酸",nameEn:"Folic Acid (Vitamin B9)",category:"vitamin",subCategory:"水溶性",unit:"μg",rda:"240（妊婦480）",deficiency:"巨赤芽球性貧血、胎児神経管閉鎖障害、動脈硬化リスク上昇",excess:"ビタミンB12欠乏の隠蔽（大量摂取時）",foods:[{name:"鶏レバー",amount:"1,300μg/100g"},{name:"枝豆",amount:"260μg/100g"},{name:"ほうれん草",amount:"210μg/100g"},{name:"ブロッコリー",amount:"210μg/100g"},{name:"いちご",amount:"90μg/100g"},{name:"牛レバー",amount:"1,000μg/100g"},{name:"豚レバー",amount:"810μg/100g"},{name:"モロヘイヤ",amount:"250μg/100g"},{name:"アスパラガス",amount:"190μg/100g"},{name:"春菊",amount:"190μg/100g"},{name:"納豆",amount:"120μg/100g"},{name:"アボカド",amount:"83μg/100g"}],description:"DNA合成・細胞分裂に不可欠。妊娠初期の摂取が特に重要。ビタミンB12と協働して赤血球を形成。"},
+  {id:"vitB12",name:"ビタミンB12",nameEn:"Vitamin B12 (Cobalamin)",category:"vitamin",subCategory:"水溶性",unit:"μg",rda:"2.4",deficiency:"悪性貧血、末梢神経障害、認知機能低下、舌炎",excess:"過剰症の報告は稀",foods:[{name:"しじみ",amount:"62μg/100g"},{name:"牛レバー",amount:"53μg/100g"},{name:"あさり",amount:"52μg/100g"},{name:"さんま",amount:"16μg/100g"},{name:"海苔",amount:"58μg/100g"},{name:"牡蠣",amount:"28μg/100g"},{name:"いわし",amount:"15.7μg/100g"},{name:"さば",amount:"13μg/100g"},{name:"ほたて",amount:"11μg/100g"},{name:"たらこ",amount:"18μg/100g"},{name:"鶏レバー",amount:"44μg/100g"},{name:"卵",amount:"1.1μg/100g"}],description:"赤血球形成・神経機能維持に必須。コバルトを含む唯一のビタミン。動物性食品にのみ含まれ、菜食主義者は欠乏リスクあり。"},
+  {id:"vitC",name:"ビタミンC",nameEn:"Vitamin C (Ascorbic Acid)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"100",deficiency:"壊血病、歯肉出血、倦怠感、免疫力低下、傷の治りが遅い",excess:"下痢、腹痛、尿路結石（大量摂取時）",foods:[{name:"赤ピーマン",amount:"170mg/100g"},{name:"キウイ",amount:"140mg/100g"},{name:"ブロッコリー",amount:"140mg/100g"},{name:"いちご",amount:"62mg/100g"},{name:"レモン",amount:"100mg/100g"},{name:"黄ピーマン",amount:"150mg/100g"},{name:"芽キャベツ",amount:"160mg/100g"},{name:"菜の花",amount:"130mg/100g"},{name:"柿",amount:"70mg/100g"},{name:"オレンジ",amount:"60mg/100g"},{name:"じゃがいも",amount:"35mg/100g"},{name:"キャベツ",amount:"41mg/100g"}],description:"強力な抗酸化作用。コラーゲン合成に必須。非ヘム鉄の吸収促進、免疫機能の強化、ビタミンEの再生にも関与。"},
+  {id:"choline",name:"コリン",nameEn:"Choline",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"400〜550",deficiency:"脂肪肝、筋障害、記憶力低下",excess:"低血圧、発汗、魚臭様体臭",foods:[{name:"卵黄",amount:"680mg/100g"},{name:"牛レバー",amount:"420mg/100g"},{name:"大豆",amount:"120mg/100g"},{name:"鶏むね肉",amount:"78mg/100g"},{name:"ブロッコリー",amount:"40mg/100g"},{name:"全卵",amount:"250mg/100g"},{name:"豚レバー",amount:"330mg/100g"},{name:"鶏レバー",amount:"290mg/100g"},{name:"鮭",amount:"90mg/100g"},{name:"たら",amount:"85mg/100g"},{name:"枝豆",amount:"56mg/100g"},{name:"カリフラワー",amount:"44mg/100g"}],description:"神経伝達物質アセチルコリンの前駆体。細胞膜の構成成分レシチンの材料。肝臓の脂肪代謝を補助。"},
+  {id:"inositol",name:"イノシトール",nameEn:"Inositol",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"公的基準なし",deficiency:"脂肪肝、動脈硬化（動物実験ベース、ヒトでの欠乏報告は稀）",excess:"胃腸障害（大量摂取時）",foods:[{name:"オレンジ",amount:"210mg/100g"},{name:"グレープフルーツ",amount:"199mg/100g"},{name:"すいか",amount:"46mg/100g"},{name:"桃",amount:"21mg/100g"},{name:"メロン",amount:"25mg/100g"},{name:"キウイ",amount:"136mg/100g"},{name:"キャベツ",amount:"95mg/100g"},{name:"玄米",amount:"90mg/100g"},{name:"小麦胚芽",amount:"770mg/100g"},{name:"大豆",amount:"160mg/100g"},{name:"アーモンド",amount:"250mg/100g"},{name:"バナナ",amount:"31mg/100g"}],description:"ビタミン様物質。細胞膜リン脂質の構成成分で、体内でグルコースから合成可能なため必須栄養素には分類されない。脂質代謝への関与が研究されている。"},
+  {id:"rutin",name:"ルチン",nameEn:"Rutin (Vitamin P)",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"公的基準なし",deficiency:"毛細血管の脆弱化（動物実験ベース）",excess:"報告はほとんどない",foods:[{name:"そば",amount:"15mg/100g"},{name:"柑橘類の皮",amount:"高含有"},{name:"アスパラガス",amount:"含有"},{name:"いちじく",amount:"含有"},{name:"トマト",amount:"含有"},{name:"そば粉",amount:"20mg/100g"},{name:"韃靼そば",amount:"1,500mg/100g"},{name:"玉ねぎ",amount:"4mg/100g"},{name:"りんご",amount:"2mg/100g"},{name:"緑茶浸出液",amount:"1mg/100g"},{name:"ブルーベリー",amount:"6mg/100g"},{name:"レモン果皮",amount:"30mg/100g"}],description:"ビタミン様物質（フラボノイド）。かつて「ビタミンP」と呼ばれたが、現在はビタミンとして公式には認められていない。毛細血管への作用やビタミンCとの関連が研究されている。"},
+  {id:"paba",name:"PABA",nameEn:"Para-Aminobenzoic Acid",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"公的基準なし",deficiency:"ヒトでの欠乏症は確認されていない",excess:"吐き気、下痢（大量摂取時）",foods:[{name:"レバー",amount:"高含有"},{name:"全粒穀物",amount:"含有"},{name:"卵",amount:"含有"},{name:"ほうれん草",amount:"含有"},{name:"きのこ類",amount:"含有"},{name:"豚レバー",amount:"0.25mg/100g"},{name:"牛レバー",amount:"0.20mg/100g"},{name:"玄米",amount:"0.08mg/100g"},{name:"小麦胚芽",amount:"0.30mg/100g"},{name:"納豆",amount:"0.05mg/100g"},{name:"まいたけ",amount:"0.04mg/100g"},{name:"ブロッコリー",amount:"0.03mg/100g"}],description:"ビタミン様物質。葉酸の化学構造の一部だが、ヒトが食事から摂取する必要性は確立されていない。かつてビタミンBxと呼ばれた時期があるが、現在その分類は撤回されている。"},
+  {id:"lipoicAcid",name:"α-リポ酸",nameEn:"Alpha-Lipoic Acid",category:"vitamin",subCategory:"水溶性",unit:"mg",rda:"公的基準なし",deficiency:"体内合成されるため食事性欠乏の報告なし",excess:"胃腸障害、皮膚発疹（稀）",foods:[{name:"レバー",amount:"含有"},{name:"ほうれん草",amount:"含有"},{name:"ブロッコリー",amount:"含有"},{name:"トマト",amount:"含有"},{name:"じゃがいも",amount:"含有"},{name:"牛レバー",amount:"0.30mg/100g"},{name:"豚レバー",amount:"0.25mg/100g"},{name:"牛心臓",amount:"0.20mg/100g"},{name:"小松菜",amount:"0.08mg/100g"},{name:"芽キャベツ",amount:"0.06mg/100g"},{name:"にんじん",amount:"0.04mg/100g"},{name:"ビーツ",amount:"0.04mg/100g"}],description:"ビタミン様物質。体内でミトコンドリアにおいて合成されるため、必須栄養素には分類されない。抗酸化作用に関する研究が進められているが、サプリメントとしての有効性は確立途上。"},
 
   // === MINERALS: Major (主要ミネラル) ===
-  {id:"ca",name:"カルシウム",nameEn:"Calcium",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"650〜800",deficiency:"骨粗鬆症、くる病、テタニー（筋痙攣）、歯の脆弱化",excess:"便秘、腎結石、鉄・亜鉛の吸収阻害",foods:[{name:"干しエビ",amount:"7,100mg/100g"},{name:"煮干し",amount:"2,200mg/100g"},{name:"パルメザンチーズ",amount:"1,300mg/100g"},{name:"小松菜",amount:"170mg/100g"},{name:"牛乳",amount:"110mg/100g"}],description:"体内で最も多いミネラル。骨・歯の主成分。筋収縮、神経伝達、血液凝固にも関与。ビタミンDが吸収を促進。"},
-  {id:"p",name:"リン",nameEn:"Phosphorus",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"800〜1,000",deficiency:"骨軟化症、筋力低下、食欲不振（欠乏は稀）",excess:"カルシウムの吸収阻害、骨代謝異常、腎障害",foods:[{name:"しらす干し",amount:"860mg/100g"},{name:"プロセスチーズ",amount:"730mg/100g"},{name:"大豆",amount:"580mg/100g"},{name:"卵黄",amount:"570mg/100g"},{name:"煮干し",amount:"1,500mg/100g"}],description:"カルシウムに次いで体内に多いミネラル。骨・歯の構成成分。ATP・DNA・RNAの構成要素。エネルギー代謝に必須。"},
-  {id:"mg",name:"マグネシウム",nameEn:"Magnesium",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"270〜370",deficiency:"筋痙攣、不整脈、骨粗鬆症、高血圧、精神不安",excess:"下痢（サプリメント過剰時）",foods:[{name:"あおさ",amount:"3,200mg/100g"},{name:"干しひじき",amount:"640mg/100g"},{name:"アーモンド",amount:"310mg/100g"},{name:"大豆",amount:"220mg/100g"},{name:"ほうれん草",amount:"69mg/100g"}],description:"300以上の酵素反応に関与。筋肉・神経機能の維持、骨の形成、エネルギー産生に重要。ビタミンDの活性化にも必要。"},
-  {id:"na",name:"ナトリウム",nameEn:"Sodium",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"600（食塩相当7.5g未満目標）",deficiency:"低ナトリウム血症、筋痙攣、めまい、意識障害",excess:"高血圧、胃がんリスク、腎臓負担、むくみ",foods:[{name:"食塩",amount:"39,000mg/100g"},{name:"醤油",amount:"5,700mg/100g"},{name:"味噌",amount:"4,900mg/100g"},{name:"梅干し",amount:"8,700mg/100g"},{name:"たくあん",amount:"1,700mg/100g"}],description:"体液の浸透圧調節、酸塩基平衡の維持に必須。神経刺激の伝達、筋収縮にも関与。カリウムと拮抗的に作用。"},
-  {id:"k",name:"カリウム",nameEn:"Potassium",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"2,500〜3,000",deficiency:"筋力低下、不整脈、便秘、倦怠感",excess:"高カリウム血症（腎機能低下時）、不整脈",foods:[{name:"干し昆布",amount:"5,300mg/100g"},{name:"干しひじき",amount:"4,400mg/100g"},{name:"大豆",amount:"1,900mg/100g"},{name:"バナナ",amount:"360mg/100g"},{name:"ほうれん草",amount:"690mg/100g"}],description:"細胞内液の主要な陽イオン。ナトリウムの排泄を促進し血圧を下げる。筋収縮、神経伝達に重要。"},
-  {id:"cl",name:"塩素",nameEn:"Chlorine",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"食塩として摂取",deficiency:"代謝性アルカローシス、食欲不振",excess:"高血圧（ナトリウムと共に）",foods:[{name:"食塩",amount:"59,900mg/100g"},{name:"醤油",amount:"含有"},{name:"味噌",amount:"含有"},{name:"海藻類",amount:"含有"},{name:"オリーブ",amount:"含有"}],description:"胃液（塩酸）の構成成分として消化に関与。体液の浸透圧調節、酸塩基平衡の維持。食塩（NaCl）として摂取。"},
-  {id:"s",name:"硫黄",nameEn:"Sulfur",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"タンパク質から摂取",deficiency:"皮膚・爪・毛髪の異常、関節障害",excess:"過剰症の報告は稀",foods:[{name:"卵",amount:"高含有"},{name:"にんにく",amount:"高含有"},{name:"玉ねぎ",amount:"含有"},{name:"ブロッコリー",amount:"含有"},{name:"肉類全般",amount:"含有"}],description:"メチオニン・システインなど含硫アミノ酸の構成元素。ケラチン（毛髪・爪）の材料。解毒作用にも関与。"},
+  {id:"ca",name:"カルシウム",nameEn:"Calcium",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"650〜800",deficiency:"骨粗鬆症、くる病、テタニー（筋痙攣）、歯の脆弱化",excess:"便秘、腎結石、鉄・亜鉛の吸収阻害",foods:[{name:"干しエビ",amount:"7,100mg/100g"},{name:"煮干し",amount:"2,200mg/100g"},{name:"パルメザンチーズ",amount:"1,300mg/100g"},{name:"小松菜",amount:"170mg/100g"},{name:"牛乳",amount:"110mg/100g"},{name:"ししゃも",amount:"350mg/100g"},{name:"木綿豆腐",amount:"93mg/100g"},{name:"厚揚げ",amount:"240mg/100g"},{name:"ヨーグルト",amount:"120mg/100g"},{name:"プロセスチーズ",amount:"630mg/100g"},{name:"ごま",amount:"1,200mg/100g"},{name:"水菜",amount:"210mg/100g"}],description:"体内で最も多いミネラル。骨・歯の主成分。筋収縮、神経伝達、血液凝固にも関与。ビタミンDが吸収を促進。"},
+  {id:"p",name:"リン",nameEn:"Phosphorus",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"800〜1,000",deficiency:"骨軟化症、筋力低下、食欲不振（欠乏は稀）",excess:"カルシウムの吸収阻害、骨代謝異常、腎障害",foods:[{name:"しらす干し",amount:"860mg/100g"},{name:"プロセスチーズ",amount:"730mg/100g"},{name:"大豆",amount:"580mg/100g"},{name:"卵黄",amount:"570mg/100g"},{name:"煮干し",amount:"1,500mg/100g"},{name:"するめ",amount:"1,100mg/100g"},{name:"豚レバー",amount:"340mg/100g"},{name:"鶏むね肉",amount:"220mg/100g"},{name:"まぐろ赤身",amount:"270mg/100g"},{name:"納豆",amount:"190mg/100g"},{name:"アーモンド",amount:"460mg/100g"},{name:"牛乳",amount:"93mg/100g"}],description:"カルシウムに次いで体内に多いミネラル。骨・歯の構成成分。ATP・DNA・RNAの構成要素。エネルギー代謝に必須。"},
+  {id:"mg",name:"マグネシウム",nameEn:"Magnesium",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"270〜370",deficiency:"筋痙攣、不整脈、骨粗鬆症、高血圧、精神不安",excess:"下痢（サプリメント過剰時）",foods:[{name:"あおさ",amount:"3,200mg/100g"},{name:"干しひじき",amount:"640mg/100g"},{name:"アーモンド",amount:"310mg/100g"},{name:"大豆",amount:"220mg/100g"},{name:"ほうれん草",amount:"69mg/100g"},{name:"ごま",amount:"360mg/100g"},{name:"カシューナッツ",amount:"240mg/100g"},{name:"落花生",amount:"200mg/100g"},{name:"納豆",amount:"100mg/100g"},{name:"玄米",amount:"110mg/100g"},{name:"そば",amount:"65mg/100g"},{name:"木綿豆腐",amount:"57mg/100g"}],description:"300以上の酵素反応に関与。筋肉・神経機能の維持、骨の形成、エネルギー産生に重要。ビタミンDの活性化にも必要。"},
+  {id:"na",name:"ナトリウム",nameEn:"Sodium",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"600（食塩相当7.5g未満目標）",deficiency:"低ナトリウム血症、筋痙攣、めまい、意識障害",excess:"高血圧、胃がんリスク、腎臓負担、むくみ",foods:[{name:"食塩",amount:"39,000mg/100g"},{name:"醤油",amount:"5,700mg/100g"},{name:"味噌",amount:"4,900mg/100g"},{name:"梅干し",amount:"8,700mg/100g"},{name:"たくあん",amount:"1,700mg/100g"},{name:"塩昆布",amount:"7,100mg/100g"},{name:"生ハム",amount:"2,800mg/100g"},{name:"ロースハム",amount:"1,000mg/100g"},{name:"プロセスチーズ",amount:"1,100mg/100g"},{name:"ちくわ",amount:"830mg/100g"},{name:"かまぼこ",amount:"1,000mg/100g"},{name:"食パン",amount:"500mg/100g"}],description:"体液の浸透圧調節、酸塩基平衡の維持に必須。神経刺激の伝達、筋収縮にも関与。カリウムと拮抗的に作用。"},
+  {id:"k",name:"カリウム",nameEn:"Potassium",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"2,500〜3,000",deficiency:"筋力低下、不整脈、便秘、倦怠感",excess:"高カリウム血症（腎機能低下時）、不整脈",foods:[{name:"干し昆布",amount:"5,300mg/100g"},{name:"干しひじき",amount:"4,400mg/100g"},{name:"大豆",amount:"1,900mg/100g"},{name:"バナナ",amount:"360mg/100g"},{name:"ほうれん草",amount:"690mg/100g"},{name:"納豆",amount:"660mg/100g"},{name:"アボカド",amount:"590mg/100g"},{name:"里芋",amount:"640mg/100g"},{name:"じゃがいも",amount:"410mg/100g"},{name:"枝豆",amount:"590mg/100g"},{name:"さつまいも",amount:"480mg/100g"},{name:"トマト",amount:"210mg/100g"}],description:"細胞内液の主要な陽イオン。ナトリウムの排泄を促進し血圧を下げる。筋収縮、神経伝達に重要。"},
+  {id:"cl",name:"塩素",nameEn:"Chlorine",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"食塩として摂取",deficiency:"代謝性アルカローシス、食欲不振",excess:"高血圧（ナトリウムと共に）",foods:[{name:"食塩",amount:"59,900mg/100g"},{name:"醤油",amount:"含有"},{name:"味噌",amount:"含有"},{name:"海藻類",amount:"含有"},{name:"オリーブ",amount:"含有"},{name:"塩昆布",amount:"10,900mg/100g"},{name:"梅干し",amount:"13,400mg/100g"},{name:"たくあん",amount:"2,600mg/100g"},{name:"ロースハム",amount:"1,500mg/100g"},{name:"プロセスチーズ",amount:"1,700mg/100g"},{name:"ちくわ",amount:"1,300mg/100g"},{name:"食パン",amount:"770mg/100g"}],description:"胃液（塩酸）の構成成分として消化に関与。体液の浸透圧調節、酸塩基平衡の維持。食塩（NaCl）として摂取。"},
+  {id:"s",name:"硫黄",nameEn:"Sulfur",category:"mineral",subCategory:"主要ミネラル",unit:"mg",rda:"タンパク質から摂取",deficiency:"皮膚・爪・毛髪の異常、関節障害",excess:"過剰症の報告は稀",foods:[{name:"卵",amount:"高含有"},{name:"にんにく",amount:"高含有"},{name:"玉ねぎ",amount:"含有"},{name:"ブロッコリー",amount:"含有"},{name:"肉類全般",amount:"含有"},{name:"鶏むね肉",amount:"メチオニン640mg/100g"},{name:"かつお",amount:"メチオニン760mg/100g"},{name:"大豆",amount:"メチオニン530mg/100g"},{name:"チーズ",amount:"メチオニン760mg/100g"},{name:"卵黄",amount:"メチオニン500mg/100g"},{name:"キャベツ",amount:"システイン27mg/100g"},{name:"にら",amount:"システイン40mg/100g"}],description:"メチオニン・システインなど含硫アミノ酸の構成元素。ケラチン（毛髪・爪）の材料。解毒作用にも関与。"},
 
   // === MINERALS: Trace (微量ミネラル) ===
-  {id:"fe",name:"鉄",nameEn:"Iron",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"6.5〜10.5",deficiency:"鉄欠乏性貧血、疲労感、動悸、息切れ、集中力低下",excess:"ヘモクロマトーシス、肝障害、酸化ストレス",foods:[{name:"豚レバー",amount:"13mg/100g"},{name:"あさり",amount:"3.8mg/100g"},{name:"小松菜",amount:"2.8mg/100g"},{name:"ほうれん草",amount:"2.0mg/100g"},{name:"納豆",amount:"3.3mg/100g"}],description:"ヘモグロビン・ミオグロビンの構成成分で酸素運搬に必須。ヘム鉄（動物性）は非ヘム鉄（植物性）より吸収率が高い。"},
-  {id:"zn",name:"亜鉛",nameEn:"Zinc",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"8〜11",deficiency:"味覚障害、成長障害、免疫力低下、皮膚炎、脱毛",excess:"銅欠乏、貧血、胃腸障害",foods:[{name:"牡蠣",amount:"14mg/100g"},{name:"豚レバー",amount:"6.9mg/100g"},{name:"牛もも肉",amount:"4.4mg/100g"},{name:"カシューナッツ",amount:"5.4mg/100g"},{name:"高野豆腐",amount:"5.2mg/100g"}],description:"300以上の酵素の活性に必要。DNA合成、免疫機能、味覚維持、創傷治癒に関与。ビタミンAの代謝にも必要。"},
-  {id:"cu",name:"銅",nameEn:"Copper",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"0.7〜1.0",deficiency:"貧血（鉄利用障害）、白血球減少、骨異常、毛髪色素脱失",excess:"肝障害、溶血性貧血（ウィルソン病）",foods:[{name:"牛レバー",amount:"5.3mg/100g"},{name:"しゃこ",amount:"3.5mg/100g"},{name:"カシューナッツ",amount:"1.9mg/100g"},{name:"大豆",amount:"1.1mg/100g"},{name:"ココア",amount:"3.8mg/100g"}],description:"鉄の代謝（セルロプラスミン）に不可欠。メラニン色素生成、コラーゲン架橋形成、抗酸化酵素SODの構成成分。"},
-  {id:"mn",name:"マンガン",nameEn:"Manganese",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"3.5〜4.0",deficiency:"骨代謝異常、成長障害、糖脂質代謝異常",excess:"中枢神経障害（職業性暴露）",foods:[{name:"玄米",amount:"2.1mg/100g"},{name:"栗",amount:"3.3mg/100g"},{name:"大豆",amount:"2.3mg/100g"},{name:"生姜",amount:"5.0mg/100g"},{name:"れんこん",amount:"0.78mg/100g"}],description:"骨形成、糖脂質代謝、抗酸化酵素MnSODの構成成分。ピルビン酸カルボキシラーゼの補因子としてエネルギー代謝にも関与。"},
-  {id:"iodine",name:"ヨウ素",nameEn:"Iodine",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"130",deficiency:"甲状腺腫、クレチン症（先天性）、甲状腺機能低下",excess:"甲状腺機能障害（過剰でも機能低下を起こしうる）",foods:[{name:"昆布",amount:"240,000μg/100g"},{name:"わかめ",amount:"8,500μg/100g"},{name:"ひじき",amount:"45,000μg/100g"},{name:"たら",amount:"350μg/100g"},{name:"牡蠣",amount:"73μg/100g"}],description:"甲状腺ホルモン（T3・T4）の構成元素。基礎代謝の調節、成長・発達に必須。日本人は海藻摂取により充足しやすい。"},
-  {id:"se",name:"セレン",nameEn:"Selenium",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"25〜30",deficiency:"心筋症（克山病）、免疫力低下、甲状腺機能低下",excess:"脱毛、爪の変形、下痢、神経障害",foods:[{name:"かつお",amount:"100μg/100g"},{name:"まぐろ",amount:"82μg/100g"},{name:"卵",amount:"32μg/100g"},{name:"たらこ",amount:"130μg/100g"},{name:"ブラジルナッツ",amount:"1,917μg/100g"}],description:"抗酸化酵素グルタチオンペルオキシダーゼの構成成分。ビタミンEと相乗的に抗酸化作用を発揮。甲状腺ホルモン代謝にも必要。"},
-  {id:"mo",name:"モリブデン",nameEn:"Molybdenum",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"25〜30",deficiency:"頻脈、頭痛、夜盲症（欠乏は極めて稀）",excess:"銅の排泄促進、痛風様症状",foods:[{name:"大豆",amount:"350μg/100g"},{name:"枝豆",amount:"240μg/100g"},{name:"そば",amount:"130μg/100g"},{name:"レバー",amount:"120μg/100g"},{name:"落花生",amount:"95μg/100g"}],description:"キサンチンオキシダーゼ等の補因子。尿酸の代謝、硫黄含有アミノ酸の代謝に関与。通常の食事で十分摂取可能。"},
-  {id:"cr",name:"クロム",nameEn:"Chromium",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"10（日本AI値）",deficiency:"耐糖能異常の報告あり（ヒトでの確認は限定的）",excess:"腎障害、肝障害（六価クロムの場合）",foods:[{name:"ひじき",amount:"24μg/100g"},{name:"青海苔",amount:"39μg/100g"},{name:"ビール酵母",amount:"高含有"},{name:"ブロッコリー",amount:"含有"},{name:"全粒穀物",amount:"含有"}],description:"日本の食事摂取基準では目安量が設定されているが、EFSA（欧州食品安全機関）は2014年にヒトでの必須性の根拠不十分として必須ミネラルから除外。糖代謝への関与（耐糖因子GTF説）は再評価が進んでいる。六価クロムは有毒で三価クロムとは区別される。"},
-  {id:"co",name:"コバルト",nameEn:"Cobalt",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"単体での基準なし（B12として摂取）",deficiency:"ビタミンB12欠乏を通じた悪性貧血",excess:"甲状腺腫、心筋症（職業的過剰暴露時）",foods:[{name:"しじみ",amount:"含有"},{name:"牛レバー",amount:"含有"},{name:"あさり",amount:"含有"},{name:"牡蠣",amount:"含有"},{name:"海苔",amount:"含有"}],description:"ビタミンB12の分子中心に位置する金属元素。単体としての食事摂取基準はなく、B12として摂取する。コバルト自体の必須性はB12を介した間接的なもの。"},
-  {id:"f",name:"フッ素",nameEn:"Fluorine",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"公的基準なし",deficiency:"虫歯リスク増加（欠乏症というより予防効果の喪失）",excess:"フッ素症（歯の白斑・褐色変色）、骨硬化症",foods:[{name:"緑茶",amount:"含有"},{name:"海産物",amount:"含有"},{name:"いわし",amount:"含有"},{name:"水道水（地域差）",amount:"微量"},{name:"紅茶",amount:"含有"}],description:"歯のエナメル質を強化する作用は広く認められているが、代謝上の必須性については議論がある。WHO/IOMは必須栄養素としての分類を保留。歯磨き粉や一部地域の水道水に添加されている。"},
-  {id:"si",name:"ケイ素",nameEn:"Silicon",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"公的基準なし",deficiency:"動物実験で骨・結合組織の異常が報告（ヒトでは未確認）",excess:"腎結石リスク（大量摂取時の報告あり）",foods:[{name:"玄米",amount:"含有"},{name:"大麦",amount:"含有"},{name:"じゃがいも",amount:"含有"},{name:"バナナ",amount:"含有"},{name:"ミネラルウォーター",amount:"含有"}],description:"動物実験ではコラーゲン架橋や骨石灰化への関与が示唆されているが、ヒトでの必須性を証明した研究は不足。公的な摂取基準は設定されていない。"},
-  {id:"b",name:"ホウ素",nameEn:"Boron",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"公的基準なし",deficiency:"動物実験で骨代謝異常が報告（ヒトでは未確立）",excess:"下痢、嘔吐、皮膚炎（大量摂取時）",foods:[{name:"りんご",amount:"含有"},{name:"ぶどう",amount:"含有"},{name:"ナッツ類",amount:"含有"},{name:"豆類",amount:"含有"},{name:"はちみつ",amount:"含有"}],description:"カルシウムやビタミンDの代謝への影響が一部の研究で報告されているが、ヒトでの必須性は確立されていない。IOMは必須栄養素としての分類を見送っている。"},
-  {id:"v",name:"バナジウム",nameEn:"Vanadium",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"公的基準なし",deficiency:"動物実験で成長障害が報告（ヒトでは未確認）",excess:"胃腸障害、腎毒性（大量摂取時）",foods:[{name:"貝類",amount:"含有"},{name:"マッシュルーム",amount:"含有"},{name:"パセリ",amount:"含有"},{name:"黒胡椒",amount:"含有"},{name:"全粒穀物",amount:"含有"}],description:"試験管内・動物実験でインスリン様作用が報告されているが、ヒトでの有効性・必須性のエビデンスは非常に限られている。IOMは必須栄養素とは認めていない。"},
+  {id:"fe",name:"鉄",nameEn:"Iron",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"6.5〜10.5",deficiency:"鉄欠乏性貧血、疲労感、動悸、息切れ、集中力低下",excess:"ヘモクロマトーシス、肝障害、酸化ストレス",foods:[{name:"豚レバー",amount:"13mg/100g"},{name:"あさり",amount:"3.8mg/100g"},{name:"小松菜",amount:"2.8mg/100g"},{name:"ほうれん草",amount:"2.0mg/100g"},{name:"納豆",amount:"3.3mg/100g"},{name:"鶏レバー",amount:"9.0mg/100g"},{name:"牛レバー",amount:"4.0mg/100g"},{name:"しじみ",amount:"8.3mg/100g"},{name:"かつお",amount:"1.9mg/100g"},{name:"ひじき",amount:"6.2mg/100g"},{name:"高野豆腐",amount:"6.8mg/100g"},{name:"枝豆",amount:"2.5mg/100g"}],description:"ヘモグロビン・ミオグロビンの構成成分で酸素運搬に必須。ヘム鉄（動物性）は非ヘム鉄（植物性）より吸収率が高い。"},
+  {id:"zn",name:"亜鉛",nameEn:"Zinc",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"8〜11",deficiency:"味覚障害、成長障害、免疫力低下、皮膚炎、脱毛",excess:"銅欠乏、貧血、胃腸障害",foods:[{name:"牡蠣",amount:"14mg/100g"},{name:"豚レバー",amount:"6.9mg/100g"},{name:"牛もも肉",amount:"4.4mg/100g"},{name:"カシューナッツ",amount:"5.4mg/100g"},{name:"高野豆腐",amount:"5.2mg/100g"},{name:"牛肩ロース",amount:"5.6mg/100g"},{name:"豚肩ロース",amount:"3.2mg/100g"},{name:"鶏レバー",amount:"3.3mg/100g"},{name:"卵黄",amount:"4.2mg/100g"},{name:"納豆",amount:"1.9mg/100g"},{name:"アーモンド",amount:"3.6mg/100g"},{name:"プロセスチーズ",amount:"3.2mg/100g"}],description:"300以上の酵素の活性に必要。DNA合成、免疫機能、味覚維持、創傷治癒に関与。ビタミンAの代謝にも必要。"},
+  {id:"cu",name:"銅",nameEn:"Copper",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"0.7〜1.0",deficiency:"貧血（鉄利用障害）、白血球減少、骨異常、毛髪色素脱失",excess:"肝障害、溶血性貧血（ウィルソン病）",foods:[{name:"牛レバー",amount:"5.3mg/100g"},{name:"しゃこ",amount:"3.5mg/100g"},{name:"カシューナッツ",amount:"1.9mg/100g"},{name:"大豆",amount:"1.1mg/100g"},{name:"ココア",amount:"3.8mg/100g"},{name:"牡蠣",amount:"1.0mg/100g"},{name:"ほたるいか",amount:"3.4mg/100g"},{name:"いか",amount:"0.34mg/100g"},{name:"アーモンド",amount:"1.2mg/100g"},{name:"ごま",amount:"1.7mg/100g"},{name:"納豆",amount:"0.61mg/100g"},{name:"玄米",amount:"0.27mg/100g"}],description:"鉄の代謝（セルロプラスミン）に不可欠。メラニン色素生成、コラーゲン架橋形成、抗酸化酵素SODの構成成分。"},
+  {id:"mn",name:"マンガン",nameEn:"Manganese",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"3.5〜4.0",deficiency:"骨代謝異常、成長障害、糖脂質代謝異常",excess:"中枢神経障害（職業性暴露）",foods:[{name:"玄米",amount:"2.1mg/100g"},{name:"栗",amount:"3.3mg/100g"},{name:"大豆",amount:"2.3mg/100g"},{name:"生姜",amount:"5.0mg/100g"},{name:"れんこん",amount:"0.78mg/100g"},{name:"ごま",amount:"2.5mg/100g"},{name:"くるみ",amount:"3.4mg/100g"},{name:"アーモンド",amount:"2.5mg/100g"},{name:"納豆",amount:"1.0mg/100g"},{name:"そば",amount:"0.76mg/100g"},{name:"小松菜",amount:"0.28mg/100g"},{name:"緑茶浸出液",amount:"0.55mg/100g"}],description:"骨形成、糖脂質代謝、抗酸化酵素MnSODの構成成分。ピルビン酸カルボキシラーゼの補因子としてエネルギー代謝にも関与。"},
+  {id:"iodine",name:"ヨウ素",nameEn:"Iodine",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"130",deficiency:"甲状腺腫、クレチン症（先天性）、甲状腺機能低下",excess:"甲状腺機能障害（過剰でも機能低下を起こしうる）",foods:[{name:"昆布",amount:"240,000μg/100g"},{name:"わかめ",amount:"8,500μg/100g"},{name:"ひじき",amount:"45,000μg/100g"},{name:"たら",amount:"350μg/100g"},{name:"牡蠣",amount:"73μg/100g"},{name:"焼きのり",amount:"2,100μg/100g"},{name:"あおさ",amount:"2,200μg/100g"},{name:"めかぶ",amount:"390μg/100g"},{name:"ほっけ",amount:"84μg/100g"},{name:"さば",amount:"21μg/100g"},{name:"鶏卵",amount:"33μg/100g"},{name:"牛乳",amount:"16μg/100g"}],description:"甲状腺ホルモン（T3・T4）の構成元素。基礎代謝の調節、成長・発達に必須。日本人は海藻摂取により充足しやすい。"},
+  {id:"se",name:"セレン",nameEn:"Selenium",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"25〜30",deficiency:"心筋症（克山病）、免疫力低下、甲状腺機能低下",excess:"脱毛、爪の変形、下痢、神経障害",foods:[{name:"かつお",amount:"100μg/100g"},{name:"まぐろ",amount:"82μg/100g"},{name:"卵",amount:"32μg/100g"},{name:"たらこ",amount:"130μg/100g"},{name:"ブラジルナッツ",amount:"1,917μg/100g"},{name:"かじき",amount:"77μg/100g"},{name:"いわし",amount:"48μg/100g"},{name:"さば",amount:"70μg/100g"},{name:"豚レバー",amount:"67μg/100g"},{name:"鶏むね肉",amount:"22μg/100g"},{name:"納豆",amount:"16μg/100g"},{name:"玄米",amount:"3μg/100g"}],description:"抗酸化酵素グルタチオンペルオキシダーゼの構成成分。ビタミンEと相乗的に抗酸化作用を発揮。甲状腺ホルモン代謝にも必要。"},
+  {id:"mo",name:"モリブデン",nameEn:"Molybdenum",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"25〜30",deficiency:"頻脈、頭痛、夜盲症（欠乏は極めて稀）",excess:"銅の排泄促進、痛風様症状",foods:[{name:"大豆",amount:"350μg/100g"},{name:"枝豆",amount:"240μg/100g"},{name:"そば",amount:"130μg/100g"},{name:"レバー",amount:"120μg/100g"},{name:"落花生",amount:"95μg/100g"},{name:"納豆",amount:"290μg/100g"},{name:"きな粉",amount:"380μg/100g"},{name:"豆腐",amount:"60μg/100g"},{name:"玄米",amount:"65μg/100g"},{name:"豚レバー",amount:"120μg/100g"},{name:"牛レバー",amount:"94μg/100g"},{name:"小豆",amount:"150μg/100g"}],description:"キサンチンオキシダーゼ等の補因子。尿酸の代謝、硫黄含有アミノ酸の代謝に関与。通常の食事で十分摂取可能。"},
+  {id:"cr",name:"クロム",nameEn:"Chromium",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"10（日本AI値）",deficiency:"耐糖能異常の報告あり（ヒトでの確認は限定的）",excess:"腎障害、肝障害（六価クロムの場合）",foods:[{name:"ひじき",amount:"24μg/100g"},{name:"青海苔",amount:"39μg/100g"},{name:"ビール酵母",amount:"高含有"},{name:"ブロッコリー",amount:"含有"},{name:"全粒穀物",amount:"含有"},{name:"あさり",amount:"4μg/100g"},{name:"牡蠣",amount:"3μg/100g"},{name:"豚レバー",amount:"2μg/100g"},{name:"玄米",amount:"1μg/100g"},{name:"じゃがいも",amount:"1μg/100g"},{name:"小松菜",amount:"1μg/100g"},{name:"りんご",amount:"1μg/100g"}],description:"日本の食事摂取基準では目安量が設定されているが、EFSA（欧州食品安全機関）は2014年にヒトでの必須性の根拠不十分として必須ミネラルから除外。糖代謝への関与（耐糖因子GTF説）は再評価が進んでいる。六価クロムは有毒で三価クロムとは区別される。"},
+  {id:"co",name:"コバルト",nameEn:"Cobalt",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"単体での基準なし（B12として摂取）",deficiency:"ビタミンB12欠乏を通じた悪性貧血",excess:"甲状腺腫、心筋症（職業的過剰暴露時）",foods:[{name:"しじみ",amount:"含有"},{name:"牛レバー",amount:"含有"},{name:"あさり",amount:"含有"},{name:"牡蠣",amount:"含有"},{name:"海苔",amount:"含有"},{name:"鶏レバー",amount:"B12 44μg/100g"},{name:"さんま",amount:"B12 16μg/100g"},{name:"さば",amount:"B12 13μg/100g"},{name:"いわし",amount:"B12 15.7μg/100g"},{name:"たらこ",amount:"B12 18μg/100g"},{name:"ほたて",amount:"B12 11μg/100g"},{name:"卵",amount:"B12 1.1μg/100g"}],description:"ビタミンB12の分子中心に位置する金属元素。単体としての食事摂取基準はなく、B12として摂取する。コバルト自体の必須性はB12を介した間接的なもの。"},
+  {id:"f",name:"フッ素",nameEn:"Fluorine",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"公的基準なし",deficiency:"虫歯リスク増加（欠乏症というより予防効果の喪失）",excess:"フッ素症（歯の白斑・褐色変色）、骨硬化症",foods:[{name:"緑茶",amount:"含有"},{name:"海産物",amount:"含有"},{name:"いわし",amount:"含有"},{name:"水道水（地域差）",amount:"微量"},{name:"紅茶",amount:"含有"},{name:"煎茶浸出液",amount:"0.10mg/100g"},{name:"番茶浸出液",amount:"0.12mg/100g"},{name:"紅茶浸出液",amount:"0.05mg/100g"},{name:"わかめ",amount:"1.1mg/100g"},{name:"焼きのり",amount:"1.5mg/100g"},{name:"いわし丸干し",amount:"1.3mg/100g"},{name:"ししゃも",amount:"0.5mg/100g"}],description:"歯のエナメル質を強化する作用は広く認められているが、代謝上の必須性については議論がある。WHO/IOMは必須栄養素としての分類を保留。歯磨き粉や一部地域の水道水に添加されている。"},
+  {id:"si",name:"ケイ素",nameEn:"Silicon",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"公的基準なし",deficiency:"動物実験で骨・結合組織の異常が報告（ヒトでは未確認）",excess:"腎結石リスク（大量摂取時の報告あり）",foods:[{name:"玄米",amount:"含有"},{name:"大麦",amount:"含有"},{name:"じゃがいも",amount:"含有"},{name:"バナナ",amount:"含有"},{name:"ミネラルウォーター",amount:"含有"},{name:"オートミール",amount:"20mg/100g"},{name:"押麦",amount:"18mg/100g"},{name:"小麦全粒粉",amount:"12mg/100g"},{name:"きゅうり",amount:"2mg/100g"},{name:"いんげん",amount:"2mg/100g"},{name:"ごぼう",amount:"3mg/100g"},{name:"ビール",amount:"2mg/100g"}],description:"動物実験ではコラーゲン架橋や骨石灰化への関与が示唆されているが、ヒトでの必須性を証明した研究は不足。公的な摂取基準は設定されていない。"},
+  {id:"b",name:"ホウ素",nameEn:"Boron",category:"mineral",subCategory:"微量ミネラル",unit:"mg",rda:"公的基準なし",deficiency:"動物実験で骨代謝異常が報告（ヒトでは未確立）",excess:"下痢、嘔吐、皮膚炎（大量摂取時）",foods:[{name:"りんご",amount:"含有"},{name:"ぶどう",amount:"含有"},{name:"ナッツ類",amount:"含有"},{name:"豆類",amount:"含有"},{name:"はちみつ",amount:"含有"},{name:"アーモンド",amount:"2.8mg/100g"},{name:"落花生",amount:"1.8mg/100g"},{name:"プルーン",amount:"2.1mg/100g"},{name:"レーズン",amount:"2.2mg/100g"},{name:"アボカド",amount:"1.0mg/100g"},{name:"大豆",amount:"1.4mg/100g"},{name:"梨",amount:"0.3mg/100g"}],description:"カルシウムやビタミンDの代謝への影響が一部の研究で報告されているが、ヒトでの必須性は確立されていない。IOMは必須栄養素としての分類を見送っている。"},
+  {id:"v",name:"バナジウム",nameEn:"Vanadium",category:"mineral",subCategory:"微量ミネラル",unit:"μg",rda:"公的基準なし",deficiency:"動物実験で成長障害が報告（ヒトでは未確認）",excess:"胃腸障害、腎毒性（大量摂取時）",foods:[{name:"貝類",amount:"含有"},{name:"マッシュルーム",amount:"含有"},{name:"パセリ",amount:"含有"},{name:"黒胡椒",amount:"含有"},{name:"全粒穀物",amount:"含有"},{name:"あさり",amount:"20μg/100g"},{name:"牡蠣",amount:"15μg/100g"},{name:"ほたて",amount:"10μg/100g"},{name:"玄米",amount:"5μg/100g"},{name:"そば",amount:"8μg/100g"},{name:"しいたけ",amount:"6μg/100g"},{name:"ほうれん草",amount:"4μg/100g"}],description:"試験管内・動物実験でインスリン様作用が報告されているが、ヒトでの有効性・必須性のエビデンスは非常に限られている。IOMは必須栄養素とは認めていない。"},
 
   // === AMINO ACIDS: Essential (必須アミノ酸) ===
-  {id:"ile",name:"イソロイシン",nameEn:"Isoleucine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり20mg",deficiency:"成長障害、筋力低下、血糖調節異常",excess:"過剰症は稀（腎臓に負担）",foods:[{name:"鶏むね肉",amount:"1,100mg/100g"},{name:"まぐろ赤身",amount:"1,200mg/100g"},{name:"卵",amount:"670mg/100g"},{name:"大豆",amount:"1,800mg/100g"},{name:"牛乳",amount:"170mg/100g"}],description:"BCAA（分岐鎖アミノ酸）の一つ。筋肉のエネルギー源、筋タンパク質合成の促進。血糖値の調節にも関与。"},
-  {id:"leu",name:"ロイシン",nameEn:"Leucine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり39mg",deficiency:"成長障害、筋力低下、タンパク質代謝異常",excess:"過剰症は稀",foods:[{name:"鶏むね肉",amount:"1,900mg/100g"},{name:"まぐろ赤身",amount:"2,000mg/100g"},{name:"大豆",amount:"2,900mg/100g"},{name:"卵",amount:"1,100mg/100g"},{name:"チーズ",amount:"2,400mg/100g"}],description:"BCAAの中で最も筋タンパク質合成を刺激する。mTOR経路を活性化。筋肉の分解抑制、エネルギー供給にも重要。"},
-  {id:"lys",name:"リシン",nameEn:"Lysine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり30mg",deficiency:"成長障害、免疫力低下、貧血、コラーゲン合成低下",excess:"胃痙攣、下痢（サプリ過剰時）",foods:[{name:"かつお",amount:"2,100mg/100g"},{name:"鶏むね肉",amount:"2,000mg/100g"},{name:"大豆",amount:"2,400mg/100g"},{name:"チーズ",amount:"2,300mg/100g"},{name:"卵",amount:"900mg/100g"}],description:"コラーゲン合成、カルシウム吸収促進に関与。米・小麦に少なく、日本食の制限アミノ酸。ヘルペス抑制効果も報告。"},
-  {id:"met",name:"メチオニン",nameEn:"Methionine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり10mg（+システイン）",deficiency:"成長障害、脂肪肝、皮膚炎、アレルギー様症状",excess:"ホモシステイン増加（動脈硬化リスク）",foods:[{name:"かつお",amount:"760mg/100g"},{name:"鶏むね肉",amount:"640mg/100g"},{name:"卵",amount:"400mg/100g"},{name:"大豆",amount:"530mg/100g"},{name:"牛乳",amount:"83mg/100g"}],description:"含硫アミノ酸。S-アデノシルメチオニン（SAMe）としてメチル基供与体に。肝臓の解毒作用、抗酸化物質グルタチオンの前駆体。"},
-  {id:"phe",name:"フェニルアラニン",nameEn:"Phenylalanine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり25mg（+チロシン）",deficiency:"成長障害、精神的無気力、皮膚色素脱失",excess:"血圧上昇、頭痛（PKU患者は厳格制限）",foods:[{name:"大豆",amount:"2,000mg/100g"},{name:"鶏むね肉",amount:"1,000mg/100g"},{name:"まぐろ赤身",amount:"960mg/100g"},{name:"チーズ",amount:"1,500mg/100g"},{name:"卵",amount:"680mg/100g"}],description:"チロシンに変換され、ドーパミン・ノルアドレナリン・アドレナリンの前駆体に。メラニン色素の合成にも必要。PKU患者は摂取制限が必要。"},
-  {id:"thr",name:"トレオニン",nameEn:"Threonine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり15mg",deficiency:"成長障害、脂肪肝、食欲不振",excess:"過剰症の報告は稀",foods:[{name:"鶏むね肉",amount:"1,000mg/100g"},{name:"まぐろ赤身",amount:"1,100mg/100g"},{name:"大豆",amount:"1,600mg/100g"},{name:"卵",amount:"610mg/100g"},{name:"牛乳",amount:"150mg/100g"}],description:"コラーゲンの構成アミノ酸。小腸粘膜のムチン合成に重要。脂肪の蓄積を防ぎ肝機能を保護。米に少ない制限アミノ酸。"},
-  {id:"trp",name:"トリプトファン",nameEn:"Tryptophan",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり4mg",deficiency:"不眠、うつ症状、ペラグラ（ナイアシン不足時）",excess:"眠気、嘔吐（大量サプリ時）",foods:[{name:"かつお",amount:"310mg/100g"},{name:"チーズ",amount:"320mg/100g"},{name:"大豆",amount:"520mg/100g"},{name:"バナナ",amount:"11mg/100g"},{name:"牛乳",amount:"42mg/100g"}],description:"セロトニン→メラトニンの前駆体で睡眠・精神安定に関与。ナイアシン（ビタミンB3）にも体内変換される。必須アミノ酸の中で最も必要量が少ない。"},
-  {id:"val",name:"バリン",nameEn:"Valine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり26mg",deficiency:"成長障害、筋力低下、食欲不振",excess:"過剰症は稀",foods:[{name:"鶏むね肉",amount:"1,200mg/100g"},{name:"まぐろ赤身",amount:"1,300mg/100g"},{name:"大豆",amount:"2,000mg/100g"},{name:"卵",amount:"830mg/100g"},{name:"チーズ",amount:"1,700mg/100g"}],description:"BCAAの一つ。筋肉のエネルギー源として利用。筋タンパク質の合成促進と分解抑制。成長促進・血液中の窒素バランスの調整。"}
+  {id:"ile",name:"イソロイシン",nameEn:"Isoleucine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり20mg",deficiency:"成長障害、筋力低下、血糖調節異常",excess:"過剰症は稀（腎臓に負担）",foods:[{name:"鶏むね肉",amount:"1,100mg/100g"},{name:"まぐろ赤身",amount:"1,200mg/100g"},{name:"卵",amount:"670mg/100g"},{name:"大豆",amount:"1,800mg/100g"},{name:"牛乳",amount:"170mg/100g"},{name:"豚ヒレ肉",amount:"1,200mg/100g"},{name:"牛もも肉",amount:"1,100mg/100g"},{name:"かつお",amount:"1,300mg/100g"},{name:"鮭",amount:"1,000mg/100g"},{name:"納豆",amount:"750mg/100g"},{name:"木綿豆腐",amount:"330mg/100g"},{name:"プロセスチーズ",amount:"1,300mg/100g"}],description:"BCAA（分岐鎖アミノ酸）の一つ。筋肉のエネルギー源、筋タンパク質合成の促進。血糖値の調節にも関与。"},
+  {id:"leu",name:"ロイシン",nameEn:"Leucine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり39mg",deficiency:"成長障害、筋力低下、タンパク質代謝異常",excess:"過剰症は稀",foods:[{name:"鶏むね肉",amount:"1,900mg/100g"},{name:"まぐろ赤身",amount:"2,000mg/100g"},{name:"大豆",amount:"2,900mg/100g"},{name:"卵",amount:"1,100mg/100g"},{name:"チーズ",amount:"2,400mg/100g"},{name:"豚ヒレ肉",amount:"2,000mg/100g"},{name:"牛もも肉",amount:"1,800mg/100g"},{name:"かつお",amount:"2,100mg/100g"},{name:"鮭",amount:"1,700mg/100g"},{name:"納豆",amount:"1,300mg/100g"},{name:"木綿豆腐",amount:"570mg/100g"},{name:"ヨーグルト",amount:"350mg/100g"}],description:"BCAAの中で最も筋タンパク質合成を刺激する。mTOR経路を活性化。筋肉の分解抑制、エネルギー供給にも重要。"},
+  {id:"lys",name:"リシン",nameEn:"Lysine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり30mg",deficiency:"成長障害、免疫力低下、貧血、コラーゲン合成低下",excess:"胃痙攣、下痢（サプリ過剰時）",foods:[{name:"かつお",amount:"2,100mg/100g"},{name:"鶏むね肉",amount:"2,000mg/100g"},{name:"大豆",amount:"2,400mg/100g"},{name:"チーズ",amount:"2,300mg/100g"},{name:"卵",amount:"900mg/100g"},{name:"まぐろ赤身",amount:"2,200mg/100g"},{name:"豚ヒレ肉",amount:"2,100mg/100g"},{name:"牛もも肉",amount:"1,900mg/100g"},{name:"鮭",amount:"1,900mg/100g"},{name:"納豆",amount:"1,100mg/100g"},{name:"木綿豆腐",amount:"460mg/100g"},{name:"牛乳",amount:"260mg/100g"}],description:"コラーゲン合成、カルシウム吸収促進に関与。米・小麦に少なく、日本食の制限アミノ酸。ヘルペス抑制効果も報告。"},
+  {id:"met",name:"メチオニン",nameEn:"Methionine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり10mg（+システイン）",deficiency:"成長障害、脂肪肝、皮膚炎、アレルギー様症状",excess:"ホモシステイン増加（動脈硬化リスク）",foods:[{name:"かつお",amount:"760mg/100g"},{name:"鶏むね肉",amount:"640mg/100g"},{name:"卵",amount:"400mg/100g"},{name:"大豆",amount:"530mg/100g"},{name:"牛乳",amount:"83mg/100g"},{name:"まぐろ赤身",amount:"760mg/100g"},{name:"鮭",amount:"620mg/100g"},{name:"豚ヒレ肉",amount:"650mg/100g"},{name:"牛もも肉",amount:"580mg/100g"},{name:"プロセスチーズ",amount:"760mg/100g"},{name:"納豆",amount:"250mg/100g"},{name:"木綿豆腐",amount:"110mg/100g"}],description:"含硫アミノ酸。S-アデノシルメチオニン（SAMe）としてメチル基供与体に。肝臓の解毒作用、抗酸化物質グルタチオンの前駆体。"},
+  {id:"phe",name:"フェニルアラニン",nameEn:"Phenylalanine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり25mg（+チロシン）",deficiency:"成長障害、精神的無気力、皮膚色素脱失",excess:"血圧上昇、頭痛（PKU患者は厳格制限）",foods:[{name:"大豆",amount:"2,000mg/100g"},{name:"鶏むね肉",amount:"1,000mg/100g"},{name:"まぐろ赤身",amount:"960mg/100g"},{name:"チーズ",amount:"1,500mg/100g"},{name:"卵",amount:"680mg/100g"},{name:"豚ヒレ肉",amount:"1,000mg/100g"},{name:"牛もも肉",amount:"930mg/100g"},{name:"かつお",amount:"1,000mg/100g"},{name:"鮭",amount:"850mg/100g"},{name:"納豆",amount:"830mg/100g"},{name:"木綿豆腐",amount:"350mg/100g"},{name:"アーモンド",amount:"1,400mg/100g"}],description:"チロシンに変換され、ドーパミン・ノルアドレナリン・アドレナリンの前駆体に。メラニン色素の合成にも必要。PKU患者は摂取制限が必要。"},
+  {id:"thr",name:"トレオニン",nameEn:"Threonine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり15mg",deficiency:"成長障害、脂肪肝、食欲不振",excess:"過剰症の報告は稀",foods:[{name:"鶏むね肉",amount:"1,000mg/100g"},{name:"まぐろ赤身",amount:"1,100mg/100g"},{name:"大豆",amount:"1,600mg/100g"},{name:"卵",amount:"610mg/100g"},{name:"牛乳",amount:"150mg/100g"},{name:"豚ヒレ肉",amount:"1,000mg/100g"},{name:"牛もも肉",amount:"910mg/100g"},{name:"かつお",amount:"1,100mg/100g"},{name:"鮭",amount:"910mg/100g"},{name:"プロセスチーズ",amount:"1,100mg/100g"},{name:"納豆",amount:"650mg/100g"},{name:"木綿豆腐",amount:"280mg/100g"}],description:"コラーゲンの構成アミノ酸。小腸粘膜のムチン合成に重要。脂肪の蓄積を防ぎ肝機能を保護。米に少ない制限アミノ酸。"},
+  {id:"trp",name:"トリプトファン",nameEn:"Tryptophan",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり4mg",deficiency:"不眠、うつ症状、ペラグラ（ナイアシン不足時）",excess:"眠気、嘔吐（大量サプリ時）",foods:[{name:"かつお",amount:"310mg/100g"},{name:"チーズ",amount:"320mg/100g"},{name:"大豆",amount:"520mg/100g"},{name:"バナナ",amount:"11mg/100g"},{name:"牛乳",amount:"42mg/100g"},{name:"まぐろ赤身",amount:"300mg/100g"},{name:"豚ヒレ肉",amount:"280mg/100g"},{name:"鶏むね肉",amount:"270mg/100g"},{name:"卵",amount:"180mg/100g"},{name:"納豆",amount:"240mg/100g"},{name:"アーモンド",amount:"200mg/100g"},{name:"ヨーグルト",amount:"47mg/100g"}],description:"セロトニン→メラトニンの前駆体で睡眠・精神安定に関与。ナイアシン（ビタミンB3）にも体内変換される。必須アミノ酸の中で最も必要量が少ない。"},
+  {id:"val",name:"バリン",nameEn:"Valine",category:"aminoAcid",subCategory:"必須アミノ酸",unit:"mg",rda:"体重1kgあたり26mg",deficiency:"成長障害、筋力低下、食欲不振",excess:"過剰症は稀",foods:[{name:"鶏むね肉",amount:"1,200mg/100g"},{name:"まぐろ赤身",amount:"1,300mg/100g"},{name:"大豆",amount:"2,000mg/100g"},{name:"卵",amount:"830mg/100g"},{name:"チーズ",amount:"1,700mg/100g"},{name:"豚ヒレ肉",amount:"1,300mg/100g"},{name:"牛もも肉",amount:"1,200mg/100g"},{name:"かつお",amount:"1,400mg/100g"},{name:"鮭",amount:"1,100mg/100g"},{name:"納豆",amount:"850mg/100g"},{name:"木綿豆腐",amount:"360mg/100g"},{name:"ヨーグルト",amount:"240mg/100g"}],description:"BCAAの一つ。筋肉のエネルギー源として利用。筋タンパク質の合成促進と分解抑制。成長促進・血液中の窒素バランスの調整。"}
 ];
 
 // ============================================================
@@ -469,12 +517,23 @@ const _dotImgSrc = 'data:image/svg+xml;base64,' + btoa(
 );
 
 // ============================================================
+// CATEGORY BADGE SVG (ノード内に表示するカテゴリ文字)
+// ============================================================
+const _font = 'system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Noto Sans JP,Hiragino Sans,Yu Gothic,sans-serif';
+const _mkBadge = (txt, sz) => 'data:image/svg+xml;base64,' + btoa(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54"><text x="27" y="27" font-size="${sz}" font-weight="700" fill="rgba(255,255,255,0.92)" text-anchor="middle" dominant-baseline="central" font-family="${_font}">${txt}</text></svg>`
+);
+const _badgeV   = _mkBadge('V', 20);
+const _badgeM   = _mkBadge('M', 20);
+const _badgeA   = _mkBadge('A', 20);
+
+// ============================================================
 // BUILD CYTOSCAPE ELEMENTS
 // ============================================================
 const cyElements = [];
 nutrients.forEach(n => {
   const ev = EVIDENCE[n.id] || 'established';
-  cyElements.push({data:{id:n.id,label:n.name,category:n.category,subCategory:n.subCategory,color:COLORS[n.subCategory].bg,evidence:ev}});
+  cyElements.push({data:{id:n.id,label:n.name,category:n.category,subCategory:n.subCategory,color:COLORS[n.subCategory].bg,lightColor:COLORS[n.subCategory].light,evidence:ev}});
 });
 edges.forEach((e,i) => {
   cyElements.push({data:{id:'e'+i,source:e.source,target:e.target,edgeType:e.type,color:EDGE_COLORS[e.type]}});
@@ -490,67 +549,63 @@ const cy = cytoscape({
     // Base node style
     {selector:'node',style:{
       'background-color':'data(color)',
+      'shadow-blur':8,'shadow-color':'rgba(0,0,0,0.18)',
+      'shadow-offset-x':1,'shadow-offset-y':3,'shadow-opacity':0.55,
       'label':'data(label)',
-      'font-size':'11px',
-      'font-family':'-apple-system,BlinkMacSystemFont,Hiragino Kaku Gothic ProN,sans-serif',
-      'color':'#333',
+      'font-size':'16px',
+      'font-family':'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif',
+      'color':'#222',
       'text-valign':'bottom',
-      'text-margin-y':4,
-      'width':32,'height':32,
-      'border-width':2,'border-color':'rgba(0,0,0,0.2)','border-style':'solid',
-      'text-outline-width':2,'text-outline-color':'#fff',
-      'transition-property':'opacity,width,height,border-color,border-width',
+      'text-margin-y':20,
+      'width':68,'height':68,
+      'border-width':1.5,
+      'border-color':'rgba(0,0,0,0.18)',
+      'text-outline-width':0,
+      'text-background-color':'#fff',
+      'text-background-opacity':0.9,
+      'text-background-padding':'3px',
+      'text-background-shape':'roundrectangle',
+      'transition-property':'opacity',
       'transition-duration':'0.2s'
     }},
-    // Shape by category (data selectors — lower specificity than class selectors)
-    {selector:'node[category="vitamin"]',   style:{'shape':'ellipse'}},
-    {selector:'node[category="mineral"]',   style:{'shape':'triangle'}},
-    {selector:'node[category="aminoAcid"]', style:{'shape':'rectangle'}},
-    // Evidence level by border style
-    {selector:'node[evidence="established"]',style:{
-      'border-style':'solid','border-color':'rgba(0,0,0,0.25)','border-width':2
-    }},
-    {selector:'node[evidence="probable"]',style:{
-      'border-style':'dashed','border-color':'#f57f17','border-width':2.5
-    }},
-    {selector:'node[evidence="limited"]',style:{
-      'border-style':'dotted','border-color':'#e57373','border-width':2.5,'opacity':0.75
-    }},
-    // Class-based overrides — come after data selectors to take precedence
-    {selector:'node:selected',style:{
-      'border-color':'#2c3e50','border-style':'solid','border-width':3,'width':40,'height':40,'opacity':1
-    }},
-    {selector:'node.highlighted',style:{
-      'border-color':'#f39c12','border-style':'solid','border-width':3,'width':40,'height':40,'opacity':1
-    }},
+    // Shape + badge SVG by category
+    {selector:'node[category="vitamin"]',   style:{'shape':'ellipse',      'background-image':_badgeV,'background-width':'100%','background-height':'100%'}},
+    {selector:'node[category="mineral"]',   style:{'shape':'round-hexagon','background-image':_badgeM,'background-width':'100%','background-height':'100%'}},
+    {selector:'node[category="aminoAcid"]', style:{'shape':'round-diamond', 'background-image':_badgeA,'background-width':'100%','background-height':'100%'}},
+    // Subtle dark border per subCategory
+    {selector:'node[subCategory="脂溶性"]',    style:{'border-color':'#c0671a'}},
+    {selector:'node[subCategory="水溶性"]',    style:{'border-color':'#1a6fa8'}},
+    {selector:'node[subCategory="主要ミネラル"]',style:{'border-color':'#1a7a45'}},
+    {selector:'node[subCategory="微量ミネラル"]',style:{'border-color':'#0e7060'}},
+    {selector:'node[subCategory="必須アミノ酸"]',style:{'border-color':'#6a2e82'}},
+    {selector:'node[evidence="established"]', style:{'opacity':1.0}},
+    {selector:'node[evidence="probable"]',    style:{'opacity':0.72}},
+    {selector:'node[evidence="limited"]',     style:{'opacity':0.45}},
+    {selector:'node:selected',   style:{'border-width':0,'width':82,'height':82,'opacity':1}},
+    {selector:'node.highlighted',style:{'border-width':0,'width':78,'height':78,'opacity':1}},
     {selector:'node.dimmed',style:{
       'opacity':0.12
     }},
     {selector:'node.searchMatch',style:{
-      'border-color':'#e74c3c','border-style':'solid','border-width':3,'width':42,'height':42,'opacity':1
+      'border-width':0,'width':78,'height':78,'opacity':1
     }},
-    // Intake: 食事解析結果による枠色（補助表示 — 一覧パネルが主表示）
-    {selector:'node.intakeLow',    style:{'border-color':'#2980b9','border-width':3,'opacity':1}},
-    {selector:'node.intakeNormal', style:{'border-color':'#27ae60','border-width':3,'opacity':1}},
-    {selector:'node.intakeHigh',   style:{'border-color':'#e67e22','border-width':3,'opacity':1}},
-    // Symptom search: 関連方向に応じた枠色ハイライト（低=青、高=橙、両=灰）
     {selector:'node.symptomHighlight',style:{
-      'border-color':'#7f8c8d','border-style':'solid','border-width':4,'width':44,'height':44,'opacity':1,
-      'background-image':'none'
+      'border-width':0,'width':78,'height':78,'opacity':1,'background-image':'none'
     }},
-    {selector:'node.symptomHighlight.symptomDef:not(.symptomEx)',style:{
-      'border-color':'#2980b9'
-    }},
+    {selector:'node.symptomHighlight.symptomDef:not(.symptomEx)',style:{}},
     {selector:'node.symptomHighlight.symptomEx:not(.symptomDef)',style:{
       'border-color':'#e67e22'
     }},
     {selector:'node.hidden',style:{
       'display':'none'
     }},
+    {selector:'node.intake-sized',style:{
+      'width':'data(iSize)','height':'data(iSize)'
+    }},
     {selector:'edge',style:{
       'line-color':'data(color)',
       'target-arrow-color':'data(color)',
-      'width':2,
+      'width':2.5,
       'curve-style':'bezier',
       'opacity':0.5,
       'transition-property':'opacity,width',
@@ -582,14 +637,6 @@ const cy = cytoscape({
 });
 
 // Size nodes by degree (connection count)
-function sizeByDegree(){
-  cy.nodes().forEach(n => {
-    const deg = n.degree();
-    const sz = Math.max(28, Math.min(56, 24 + deg * 4));
-    n.style('width', sz);
-    n.style('height', sz);
-  });
-}
 
 // ============================================================
 // LAYOUTS
@@ -629,15 +676,26 @@ function applyLayout(name){
       break;
     case 'subcategory':
       opts = {name:'preset',animate:true,animationDuration:600};
-      const subGroups = {'脂溶性':{x:0,y:0},'水溶性':{x:300,y:0},'主要ミネラル':{x:600,y:0},'微量ミネラル':{x:150,y:350},'必須アミノ酸':{x:450,y:350}};
+      // ビタミン群（左）: 脂溶性=上、水溶性=下
+      // ミネラル群（右）: 主要=上、微量=下
+      // アミノ酸群（中央下）
+      // 実際の個数: 脂溶性4, 水溶性14, 主要ミネラル7(2行), 微量ミネラル13(3行), アミノ酸8
+      const subGroups = {
+        '脂溶性':      {x:60,  y:60},
+        '水溶性':      {x:60,  y:320},
+        '主要ミネラル':{x:820, y:60},
+        '微量ミネラル':{x:820, y:320},
+        '必須アミノ酸':{x:570, y:690}
+      };
+      const subCols = {'脂溶性':2,'水溶性':5,'主要ミネラル':5,'微量ミネラル':5,'必須アミノ酸':4};
       cy.nodes().forEach(n=>{
-        const sg = subGroups[n.data('subCategory')] || {x:300,y:175};
+        const sg = subGroups[n.data('subCategory')] || {x:400,y:400};
         const sameGroup = cy.nodes().filter(m=>m.data('subCategory')===n.data('subCategory'));
         const idx = sameGroup.indexOf(n);
-        const cols = Math.ceil(Math.sqrt(sameGroup.length));
+        const cols = subCols[n.data('subCategory')] || Math.ceil(Math.sqrt(sameGroup.length));
         const row = Math.floor(idx/cols);
         const col = idx % cols;
-        n.position({x:sg.x + col*60, y:sg.y + row*60});
+        n.position({x:sg.x + col*115, y:sg.y + row*110});
       });
       break;
     case 'force':
@@ -656,12 +714,12 @@ function applyLayout(name){
       break;
   }
   cy.layout(opts).run();
-  setTimeout(sizeByDegree, 700);
+  setTimeout(()=>cy.nodes().style({width:64,height:64}), 700);
 }
 
 // Initial layout
 applyLayout('subcategory');
-sizeByDegree();
+cy.edges().style('display', 'none');  // エッジはデフォルト非表示・ノード選択時に表示
 setTimeout(()=>cy.fit(null,40), 750);
 
 document.getElementById('layoutSelect').addEventListener('change', e => applyLayout(e.target.value));
@@ -695,6 +753,141 @@ document.getElementById('detailClose').addEventListener('click', ()=>{
   cy.elements().removeClass('highlighted dimmed');
 });
 
+function getFoodsForNutrient(nutrientId, fallbackFoods = []){
+  if(typeof FOOD_DICT === 'undefined') return fallbackFoods;
+  const nutrient = nutrients.find(n=>n.id===nutrientId);
+  const unit = nutrient?.unit || '';
+  const foods = FOOD_DICT
+    .filter(f=>f.per100g && f.per100g[nutrientId] > 0)
+    .sort((a,b)=>b.per100g[nutrientId] - a.per100g[nutrientId])
+    .slice(0,25)
+    .map(f=>({
+      name:f.names[0],
+      amount:f.per100g[nutrientId] + unit + '/100g'
+    }));
+  return foods.length ? foods : fallbackFoods;
+}
+
+function getIntakeBanner(nutrientId) {
+  if (!intakeSummary || !intakeSummary.nutrients) return '';
+  const status = intakeSummary.nutrients[nutrientId];
+  if (status === 'low') return '<div class="intake-banner intake-low">🔵 少なめの傾向</div>';
+  if (status === 'high' || status === 'slightly-high') return '<div class="intake-banner intake-high">🟡 多めの傾向</div>';
+  if (status === 'normal') return '<div class="intake-banner intake-normal">✅ 参考基準付近</div>';
+  return '';
+}
+
+function buildCardView(){
+  const nodeData = cyElements.filter(e=>e.data && !e.data.source);
+  const groups = {
+    'ビタミン（脂溶性）': nodeData.filter(e=>e.data.category==='vitamin' && e.data.subCategory==='脂溶性'),
+    'ビタミン（水溶性）': nodeData.filter(e=>e.data.category==='vitamin' && e.data.subCategory==='水溶性'),
+    'ミネラル（主要）': nodeData.filter(e=>e.data.category==='mineral' && e.data.subCategory==='主要ミネラル'),
+    'ミネラル（微量）': nodeData.filter(e=>e.data.category==='mineral' && e.data.subCategory==='微量ミネラル'),
+    'アミノ酸': nodeData.filter(e=>e.data.category==='aminoAcid')
+  };
+  let html = '';
+  for(const [groupName, nodes] of Object.entries(groups)){
+    if(!nodes.length) continue;
+    html += `<div class="nutrient-category-section">
+      <div class="nutrient-category-title">${groupName}（${nodes.length}種）</div>
+      <div class="nutrient-cards">`;
+    nodes.forEach(node=>{
+      const d = nutrients.find(n=>n.id===node.data.id) || node.data;
+      const topFoods = getFoodsForNutrient(d.id, d.foods).slice(0,3).map(f=>f.name).join('・');
+      const badge = getCategoryBadge(d);
+      const evidence = getEvidenceBadge(d.id);
+      const summary = (d.description || '').length > 50 ? (d.description || '').slice(0,50) + '…' : (d.description || '');
+      html += `<div class="nutrient-card">
+        ${getIntakeBanner(d.id)}
+        <span class="category-badge ${badge.className}">${badge.label}</span><span class="evidence-badge ${evidence.className}">${evidence.label}</span>
+        <div class="card-name">${d.name}</div>
+        <div class="card-desc">${summary}</div>
+        <div class="card-foods">主な含有食材: ${topFoods}</div>
+        <div class="card-actions">
+          <button type="button" class="card-btn-detail" onclick="showNodeDetail('${d.id}')">詳しく見る</button>
+          <button type="button" class="card-btn-relation" onclick="showInGraph('${d.id}')">関連を見る</button>
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+  document.getElementById('cardView').innerHTML = html;
+}
+
+function getCategoryBadge(d){
+  if(d.category === 'vitamin' && d.subCategory === '脂溶性') {
+    return {label:'脂溶性ビタミン', className:'badge-vitamin-fat'};
+  }
+  if(d.category === 'vitamin' && d.subCategory === '水溶性') {
+    return {label:'水溶性ビタミン', className:'badge-vitamin-water'};
+  }
+  if(d.category === 'mineral' && d.subCategory === '主要ミネラル') {
+    return {label:'主要ミネラル', className:'badge-mineral-major'};
+  }
+  if(d.category === 'mineral' && d.subCategory === '微量ミネラル') {
+    return {label:'微量ミネラル', className:'badge-mineral-trace'};
+  }
+  return {label:'必須アミノ酸', className:'badge-amino'};
+}
+
+function getEvidenceBadge(nutrientId){
+  const ev = EVIDENCE[nutrientId] || 'established';
+  if(ev === 'probable') return {label:'根拠：中', className:'ev-probable'};
+  if(ev === 'limited') return {label:'根拠：参考', className:'ev-limited'};
+  return {label:'根拠：高', className:'ev-established'};
+}
+
+let _cardBuilt = false;
+function toggleView(){
+  const cyEl = document.getElementById('cy');
+  const cardView = document.getElementById('cardView');
+  const btn = document.getElementById('viewToggleBtn');
+  const isCard = cardView.style.display !== 'none';
+  if(isCard){
+    cardView.style.display = 'none';
+    cyEl.style.display = '';
+    btn.textContent = '一覧で見る';
+    cy.resize();
+    cy.fit(null, 50);
+  } else {
+    cyEl.style.display = 'none';
+    cardView.style.display = 'block';
+    btn.textContent = '関係を見る';
+    if(!_cardBuilt){
+      buildCardView();
+      _cardBuilt = true;
+    }
+  }
+}
+
+function showInGraph(nodeId){
+  const cardView = document.getElementById('cardView');
+  if(cardView.style.display !== 'none'){
+    toggleView();
+  }
+  setTimeout(function(){
+    const target = cy.getElementById(nodeId);
+    cy.nodes().unselect();
+    target.select();
+    cy.animate({center:{eles:target}, zoom:1.8, duration:400});
+    highlightNode(nodeId);
+    showDetail(nodeId);
+  }, 100);
+}
+
+function showNodeDetail(nodeId){
+  const node = cy.getElementById(nodeId);
+  if(node && node.length){
+    node.select();
+    highlightNode(nodeId);
+  }
+  showDetail(nodeId);
+}
+
+buildCardView();
+_cardBuilt = true;
+
 function showDetail(nodeId){
   const d = nutrients.find(x=>x.id===nodeId);
   if(!d) return;
@@ -711,10 +904,23 @@ function showDetail(nodeId){
     if(other) relations.push({...ed, otherName:other.name, otherId});
   });
 
-  let foodsHtml = d.foods.map(f=>`<div class="food-item"><span class="food-name">${f.name}</span><span class="food-amount">${f.amount}</span></div>`).join('');
+  const foods = getFoodsForNutrient(d.id, d.foods);
+  let foodsHtml = foods.map(f=>`<div class="food-item"><span class="food-name">${f.name}</span><span class="food-amount">${f.amount}</span></div>`).join('');
   let defTags = d.deficiency.split('、').map(s=>`<span class="tag deficiency">${s}</span>`).join('');
   let exTags = d.excess.split('、').map(s=>`<span class="tag excess">${s}</span>`).join('');
-  let relHtml = relations.map(r=>`<div class="relation-item" data-node="${r.otherId}"><span class="relation-type ${r.type}">${EDGE_LABELS[r.type]}</span><span>${r.otherName}</span></div>`).join('') || '<div class="info-row" style="color:#bbb">接続なし</div>';
+  const synergy    = relations.filter(r=>r.type==='synergy');
+  const absorption = relations.filter(r=>r.type==='absorption');
+  const antagonist = relations.filter(r=>r.type==='antagonist');
+  function makeRelGroup(label,items){
+    if(!items.length) return '';
+    return `<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:4px">${label}</div>`
+      + items.map(r=>`<div class="relation-item" data-node="${r.otherId}"><span class="relation-type ${r.type}">${EDGE_LABELS[r.type]}</span><span>${r.otherName}</span></div>`).join('')
+      + '</div>';
+  }
+  let relHtml = makeRelGroup('一緒に意識したい栄養素',synergy)
+              + makeRelGroup('吸収を助ける関係',absorption)
+              + makeRelGroup('摂り方に注意したい組み合わせ',antagonist)
+              || '<div class="info-row" style="color:#bbb">関連データなし</div>';
 
   const ev = EVIDENCE_LABELS[EVIDENCE[d.id]||'established'];
   const evBadge = `<span class="evidence-badge ${EVIDENCE[d.id]||'established'}">${ev.label}</span>`;
@@ -735,11 +941,11 @@ function showDetail(nodeId){
       <div class="info-row">推奨量(成人): ${d.rda}</div>
     </div>
     <div class="detail-section">
-      <h4>欠乏症</h4>
+      <h4>少ない状態で見られること</h4>
       <div>${defTags}</div>
     </div>
     <div class="detail-section">
-      <h4>過剰症</h4>
+      <h4>多い状態で見られること</h4>
       <div>${exTags}</div>
     </div>
     <div class="detail-section">
@@ -747,11 +953,11 @@ function showDetail(nodeId){
       ${foodsHtml}
     </div>
     <div class="detail-section">
-      <h4>関連栄養素 (${relations.length})</h4>
+      <h4>関連する栄養素</h4>
       ${relHtml}
     </div>
     <div style="font-size:10px;color:#aaa;padding:10px 16px;line-height:1.5;border-top:1px solid #f0f0f0">
-      ※ 欠乏・過剰に関する情報は一般的な参考情報です。診断・治療・疾病予防を目的とするものではありません。個別の判断は専門職にご相談ください。<br>
+      ※ 栄養素の状態に関する情報は一般的な参考情報です。診断・治療・疾病予防を目的とするものではありません。個別の判断は専門職にご相談ください。<br>
       <!-- TODO Phase 1b: 相関エッジの根拠レベル・出典を個別レビューする -->
     </div>
   `;
@@ -776,9 +982,14 @@ function highlightNode(nodeId){
   symptomHighlightBtn.style.display = 'none';
   const node = cy.getElementById(nodeId);
   const neighborhood = node.closedNeighborhood();
+  // エッジ：接続エッジのみ表示、それ以外は非表示
+  cy.edges().style('display','none');
+  node.connectedEdges().style('display','element');
   cy.elements().not(neighborhood).addClass('dimmed');
   neighborhood.addClass('highlighted');
   node.removeClass('dimmed');
+  // 接続ノード全体が見えるようにauto-fit
+  setTimeout(function(){ cy.animate({fit:{eles:neighborhood,padding:70}},{duration:450}); }, 80);
 }
 
 cy.on('tap','node', e=>{
@@ -790,6 +1001,7 @@ cy.on('tap','node', e=>{
 cy.on('tap', e=>{
   if(e.target === cy){
     cy.elements().removeClass('highlighted dimmed searchMatch deficiencyMatch excessMatch symptomHighlight symptomDef symptomEx');
+    cy.edges().style('display','none');
     detailPanel.classList.remove('open');
     symptomHighlightBtn.style.display = 'none';
   }
@@ -1087,17 +1299,71 @@ let lastSymptomMatches = [];
 // ============================================================
 let _intakeSummary = null;
 let _intakeContext = null; // { numDays, mealCount, hasStoredProfile }
+let intakeDisplayMode = false;
 
 function _applyIntakeNodeClasses() {
-  cy.nodes().removeClass('intakeLow intakeNormal intakeHigh');
-  if (!_intakeSummary) return;
-  cy.nodes().forEach(n => {
-    const lv = _intakeSummary[n.id()];
-    if (lv === 'low')                              n.addClass('intakeLow');
-    else if (lv === 'normal')                      n.addClass('intakeNormal');
-    else if (lv === 'high' || lv === 'slightly-high') n.addClass('intakeHigh');
+  // 摂取傾向は toggleIntakeDisplay() のノードサイズで表現する。
+}
+
+function _intakeSizeFor(nodeId) {
+  if (!intakeSummary || !intakeSummary.nutrients) return 64;
+  const status = intakeSummary.nutrients[nodeId];
+  if (status === 'low' || status === 'zero') return 20;
+  if (status === 'normal') return 64;
+  if (status === 'high' || status === 'slightly-high') return 150;
+  return 64;
+}
+
+function _reapplyIntakeSizes() {
+  if (!intakeDisplayMode) return;
+  cy.batch(function() {
+    cy.nodes().forEach(function(node) {
+      node.data('iSize', _intakeSizeFor(node.id()));
+      node.addClass('intake-sized');
+    });
   });
 }
+
+function toggleIntakeDisplay() {
+  // 常に最新のlocalStorageを参照
+  intakeSummary = loadIntakeSummary();
+  if (!intakeSummary || !intakeSummary.nutrients) {
+    const btn = document.getElementById('intakeToggleBtn');
+    if (btn) btn.disabled = true;
+    if (intakeDisplayMode) { intakeDisplayMode = false; cy.nodes().style({width:64,height:64}); }
+    return;
+  }
+  intakeDisplayMode = !intakeDisplayMode;
+  const btn = document.getElementById('intakeToggleBtn');
+
+  if (intakeDisplayMode) {
+    cy.batch(function() {
+      cy.nodes().forEach(function(node) {
+        node.data('iSize', _intakeSizeFor(node.id()));
+        node.addClass('intake-sized');
+      });
+    });
+    btn.textContent = '摂取傾向 表示中';
+    btn.classList.add('active');
+  } else {
+    cy.batch(function() {
+      cy.nodes().removeClass('intake-sized');
+    });
+    btn.textContent = '摂取傾向を見る';
+    btn.classList.remove('active');
+  }
+}
+
+// 選択解除時にintakeModeのサイズを維持する
+cy.on('unselect', 'node', function() {
+  const node = this;
+  if (intakeDisplayMode) {
+    setTimeout(function() {
+      node.data('iSize', _intakeSizeFor(node.id()));
+      node.addClass('intake-sized');
+    }, 50);
+  }
+});
 
 function renderIntakeTendencyPanel() {
   const section = document.getElementById('intakeTendencySection');
@@ -1119,9 +1385,9 @@ function renderIntakeTendencyPanel() {
   });
 
   const defs = [
-    { key:'low',     label:'参考基準より少なめ', cls:'it-label-low' },
-    { key:'normal',  label:'参考基準付近',       cls:'it-label-normal' },
-    { key:'high',    label:'参考基準より多め',   cls:'it-label-high' },
+    { key:'low',     label:'少なめの傾向', cls:'it-label-low' },
+    { key:'normal',  label:'参考基準付近', cls:'it-label-normal' },
+    { key:'high',    label:'多めの傾向',   cls:'it-label-high' },
     { key:'unknown', label:'比較保留',           cls:'it-label-unknown' },
   ];
 
@@ -1163,14 +1429,18 @@ function renderIntakeTendencyPanel() {
 }
 
 function applyIntakeBadges() {
-  try {
-    const raw = localStorage.getItem('eiyou_intake_summary');
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    if (!data || !data.nutrients) return;
-    _intakeSummary = data.nutrients;
-    _intakeContext = { numDays: data.numDays, mealCount: data.mealCount, hasStoredProfile: data.hasStoredProfile };
-  } catch { return; }
+  const btn = document.getElementById('intakeToggleBtn');
+  if (!intakeSummary || !intakeSummary.nutrients) {
+    if (btn) btn.disabled = true;
+    return;
+  }
+  if (btn) btn.disabled = false;
+  _intakeSummary = intakeSummary.nutrients;
+  _intakeContext = {
+    numDays: intakeSummary.numDays,
+    mealCount: intakeSummary.mealCount,
+    hasStoredProfile: intakeSummary.hasStoredProfile
+  };
 
   _applyIntakeNodeClasses();       // 補助：ノード枠色
   renderIntakeTendencyPanel();     // 主表示：一覧パネル
@@ -1179,7 +1449,7 @@ function applyIntakeBadges() {
 }
 
 function _hideIntakeBadges() {
-  cy.nodes().removeClass('intakeLow intakeNormal intakeHigh');
+  if (intakeDisplayMode) toggleIntakeDisplay();
   const section = document.getElementById('intakeTendencySection');
   if (section) section.style.display = 'none';
   const note = document.getElementById('htrIntakeNote');
@@ -1380,7 +1650,22 @@ mobileOverlay.addEventListener('click', ()=>{
 // ============================================================
 // INIT: 食事解析結果バッジを読み込んで表示（checker.htmlで解析済みの場合）
 // ============================================================
+cy.nodes().style({width:64, height:64});
 applyIntakeBadges();
+
+// checker.htmlでデータ削除/更新された時に摂取傾向を同期
+window.addEventListener('storage', function(e) {
+  if (e.key === 'eiyou_intake_summary' || e.key === 'eiyou_meals') {
+    intakeSummary = loadIntakeSummary();
+    applyIntakeBadges();
+    if (!intakeSummary && intakeDisplayMode) {
+      intakeDisplayMode = false;
+      cy.nodes().style({width:64, height:64});
+      const btn = document.getElementById('intakeToggleBtn');
+      if (btn) { btn.textContent = '摂取傾向を見る'; btn.classList.remove('active'); btn.disabled = true; }
+    }
+  }
+});
 </script>
 </body>
 </html>
