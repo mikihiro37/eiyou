@@ -23,7 +23,7 @@ function cancelGemini() {
 }
 
 // Gemini API呼び出し
-async function callGemini(prompt, imageBase64) {
+async function callGemini(prompt, imageBase64, onProgress) {
   // 共通関数 getApiKey() で取得（checkApiKey と同じ取得元を保証）
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('API_KEY_MISSING');
@@ -36,7 +36,7 @@ async function callGemini(prompt, imageBase64) {
 
   // モデル名（設定から取得）
   const model = localStorage.getItem('eiyou_model') || 'gemini-2.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
 
   const genConfig = {temperature:0.2, responseMimeType:'application/json'};
 
@@ -62,10 +62,9 @@ async function callGemini(prompt, imageBase64) {
     if (e.name === 'AbortError') throw new Error('CANCELLED');
     throw e;
   }
-  clearTimeout(timeoutId);
-  _currentAbort = null;
-
   if (!resp.ok) {
+    clearTimeout(timeoutId);
+    _currentAbort = null;
     let detail = '';
     try {
       const errBody = await resp.json();
@@ -79,19 +78,82 @@ async function callGemini(prompt, imageBase64) {
     throw new Error(`API_ERROR_${resp.status}:${detail}`);
   }
 
-  const data = await resp.json();
+  let accumulated = '';
+  let blockedReason = '';
 
-  // candidates が空の場合（安全フィルタ等）
-  if (!data.candidates || data.candidates.length === 0) {
-    const reason = data.promptFeedback?.blockReason || 'unknown';
-    throw new Error('BLOCKED:' + reason);
+  try {
+    if (!resp.body) throw new Error('EMPTY_RESPONSE');
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, {stream:true});
+      const events = buffer.split(/\r?\n\r?\n/);
+      buffer = events.pop() || '';
+
+      for (const event of events) {
+        const dataText = event.split(/\r?\n/)
+          .filter(line => line.startsWith('data:'))
+          .map(line => line.replace(/^data:\s?/, ''))
+          .join('\n')
+          .trim();
+        if (!dataText || dataText === '[DONE]') continue;
+
+        let data;
+        try {
+          data = JSON.parse(dataText);
+        } catch {
+          continue;
+        }
+
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (text) {
+          accumulated += text;
+          if (onProgress) onProgress(accumulated.length);
+        }
+        blockedReason = data.promptFeedback?.blockReason || blockedReason;
+      }
+    }
+
+    buffer += decoder.decode();
+    const dataText = buffer.split(/\r?\n/)
+      .filter(line => line.startsWith('data:'))
+      .map(line => line.replace(/^data:\s?/, ''))
+      .join('\n')
+      .trim();
+    if (dataText && dataText !== '[DONE]') {
+      try {
+        const data = JSON.parse(dataText);
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (text) {
+          accumulated += text;
+          if (onProgress) onProgress(accumulated.length);
+        }
+        blockedReason = data.promptFeedback?.blockReason || blockedReason;
+      } catch {}
+    }
+  } catch (e) {
+    clearTimeout(timeoutId);
+    _currentAbort = null;
+    if (e.name === 'AbortError') throw new Error('CANCELLED');
+    throw e;
   }
 
-  let text = data.candidates[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('EMPTY_RESPONSE');
+  clearTimeout(timeoutId);
+  _currentAbort = null;
+
+  if (!accumulated) {
+    if (blockedReason) throw new Error('BLOCKED:' + blockedReason);
+    throw new Error('EMPTY_RESPONSE');
+  }
 
   // markdownコードブロック(```json ... ```)を除去
-  text = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+  const text = accumulated.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
 
   return JSON.parse(text);
 }
@@ -124,8 +186,32 @@ function normalizeMeta(raw) {
 // ============================================================
 // --- フォーム入力解析 ---
 // ============================================================
-async function analyzeFormItems(items) {
-  const itemList = items.map(it =>
+async function analyzeFormItems(items, onProgress) {
+  const localMatched = [];
+  const unknownItems = [];
+
+  for (const item of items) {
+    const result = typeof calcNutrientsLocal === 'function' ? calcNutrientsLocal(item) : null;
+    if (result) {
+      localMatched.push(result);
+    } else {
+      unknownItems.push(item);
+    }
+  }
+
+  if (unknownItems.length === 0) {
+    return {
+      nutrients: normalizeNutrients(sumNutrients(localMatched.map(r => r.nutrients))),
+      assumptions: localMatched.map(r => `${r.food.names[0]}（辞書: ${r.grams}g想定）`),
+      uncertainItems: [],
+      confidence: '中',
+      warnings: ['辞書データを使用した概算値です'],
+      notForMedicalUse: true
+    };
+  }
+
+  const {sex, age, bodyWeight} = loadProfile();
+  const itemList = unknownItems.map(it =>
     `${it.name} ${it.quantity || '普通'} (${it.grams ? it.grams+'g' : '標準量'})`
   ).join('\n');
 
@@ -139,7 +225,9 @@ ${itemList}
 
 重要な前提:
 - 食材の産地・調理法・ブランドにより実際の栄養値は大きく異なります
+- 対象者プロフィール: ${sex === 'female' ? '女性' : '男性'}・${age}歳・体重${bodyWeight}kg
 - 分量の記載がない場合は、日本の標準的な1人前を仮定します
+- 分量の記載がない場合は、このプロフィールに近い日本人の標準的な1人前を仮定します
 - 仮定した内容はassumptionsに記載してください
 - 判断できない食材や不明な内容はuncertainItemsに記載してください
 - 結果は食事を振り返るための参考情報です
@@ -166,17 +254,31 @@ confidenceの基準:
 - 日本食品標準成分表を参考に概算
 - アミノ酸はmg単位`;
 
-  const raw = await callGemini(prompt);
-  return {
+  const raw = await callGemini(prompt, null, onProgress);
+  const geminiResult = {
     nutrients: normalizeNutrients(raw.nutrients || raw),
     ...normalizeMeta(raw)
+  };
+  const combined = normalizeNutrients(sumNutrients([
+    ...localMatched.map(r => r.nutrients),
+    geminiResult.nutrients
+  ]));
+
+  return {
+    ...geminiResult,
+    nutrients: combined,
+    assumptions: [
+      ...localMatched.map(r => `${r.food.names[0]}（辞書: ${r.grams}g想定）`),
+      ...(geminiResult.assumptions || [])
+    ]
   };
 }
 
 // ============================================================
 // --- 写真解析 ---
 // ============================================================
-async function analyzePhoto(imageBase64) {
+async function analyzePhoto(imageBase64, onProgress) {
+  const {sex, age, bodyWeight} = loadProfile();
   const prompt = `あなたは食事の写真から食べている内容を推定し、栄養素を概算する補助ツールです。
 医療・診断・治療・疾病予防・栄養指導を目的とした出力は行いません。
 
@@ -184,8 +286,10 @@ async function analyzePhoto(imageBase64) {
 
 重要な前提:
 - 写真からの食品・分量の特定には誤差があります
+- 対象者プロフィール: ${sex === 'female' ? '女性' : '男性'}・${age}歳・体重${bodyWeight}kg
 - 食材の産地・調理法・調味料の量は写真から正確に判断できません
 - 一般的な調理法と標準的な分量を仮定します
+- 分量の記載がない場合は、このプロフィールに近い日本人の標準的な1人前を仮定します
 - 写真に写っていない食品（飲み物など）は含まれません
 - 結果は食事を振り返るための参考情報です
 
@@ -211,7 +315,7 @@ confidenceの基準:
 - 値は数値のみ
 - 日本食品標準成分表を参考に概算`;
 
-  const raw = await callGemini(prompt, imageBase64);
+  const raw = await callGemini(prompt, imageBase64, onProgress);
   return {
     estimatedFoods: Array.isArray(raw.estimatedFoods) ? raw.estimatedFoods
                   : Array.isArray(raw.items) ? raw.items : [],
@@ -223,8 +327,9 @@ confidenceの基準:
 // ============================================================
 // --- テキスト解析（1食分） ---
 // ============================================================
-async function analyzeText(text) {
+async function analyzeText(text, onProgress) {
   const today = new Date().toISOString().split('T')[0];
+  const {sex, age, bodyWeight} = loadProfile();
 
   const prompt = `あなたは食事の記述内容を構造化し、栄養素を概算する補助ツールです。
 医療・診断・治療・疾病予防・栄養指導を目的とした出力は行いません。
@@ -234,7 +339,9 @@ async function analyzeText(text) {
 入力: "${text}"
 
 重要な前提:
+- 対象者プロフィール: ${sex === 'female' ? '女性' : '男性'}・${age}歳・体重${bodyWeight}kg
 - 文章から読み取れない食材・分量は、一般的なものを仮定します
+- 分量の記載がない場合は、このプロフィールに近い日本人の標準的な1人前を仮定します
 - 仮定した内容はassumptionsに記載してください
 - 特定できない内容はuncertainItemsに記載してください
 - 結果は食事を振り返るための参考情報です
@@ -259,7 +366,7 @@ async function analyzeText(text) {
 - 値は数値のみ
 - 日本食品標準成分表を参考に概算`;
 
-  const raw = await callGemini(prompt);
+  const raw = await callGemini(prompt, null, onProgress);
   return {
     date:    raw.date || today,
     mealType: raw.mealType || 'lunch',

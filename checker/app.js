@@ -11,11 +11,11 @@ function saveMeals(meals) {
   localStorage.setItem('eiyou_meals', JSON.stringify(meals));
 }
 function loadProfile() {
+  const defaults = {age:35, sex:'male', activityLevel:'normal', bodyWeight:65, mealsPerDay:3};
   try {
-    return JSON.parse(localStorage.getItem('eiyou_profile')) ||
-      {age:35, sex:'male', activityLevel:'normal', bodyWeight:65};
+    return {...defaults, ...(JSON.parse(localStorage.getItem('eiyou_profile')) || {})};
   } catch {
-    return {age:35, sex:'male', activityLevel:'normal', bodyWeight:65};
+    return defaults;
   }
 }
 function saveProfile(p) {
@@ -128,6 +128,9 @@ function hideLoading() {
   clearInterval(_tipTimer);
   _tipTimer = null;
 }
+function updateLoadingText(msg) {
+  document.getElementById('loadingText').textContent = msg;
+}
 function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -187,6 +190,7 @@ const profileAge = document.getElementById('profileAge');
 const profileSex = document.getElementById('profileSex');
 const profileActivity = document.getElementById('profileActivity');
 const profileWeight = document.getElementById('profileWeight');
+const profileMealsPerDay = document.getElementById('profileMealsPerDay');
 
 settingsBtn.addEventListener('click', () => {
   apiKeyInput.value = getApiKey();
@@ -201,6 +205,7 @@ settingsBtn.addEventListener('click', () => {
   profileSex.value = p.sex;
   profileActivity.value = p.activityLevel;
   profileWeight.value = p.bodyWeight;
+  profileMealsPerDay.value = p.mealsPerDay || 3;
   openModal('settingsModal');
 });
 
@@ -230,7 +235,8 @@ saveSettingsBtn.addEventListener('click', () => {
     age: Number(profileAge.value) || 35,
     sex: profileSex.value,
     activityLevel: profileActivity.value,
-    bodyWeight: Number(profileWeight.value) || 65
+    bodyWeight: Number(profileWeight.value) || 65,
+    mealsPerDay: Number(profileMealsPerDay.value) || 3
   });
   closeModal('settingsModal');
   showToast('設定を保存しました', 'success');
@@ -328,9 +334,11 @@ function renderFoodList() {
 // --- Form Analyze ---
 formAnalyzeBtn.addEventListener('click', async () => {
   if (!checkApiKey()) return;
-  showLoading('食事を解析中...');
+  showLoading('食事を解析中... (受信: 0文字)');
   try {
-    const result = await analyzeFormItems(foodItems);
+    const result = await analyzeFormItems(foodItems, count => {
+      updateLoadingText(`食事を解析中... (受信: ${count}文字)`);
+    });
     hideLoading();
     showConfirmModal({
       date: document.getElementById('formDate').value,
@@ -367,10 +375,12 @@ photoAnalyzeBtn.addEventListener('click', async () => {
   if (!checkApiKey()) return;
   const file = photoFile.files[0];
   if (!file) return;
-  showLoading('写真を解析中...');
+  showLoading('写真を解析中... (受信: 0文字)');
   try {
     const base64 = await resizeImage(file);
-    const result = await analyzePhoto(base64);
+    const result = await analyzePhoto(base64, count => {
+      updateLoadingText(`写真を解析中... (受信: ${count}文字)`);
+    });
     hideLoading();
     showConfirmModal({
       date: document.getElementById('photoDate').value,
@@ -397,9 +407,11 @@ textAnalyzeBtn.addEventListener('click', async () => {
   const text = textInput.value.trim();
   if (!text) { showToast('テキストを入力してください', 'error'); return; }
   if (!checkApiKey()) return;
-  showLoading('テキストを解析中...');
+  showLoading('テキストを解析中... (受信: 0文字)');
   try {
-    const result = await analyzeText(text);
+    const result = await analyzeText(text, count => {
+      updateLoadingText(`テキストを解析中... (受信: ${count}文字)`);
+    });
     hideLoading();
     showConfirmModal({
       date: result.date,
@@ -446,6 +458,7 @@ document.getElementById('apiKeySetupBtn').addEventListener('click', () => {
   profileSex.value = p.sex;
   profileActivity.value = p.activityLevel;
   profileWeight.value = p.bodyWeight;
+  profileMealsPerDay.value = p.mealsPerDay || 3;
   openModal('settingsModal');
 });
 
@@ -685,9 +698,12 @@ function renderDashboard() {
   const numDays = days.length || 1;
   const totals = aggregateNutrients(meals);
   const daily = {};
-  NUTRIENT_KEYS.forEach(k => daily[k] = totals[k] / numDays);
-
   const profile = loadProfile();
+  const avgMealsPerDay = meals.length / numDays;
+  const mealsPerDay = profile.mealsPerDay || 3;
+  const scale = avgMealsPerDay > 0 ? mealsPerDay / avgMealsPerDay : 1;
+  NUTRIENT_KEYS.forEach(k => daily[k] = (totals[k] / numDays) * scale);
+
   const rda = calcRDA(profile);
 
   // Build bar chart HTML
@@ -742,9 +758,7 @@ function renderDashboard() {
     html += '</div>';
   }
 
-  if (numDays > 1) {
-    html = `<div style="font-size:12px;color:#888;margin-bottom:12px">${numDays}日間の1日平均値</div>` + html;
-  }
+  html = `<div style="font-size:12px;color:#888;margin-bottom:12px">1日${mealsPerDay}食設定で推計（${numDays}日間の記録）</div>` + html;
 
   content.innerHTML = html;
 
@@ -790,6 +804,18 @@ function writeIntakeSummary(daily, rda, ctx = {}) {
 // ============================================================
 // ALERTS
 // ============================================================
+function getFoodSuggestions(nutrientId, trend) {
+  if (typeof FOOD_DICT === 'undefined') return '';
+  const foods = FOOD_DICT
+    .filter(f => ((f.per100g && f.per100g[nutrientId]) || 0) > 0)
+    .sort((a, b) => b.per100g[nutrientId] - a.per100g[nutrientId])
+    .slice(0, 5)
+    .map(f => esc(f.names[0]));
+  if (!foods.length) return '';
+  const label = trend === 'high' || trend === 'excess' ? '含有量が多い食材（参考）' : '意識したい食材';
+  return `<div class="food-suggestion"><span class="fs-label">${label}:</span> ${foods.join('・')}</div>`;
+}
+
 function renderAlerts(daily, rda) {
   const alertCard = document.getElementById('alertCard');
   const alertContent = document.getElementById('alertContent');
@@ -843,6 +869,7 @@ function renderAlerts(daily, rda) {
           <span class="alert-label ${a.type}">${esc(a.label)}</span>
         </div>
         <div class="alert-sub">${esc(a.pctText)} — ${esc(a.note)}</div>
+        ${getFoodSuggestions(a.key, a.type)}
       </div>
     </div>`
   ).join('') +
@@ -1045,11 +1072,12 @@ document.getElementById('deleteApiKeyBtn').addEventListener('click', () => {
 document.getElementById('deleteProfileBtn').addEventListener('click', () => {
   if (!confirm('プロフィール情報（年齢・性別・活動量・体重）を削除します。よろしいですか？')) return;
   localStorage.removeItem('eiyou_profile');
-  const defaults = {age:35, sex:'male', activityLevel:'normal', bodyWeight:65};
+  const defaults = {age:35, sex:'male', activityLevel:'normal', bodyWeight:65, mealsPerDay:3};
   document.getElementById('profileAge').value = defaults.age;
   document.getElementById('profileSex').value = defaults.sex;
   document.getElementById('profileActivity').value = defaults.activityLevel;
   document.getElementById('profileWeight').value = defaults.bodyWeight;
+  document.getElementById('profileMealsPerDay').value = defaults.mealsPerDay;
   showToast('プロフィール情報を削除しました', 'info');
 });
 

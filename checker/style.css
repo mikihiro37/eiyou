@@ -114,6 +114,8 @@ textarea{resize:vertical;min-height:80px}
 .alert-label.warning{background:#f39c12;color:#fff}
 .alert-label.danger{background:#e74c3c;color:#fff}
 .alert-label.excess{background:#e67e22;color:#fff}
+.food-suggestion{font-size:12px;margin-top:4px;padding:4px 8px;background:#f8fffe;border-radius:4px;line-height:1.5}
+.fs-label{font-weight:600;color:#2E8B57}
 .alert-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .alert-tag{font-size:11px;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.06);color:#555}
 

@@ -241,12 +241,12 @@
     </div>
     <div class="card-body">
       <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
-        <select id="suggestDays" style="width:80px;padding:6px;font-size:13px">
+        <select id="suggestDays" style="width:88px;padding:8px;font-size:14px">
           <option value="1">1日分</option>
-          <option value="3" selected>3日分</option>
-          <option value="7">7日分</option>
+          <option value="3">3日分</option>
+          <option value="7" selected>7日分</option>
         </select>
-        <button class="btn btn-sm btn-primary" id="suggestBtn">提案を生成</button>
+        <button class="btn btn-primary" id="suggestBtn">提案を生成</button>
       </div>
       <div id="suggestContent" class="empty-state">栄養バランスを参考にしたAI献立アイデア</div>
     </div>
@@ -389,6 +389,16 @@
         <div class="form-group">
           <label>体重 (kg)</label>
           <input type="number" id="profileWeight" min="20" max="200" value="65" step="0.1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>1日の食事回数</label>
+          <select id="profileMealsPerDay">
+            <option value="1">1食</option>
+            <option value="2">2食</option>
+            <option value="3" selected>3食（標準）</option>
+          </select>
         </div>
       </div>
     </div>
@@ -557,6 +567,8 @@
 
 <!-- ======== Scripts ======== -->
 <script src="checker/data.js?v=4"></script>
+<script src="checker/food-dict.js"></script>
+<script src="checker/food-lookup.js"></script>
 <script src="checker/gemini.js?v=4"></script>
 <script src="checker/demo.js?v=4"></script>
 <script src="checker/bulk.js?v=4"></script>
