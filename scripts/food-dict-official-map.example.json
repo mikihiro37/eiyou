@@ -1,0 +1,12 @@
+{
+  "_note": "food-dict.js の food.id と、日本食品標準成分表（八訂）増補2023年Excelの食品番号を対応させるための確認済みマップ例です。実運用ではこのファイルをコピーして food-dict-official-map.json を作り、手作業確認済みの食品だけ追加します。",
+  "_usage": "node scripts/audit-food-dict.js /private/tmp/mext_food_2023.xlsx scripts/food-dict-official-map.json",
+  "rice_white": {
+    "foodNumber": "01088",
+    "officialName": "こめ　［水稲めし］　精白米　うるち米"
+  },
+  "oatmeal": {
+    "foodNumber": "01004",
+    "officialName": "えんばく　オートミール"
+  }
+}

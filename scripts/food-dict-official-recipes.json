@@ -1,0 +1,244 @@
+{
+  "_note": "公式表に同名の完成品がない食品を、公式食品番号の標準的な組み合わせで近似する。grams は調理後の1食構成の目安。",
+  "rice_multigrain": {
+    "note": "精白米めし8:押麦めし2の近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 120},
+      {"foodNumber": "01170", "grams": 30}
+    ]
+  },
+  "sushi_rice": {
+    "note": "精白米めしににぎり用すし酢を加えた近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 145},
+      {"foodNumber": "17102", "grams": 5}
+    ]
+  },
+  "tortilla_flour": {
+    "note": "薄力粉、調合油、食塩、水分の近似。公式表にトルティーヤ項目なし",
+    "components": [
+      {"foodNumber": "01015", "grams": 55},
+      {"foodNumber": "14006", "grams": 5},
+      {"foodNumber": "17012", "grams": 0.8},
+      {"grams": 40}
+    ]
+  },
+  "granola": {
+    "note": "オートミール、干しぶどう、アーモンド、はちみつ、調合油の近似。市販品の差は大きい",
+    "components": [
+      {"foodNumber": "01004", "grams": 60},
+      {"foodNumber": "07117", "grams": 15},
+      {"foodNumber": "05040", "grams": 15},
+      {"foodNumber": "03022", "grams": 5},
+      {"foodNumber": "14006", "grams": 5}
+    ]
+  },
+  "salad_chicken": {
+    "note": "鶏むね皮なしと食塩の近似。市販品の調味差は反映しない",
+    "components": [
+      {"foodNumber": "11220", "grams": 100},
+      {"foodNumber": "17012", "grams": 1}
+    ]
+  },
+  "yakitori_thigh": {
+    "note": "鶏もも肉と焼き鳥のたれの近似",
+    "components": [
+      {"foodNumber": "11221", "grams": 90},
+      {"foodNumber": "17112", "grams": 10}
+    ]
+  },
+  "fruit_cocktail": {
+    "note": "主要な果物缶を均等に混ぜた近似",
+    "components": [
+      {"foodNumber": "07035", "grams": 34},
+      {"foodNumber": "07102", "grams": 33},
+      {"foodNumber": "07138", "grams": 33}
+    ]
+  },
+  "miso_soup_drink": {
+    "note": "かつお・昆布だしと淡色辛みその近似。具材差は反映しない",
+    "components": [
+      {"foodNumber": "17021", "grams": 180},
+      {"foodNumber": "17045", "grams": 20}
+    ]
+  },
+  "curry_rice": {
+    "note": "精白米めしとビーフカレーの近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 250},
+      {"foodNumber": "18001", "grams": 200}
+    ]
+  },
+  "beef_bowl": {
+    "note": "精白米めしと牛飯の具の近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 250},
+      {"foodNumber": "18031", "grams": 150}
+    ]
+  },
+  "oyakodon": {
+    "note": "精白米めしと親子丼の具の近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 250},
+      {"foodNumber": "18030", "grams": 130}
+    ]
+  },
+  "katsudon": {
+    "note": "精白米めし、ロースとんかつ、卵、めんつゆの近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 250},
+      {"foodNumber": "11276", "grams": 100},
+      {"foodNumber": "12004", "grams": 50},
+      {"foodNumber": "17029", "grams": 50}
+    ]
+  },
+  "tempura_bowl": {
+    "note": "精白米めし、えび天ぷら、野菜天ぷら、めんつゆの近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 250},
+      {"foodNumber": "10416", "grams": 60},
+      {"foodNumber": "06343", "grams": 50},
+      {"foodNumber": "17029", "grams": 70}
+    ]
+  },
+  "sushi_set": {
+    "note": "酢飯、まぐろ赤身、たい、しろさけ、しょうゆの近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 210},
+      {"foodNumber": "17102", "grams": 10},
+      {"foodNumber": "10253", "grams": 30},
+      {"foodNumber": "10193", "grams": 25},
+      {"foodNumber": "10134", "grams": 25},
+      {"foodNumber": "17007", "grams": 5}
+    ]
+  },
+  "ramen_shoyu": {
+    "note": "しょうゆ味即席カップめん調理後全体で近似",
+    "components": [
+      {"foodNumber": "01200", "grams": 600}
+    ]
+  },
+  "udon_kake": {
+    "note": "ゆでうどん、ストレートめんつゆ、水分の近似。つゆを全量めんつゆにしない",
+    "components": [
+      {"foodNumber": "01039", "grams": 220},
+      {"foodNumber": "17029", "grams": 120},
+      {"grams": 160}
+    ]
+  },
+  "soba_zaru": {
+    "note": "ゆでそばとストレートめんつゆの近似",
+    "components": [
+      {"foodNumber": "01128", "grams": 220},
+      {"foodNumber": "17029", "grams": 80}
+    ]
+  },
+  "yakisoba": {
+    "note": "焼きそば調理後全体で近似",
+    "components": [
+      {"foodNumber": "01202", "grams": 300}
+    ]
+  },
+  "gyoza_cooked": {
+    "note": "餃子の皮、豚ひき肉、キャベツ、しょうゆの近似",
+    "components": [
+      {"foodNumber": "01074", "grams": 45},
+      {"foodNumber": "11163", "grams": 45},
+      {"foodNumber": "06061", "grams": 30},
+      {"foodNumber": "17007", "grams": 8}
+    ]
+  },
+  "omurice": {
+    "note": "精白米めし、卵、鶏肉、ケチャップの近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 250},
+      {"foodNumber": "12004", "grams": 80},
+      {"foodNumber": "11220", "grams": 40},
+      {"foodNumber": "17036", "grams": 30}
+    ]
+  },
+  "hamburger_set": {
+    "note": "食パン、合いびきハンバーグ、プロセスチーズ、ケチャップの近似",
+    "components": [
+      {"foodNumber": "01032", "grams": 80},
+      {"foodNumber": "18050", "grams": 100},
+      {"foodNumber": "13040", "grams": 20},
+      {"foodNumber": "17036", "grams": 20}
+    ]
+  },
+  "pizza_slice": {
+    "note": "ピザ生地、モッツァレラ、トマトソースの近似",
+    "components": [
+      {"foodNumber": "01076", "grams": 70},
+      {"foodNumber": "13056", "grams": 35},
+      {"foodNumber": "17037", "grams": 15}
+    ]
+  },
+  "napolitan": {
+    "note": "ゆでスパゲッティ、ウインナー、ケチャップの近似",
+    "components": [
+      {"foodNumber": "01064", "grams": 250},
+      {"foodNumber": "11186", "grams": 40},
+      {"foodNumber": "17036", "grams": 60}
+    ]
+  },
+  "bento_salmon": {
+    "note": "精白米めし、塩ざけ、キャベツ、しょうゆ少量の近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 300},
+      {"foodNumber": "10139", "grams": 90},
+      {"foodNumber": "06061", "grams": 50},
+      {"foodNumber": "17007", "grams": 5}
+    ]
+  },
+  "bento_karaage": {
+    "note": "精白米めし、鶏から揚げ、キャベツの近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 300},
+      {"foodNumber": "18054", "grams": 100},
+      {"foodNumber": "06061", "grams": 50}
+    ]
+  },
+  "tonkatsu_set": {
+    "note": "精白米めし、ロースとんかつ、キャベツ、中濃ソースの近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 250},
+      {"foodNumber": "11276", "grams": 120},
+      {"foodNumber": "06061", "grams": 80},
+      {"foodNumber": "17002", "grams": 30}
+    ]
+  },
+  "grilled_fish_set": {
+    "note": "精白米めし、焼きさば、味噌汁、キャベツ、しょうゆ少量の近似",
+    "components": [
+      {"foodNumber": "01088", "grams": 250},
+      {"foodNumber": "10156", "grams": 100},
+      {"foodNumber": "17021", "grams": 135},
+      {"foodNumber": "17045", "grams": 15},
+      {"foodNumber": "06061", "grams": 40},
+      {"foodNumber": "17007", "grams": 5}
+    ]
+  },
+  "steamed_bread": {
+    "note": "ホットケーキ用プレミックス粉、牛乳、卵、水分の近似。蒸しパン項目なし",
+    "components": [
+      {"foodNumber": "01024", "grams": 45},
+      {"foodNumber": "13003", "grams": 35},
+      {"foodNumber": "12004", "grams": 10},
+      {"grams": 10}
+    ]
+  },
+  "greek_yogurt": {
+    "note": "全脂無糖ヨーグルトを水切りした近似。150gを100gに濃縮する想定",
+    "yieldGrams": 100,
+    "components": [
+      {"foodNumber": "13025", "grams": 150}
+    ]
+  },
+  "water": {
+    "note": "公式食品番号には紐付けず、栄養値ゼロの飲料として扱う",
+    "components": [
+      {"grams": 100}
+    ]
+  }
+}

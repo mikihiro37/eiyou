@@ -1,0 +1,1084 @@
+{
+  "_note": "food-dict.js の food.id と、日本食品標準成分表（八訂）増補2023年Excelの食品番号を対応させる確認済みマップです。自動候補ではなく、手作業で確認した食品だけ追加します。",
+  "_source": "日本食品標準成分表（八訂）増補2023年",
+  "rice_white": {
+    "foodNumber": "01088",
+    "officialName": "こめ　［水稲めし］　精白米　うるち米"
+  },
+  "rice_brown": {
+    "foodNumber": "01085",
+    "officialName": "こめ　［水稲めし］　玄米"
+  },
+  "rice_porridge": {
+    "foodNumber": "01093",
+    "officialName": "こめ　［水稲全かゆ］　精白米"
+  },
+  "onigiri_salt": {
+    "foodNumber": "01111",
+    "officialName": "こめ　［うるち米製品］　おにぎり"
+  },
+  "bread_shokupan": {
+    "foodNumber": "01026",
+    "officialName": "こむぎ　［パン類］　角形食パン　食パン"
+  },
+  "bread_white_roll": {
+    "foodNumber": "01034",
+    "officialName": "こむぎ　［パン類］　ロールパン"
+  },
+  "bread_french": {
+    "foodNumber": "01031",
+    "officialName": "こむぎ　［パン類］　フランスパン"
+  },
+  "udon_boiled": {
+    "foodNumber": "01039",
+    "officialName": "こむぎ　［うどん・そうめん類］　うどん　ゆで"
+  },
+  "soba_boiled": {
+    "foodNumber": "01128",
+    "officialName": "そば　そば　ゆで"
+  },
+  "ramen_noodle_boiled": {
+    "foodNumber": "01048",
+    "officialName": "こむぎ　［中華めん類］　中華めん　ゆで"
+  },
+  "somen_boiled": {
+    "foodNumber": "01044",
+    "officialName": "こむぎ　［うどん・そうめん類］　そうめん・ひやむぎ　ゆで"
+  },
+  "hiyamugi_boiled": {
+    "foodNumber": "01044",
+    "officialName": "こむぎ　［うどん・そうめん類］　そうめん・ひやむぎ　ゆで"
+  },
+  "spaghetti_boiled": {
+    "foodNumber": "01064",
+    "officialName": "こむぎ　［マカロニ・スパゲッティ類］　マカロニ・スパゲッティ　ゆで"
+  },
+  "macaroni_boiled": {
+    "foodNumber": "01064",
+    "officialName": "こむぎ　［マカロニ・スパゲッティ類］　マカロニ・スパゲッティ　ゆで"
+  },
+  "mochi": {
+    "foodNumber": "01117",
+    "officialName": "こめ　［もち米製品］　もち"
+  },
+  "oatmeal": {
+    "foodNumber": "01004",
+    "officialName": "えんばく　オートミール"
+  },
+  "tofu_momen": {
+    "foodNumber": "04032",
+    "officialName": "だいず　［豆腐・油揚げ類］　木綿豆腐"
+  },
+  "tofu_kinugoshi": {
+    "foodNumber": "04033",
+    "officialName": "だいず　［豆腐・油揚げ類］　絹ごし豆腐"
+  },
+  "tofu_firm_deepfried": {
+    "foodNumber": "04039",
+    "officialName": "だいず　［豆腐・油揚げ類］　生揚げ"
+  },
+  "aburaage": {
+    "foodNumber": "04040",
+    "officialName": "だいず　［豆腐・油揚げ類］　油揚げ　生"
+  },
+  "natto": {
+    "foodNumber": "04046",
+    "officialName": "だいず　［納豆類］　糸引き納豆"
+  },
+  "soybean_boiled": {
+    "foodNumber": "04024",
+    "officialName": "だいず　［全粒・全粒製品］　全粒　黄大豆　国産　ゆで"
+  },
+  "kinako": {
+    "foodNumber": "04029",
+    "officialName": "だいず　［全粒・全粒製品］　きな粉　黄大豆　全粒大豆"
+  },
+  "okara": {
+    "foodNumber": "04051",
+    "officialName": "だいず　［その他］　おから　生"
+  },
+  "soy_milk_unsweetened": {
+    "foodNumber": "04052",
+    "officialName": "だいず　［その他］　豆乳　豆乳"
+  },
+  "miso": {
+    "foodNumber": "17045",
+    "officialName": "＜調味料類＞　（みそ類）　米みそ　淡色辛みそ"
+  },
+  "soy_sauce": {
+    "foodNumber": "17007",
+    "officialName": "＜調味料類＞　（しょうゆ類）　こいくちしょうゆ"
+  },
+  "tofu_koya": {
+    "foodNumber": "04042",
+    "officialName": "だいず　［豆腐・油揚げ類］　凍り豆腐　乾"
+  },
+  "yuba": {
+    "foodNumber": "04059",
+    "officialName": "だいず　［その他］　湯葉　生"
+  },
+  "tempeh": {
+    "foodNumber": "04063",
+    "officialName": "だいず　［その他］　テンペ"
+  },
+  "red_bean_boiled": {
+    "foodNumber": "04002",
+    "officialName": "あずき　全粒　ゆで"
+  },
+  "black_soybean": {
+    "foodNumber": "04106",
+    "officialName": "だいず　［全粒・全粒製品］　全粒　黒大豆　国産　ゆで"
+  },
+  "green_peas": {
+    "foodNumber": "06023",
+    "officialName": "（えんどう類）　グリンピース　生"
+  },
+  "chickpea_boiled": {
+    "foodNumber": "04066",
+    "officialName": "ひよこまめ　全粒　ゆで"
+  },
+  "lentil_boiled": {
+    "foodNumber": "04094",
+    "officialName": "レンズまめ　全粒　ゆで"
+  },
+  "peanut": {
+    "foodNumber": "05044",
+    "officialName": "らっかせい　小粒種　乾"
+  },
+  "egg_whole": {
+    "foodNumber": "12004",
+    "officialName": "鶏卵　全卵　生"
+  },
+  "egg_yolk": {
+    "foodNumber": "12010",
+    "officialName": "鶏卵　卵黄　生"
+  },
+  "egg_white": {
+    "foodNumber": "12014",
+    "officialName": "鶏卵　卵白　生"
+  },
+  "milk_whole": {
+    "foodNumber": "13003",
+    "officialName": "＜牛乳及び乳製品＞　（液状乳類）　普通牛乳"
+  },
+  "milk_lowfat": {
+    "foodNumber": "13005",
+    "officialName": "＜牛乳及び乳製品＞　（液状乳類）　加工乳　低脂肪"
+  },
+  "yogurt_plain": {
+    "foodNumber": "13025",
+    "officialName": "＜牛乳及び乳製品＞　（発酵乳・乳酸菌飲料）　ヨーグルト　全脂無糖"
+  },
+  "cheese_process": {
+    "foodNumber": "13040",
+    "officialName": "＜牛乳及び乳製品＞　（チーズ類）　プロセスチーズ"
+  },
+  "cheese_parmesan": {
+    "foodNumber": "13038",
+    "officialName": "＜牛乳及び乳製品＞　（チーズ類）　ナチュラルチーズ　パルメザン"
+  },
+  "cheese_cottage": {
+    "foodNumber": "13033",
+    "officialName": "＜牛乳及び乳製品＞　（チーズ類）　ナチュラルチーズ　カテージ"
+  },
+  "cheese_cream": {
+    "foodNumber": "13035",
+    "officialName": "＜牛乳及び乳製品＞　（チーズ類）　ナチュラルチーズ　クリーム"
+  },
+  "butter": {
+    "foodNumber": "14017",
+    "officialName": "（バター類）　無発酵バター　有塩バター"
+  },
+  "margarine": {
+    "foodNumber": "14020",
+    "officialName": "（マーガリン類）　マーガリン　家庭用　有塩"
+  },
+  "fresh_cream": {
+    "foodNumber": "13014",
+    "officialName": "＜牛乳及び乳製品＞　（クリーム類）　クリーム　乳脂肪"
+  },
+  "ice_cream": {
+    "foodNumber": "13043",
+    "officialName": "＜牛乳及び乳製品＞　（アイスクリーム類）　アイスクリーム　普通脂肪"
+  },
+  "pudding": {
+    "foodNumber": "15086",
+    "officialName": "＜デザート菓子類＞　カスタードプリン"
+  },
+  "quail_egg": {
+    "foodNumber": "12002",
+    "officialName": "うずら卵　全卵　生"
+  },
+  "milk_powder_skim": {
+    "foodNumber": "13010",
+    "officialName": "＜牛乳及び乳製品＞　（粉乳類）　脱脂粉乳"
+  },
+  "condensed_milk": {
+    "foodNumber": "13013",
+    "officialName": "＜牛乳及び乳製品＞　（練乳類）　加糖練乳"
+  },
+  "drinkable_yogurt": {
+    "foodNumber": "13027",
+    "officialName": "＜牛乳及び乳製品＞　（発酵乳・乳酸菌飲料）　ヨーグルト　ドリンクタイプ　加糖"
+  },
+  "apple": {
+    "foodNumber": "07148",
+    "officialName": "りんご　皮なし　生"
+  },
+  "banana": {
+    "foodNumber": "07107",
+    "officialName": "バナナ　生"
+  },
+  "orange": {
+    "foodNumber": "07041",
+    "officialName": "（かんきつ類）　オレンジ　バレンシア　米国産　砂じょう　生"
+  },
+  "grapefruit": {
+    "foodNumber": "07062",
+    "officialName": "（かんきつ類）　グレープフルーツ　白肉種　砂じょう　生"
+  },
+  "mandarin": {
+    "foodNumber": "07027",
+    "officialName": "（かんきつ類）　うんしゅうみかん　じょうのう　普通　生"
+  },
+  "lemon": {
+    "foodNumber": "07155",
+    "officialName": "（かんきつ類）　レモン　全果　生"
+  },
+  "kiwi_green": {
+    "foodNumber": "07054",
+    "officialName": "キウイフルーツ　緑肉種　生"
+  },
+  "strawberry": {
+    "foodNumber": "07012",
+    "officialName": "いちご　生"
+  },
+  "grape": {
+    "foodNumber": "07116",
+    "officialName": "ぶどう　皮なし　生"
+  },
+  "peach": {
+    "foodNumber": "07136",
+    "officialName": "（もも類）　もも　白肉種　生"
+  },
+  "pear_japanese": {
+    "foodNumber": "07088",
+    "officialName": "（なし類）　日本なし　生"
+  },
+  "persimmon": {
+    "foodNumber": "07049",
+    "officialName": "かき　甘がき　生"
+  },
+  "watermelon": {
+    "foodNumber": "07077",
+    "officialName": "すいか　赤肉種　生"
+  },
+  "melon": {
+    "foodNumber": "07134",
+    "officialName": "メロン　温室メロン　生"
+  },
+  "pineapple": {
+    "foodNumber": "07097",
+    "officialName": "パインアップル　生"
+  },
+  "mango": {
+    "foodNumber": "07132",
+    "officialName": "マンゴー　生"
+  },
+  "avocado_fruit": {
+    "foodNumber": "07006",
+    "officialName": "アボカド　生"
+  },
+  "blueberry": {
+    "foodNumber": "07124",
+    "officialName": "ブルーベリー　生"
+  },
+  "raspberry": {
+    "foodNumber": "07146",
+    "officialName": "ラズベリー　生"
+  },
+  "cherry": {
+    "foodNumber": "07070",
+    "officialName": "さくらんぼ　国産　生"
+  },
+  "fig": {
+    "foodNumber": "07015",
+    "officialName": "いちじく　生"
+  },
+  "prune_dried": {
+    "foodNumber": "07082",
+    "officialName": "（すもも類）　プルーン　乾"
+  },
+  "raisin": {
+    "foodNumber": "07117",
+    "officialName": "ぶどう　干しぶどう"
+  },
+  "dried_persimmon": {
+    "foodNumber": "07051",
+    "officialName": "かき　干しがき"
+  },
+  "apricot_dried": {
+    "foodNumber": "07008",
+    "officialName": "あんず　乾"
+  },
+  "papaya": {
+    "foodNumber": "07109",
+    "officialName": "パパイア　完熟　生"
+  },
+  "yuzu": {
+    "foodNumber": "07142",
+    "officialName": "（かんきつ類）　ゆず　果皮　生"
+  },
+  "lime": {
+    "foodNumber": "07145",
+    "officialName": "（かんきつ類）　ライム　果汁　生"
+  },
+  "coconut_milk": {
+    "foodNumber": "07158",
+    "officialName": "ココナッツ　ココナッツミルク"
+  },
+  "carrot": {
+    "foodNumber": "06214",
+    "officialName": "（にんじん類）　にんじん　根　皮なし　生"
+  },
+  "spinach": {
+    "foodNumber": "06267",
+    "officialName": "ほうれんそう　葉　通年平均　生"
+  },
+  "komatsuna": {
+    "foodNumber": "06086",
+    "officialName": "こまつな　葉　生"
+  },
+  "broccoli": {
+    "foodNumber": "06263",
+    "officialName": "ブロッコリー　花序　生"
+  },
+  "cabbage": {
+    "foodNumber": "06061",
+    "officialName": "（キャベツ類）　キャベツ　結球葉　生"
+  },
+  "lettuce": {
+    "foodNumber": "06312",
+    "officialName": "（レタス類）　レタス　土耕栽培　結球葉　生"
+  },
+  "sunny_lettuce": {
+    "foodNumber": "06315",
+    "officialName": "（レタス類）　サニーレタス　葉　生"
+  },
+  "tomato": {
+    "foodNumber": "06182",
+    "officialName": "（トマト類）　赤色トマト　果実　生"
+  },
+  "mini_tomato": {
+    "foodNumber": "06183",
+    "officialName": "（トマト類）　赤色ミニトマト　果実　生"
+  },
+  "cucumber": {
+    "foodNumber": "06065",
+    "officialName": "きゅうり　果実　生"
+  },
+  "eggplant": {
+    "foodNumber": "06191",
+    "officialName": "（なす類）　なす　果実　生"
+  },
+  "green_pepper": {
+    "foodNumber": "06245",
+    "officialName": "（ピーマン類）　青ピーマン　果実　生"
+  },
+  "red_pepper": {
+    "foodNumber": "06247",
+    "officialName": "（ピーマン類）　赤ピーマン　果実　生"
+  },
+  "yellow_pepper": {
+    "foodNumber": "06249",
+    "officialName": "（ピーマン類）　黄ピーマン　果実　生"
+  },
+  "onion": {
+    "foodNumber": "06153",
+    "officialName": "（たまねぎ類）　たまねぎ　りん茎　生"
+  },
+  "green_onion": {
+    "foodNumber": "06226",
+    "officialName": "（ねぎ類）　根深ねぎ　葉　軟白　生"
+  },
+  "garlic": {
+    "foodNumber": "06223",
+    "officialName": "（にんにく類）　にんにく　りん茎　生"
+  },
+  "ginger": {
+    "foodNumber": "06103",
+    "officialName": "（しょうが類）　しょうが　根茎　皮なし　生"
+  },
+  "daikon": {
+    "foodNumber": "06134",
+    "officialName": "（だいこん類）　だいこん　根　皮なし　生"
+  },
+  "lotus_root": {
+    "foodNumber": "06317",
+    "officialName": "れんこん　根茎　生"
+  },
+  "burdock": {
+    "foodNumber": "06084",
+    "officialName": "（ごぼう類）　ごぼう　根　生"
+  },
+  "potato": {
+    "foodNumber": "02017",
+    "officialName": "＜いも類＞　じゃがいも　塊茎　皮なし　生"
+  },
+  "sweet_potato": {
+    "foodNumber": "02006",
+    "officialName": "＜いも類＞　（さつまいも類）　さつまいも　塊根　皮なし　生"
+  },
+  "taro": {
+    "foodNumber": "02010",
+    "officialName": "＜いも類＞　（さといも類）　さといも　球茎　生"
+  },
+  "pumpkin": {
+    "foodNumber": "06048",
+    "officialName": "（かぼちゃ類）　西洋かぼちゃ　果実　生"
+  },
+  "corn": {
+    "foodNumber": "06175",
+    "officialName": "（とうもろこし類）　スイートコーン　未熟種子　生"
+  },
+  "edamame_veg": {
+    "foodNumber": "06015",
+    "officialName": "えだまめ　生"
+  },
+  "asparagus": {
+    "foodNumber": "06007",
+    "officialName": "アスパラガス　若茎　生"
+  },
+  "okra": {
+    "foodNumber": "06032",
+    "officialName": "オクラ　果実　生"
+  },
+  "green_beans": {
+    "foodNumber": "06010",
+    "officialName": "いんげんまめ　さやいんげん　若ざや　生"
+  },
+  "snap_peas": {
+    "foodNumber": "06022",
+    "officialName": "（えんどう類）　スナップえんどう　若ざや　生"
+  },
+  "bean_sprouts": {
+    "foodNumber": "06291",
+    "officialName": "（もやし類）　りょくとうもやし　生"
+  },
+  "nira": {
+    "foodNumber": "06207",
+    "officialName": "（にら類）　にら　葉　生"
+  },
+  "shungiku": {
+    "foodNumber": "06099",
+    "officialName": "しゅんぎく　葉　生"
+  },
+  "mizuna": {
+    "foodNumber": "06072",
+    "officialName": "みずな　葉　生"
+  },
+  "bok_choy": {
+    "foodNumber": "06160",
+    "officialName": "チンゲンサイ　葉　生"
+  },
+  "hakusai": {
+    "foodNumber": "06233",
+    "officialName": "はくさい　結球葉　生"
+  },
+  "cauliflower": {
+    "foodNumber": "06054",
+    "officialName": "カリフラワー　花序　生"
+  },
+  "avocado_veg": {
+    "foodNumber": "07006",
+    "officialName": "アボカド　生"
+  },
+  "shiitake_fresh": {
+    "foodNumber": "08039",
+    "officialName": "しいたけ　生しいたけ　菌床栽培　生"
+  },
+  "shiitake_dried": {
+    "foodNumber": "08013",
+    "officialName": "しいたけ　乾しいたけ　乾"
+  },
+  "shimeji": {
+    "foodNumber": "08016",
+    "officialName": "（しめじ類）　ぶなしめじ　生"
+  },
+  "enoki": {
+    "foodNumber": "08001",
+    "officialName": "えのきたけ　生"
+  },
+  "maitake": {
+    "foodNumber": "08028",
+    "officialName": "まいたけ　生"
+  },
+  "eringi": {
+    "foodNumber": "08025",
+    "officialName": "（ひらたけ類）　エリンギ　生"
+  },
+  "wakame_seaweed": {
+    "foodNumber": "09039",
+    "officialName": "わかめ　原藻　生"
+  },
+  "hijiki": {
+    "foodNumber": "09050",
+    "officialName": "ひじき　ほしひじき　ステンレス釜　乾"
+  },
+  "konbu_dried": {
+    "foodNumber": "09017",
+    "officialName": "（こんぶ類）　まこんぶ　素干し　乾"
+  },
+  "nori_toasted": {
+    "foodNumber": "09004",
+    "officialName": "あまのり　焼きのり"
+  },
+  "takuan": {
+    "foodNumber": "06139",
+    "officialName": "（だいこん類）　漬物　たくあん漬　干しだいこん漬"
+  },
+  "beef_round_lean": {
+    "foodNumber": "11021",
+    "officialName": "＜畜肉類＞　うし　［和牛肉］　もも　赤肉　生"
+  },
+  "beef_sirloin": {
+    "foodNumber": "11071",
+    "officialName": "＜畜肉類＞　うし　［輸入牛肉］　サーロイン　脂身つき　生"
+  },
+  "beef_rib": {
+    "foodNumber": "11074",
+    "officialName": "＜畜肉類＞　うし　［輸入牛肉］　ばら　脂身つき　生"
+  },
+  "beef_minced": {
+    "foodNumber": "11089",
+    "officialName": "＜畜肉類＞　うし　［ひき肉］　生"
+  },
+  "beef_liver": {
+    "foodNumber": "11092",
+    "officialName": "＜畜肉類＞　うし　［副生物］　肝臓　生"
+  },
+  "pork_lion": {
+    "foodNumber": "11123",
+    "officialName": "＜畜肉類＞　ぶた　［大型種肉］　ロース　脂身つき　生"
+  },
+  "pork_tenderloin": {
+    "foodNumber": "11140",
+    "officialName": "＜畜肉類＞　ぶた　［大型種肉］　ヒレ　赤肉　生"
+  },
+  "pork_belly": {
+    "foodNumber": "11129",
+    "officialName": "＜畜肉類＞　ぶた　［大型種肉］　ばら　脂身つき　生"
+  },
+  "pork_minced": {
+    "foodNumber": "11163",
+    "officialName": "＜畜肉類＞　ぶた　［ひき肉］　生"
+  },
+  "pork_liver": {
+    "foodNumber": "11166",
+    "officialName": "＜畜肉類＞　ぶた　［副生物］　肝臓　生"
+  },
+  "chicken_breast_skinless": {
+    "foodNumber": "11220",
+    "officialName": "＜鳥肉類＞　にわとり　［若どり・主品目］　むね　皮なし　生"
+  },
+  "chicken_thigh": {
+    "foodNumber": "11221",
+    "officialName": "＜鳥肉類＞　にわとり　［若どり・主品目］　もも　皮つき　生"
+  },
+  "chicken_sasami": {
+    "foodNumber": "11227",
+    "officialName": "＜鳥肉類＞　にわとり　［若どり・副品目］　ささみ　生"
+  },
+  "chicken_wing": {
+    "foodNumber": "11285",
+    "officialName": "＜鳥肉類＞　にわとり　［若どり・主品目］　手羽さき　皮つき　生"
+  },
+  "chicken_liver": {
+    "foodNumber": "11232",
+    "officialName": "＜鳥肉類＞　にわとり　［副品目］　肝臓　生"
+  },
+  "chicken_minced": {
+    "foodNumber": "11230",
+    "officialName": "＜鳥肉類＞　にわとり　［二次品目］　ひき肉　生"
+  },
+  "ham_lion": {
+    "foodNumber": "11176",
+    "officialName": "＜畜肉類＞　ぶた　［ハム類］　ロースハム　ロースハム"
+  },
+  "bacon": {
+    "foodNumber": "11183",
+    "officialName": "＜畜肉類＞　ぶた　［ベーコン類］　ばらベーコン　ばらベーコン"
+  },
+  "sausage_wiener": {
+    "foodNumber": "11186",
+    "officialName": "＜畜肉類＞　ぶた　［ソーセージ類］　ウインナーソーセージ　ウインナーソーセージ"
+  },
+  "sausage_fish_meat": {
+    "foodNumber": "10388",
+    "officialName": "＜水産練り製品＞　魚肉ソーセージ"
+  },
+  "hamburger_patty": {
+    "foodNumber": "18050",
+    "officialName": "洋風料理　ハンバーグステーキ類　合いびきハンバーグ"
+  },
+  "meatball": {
+    "foodNumber": "18015",
+    "officialName": "洋風料理　素揚げ類　ミートボール"
+  },
+  "roast_beef": {
+    "foodNumber": "11104",
+    "officialName": "＜畜肉類＞　うし　［加工品］　ローストビーフ"
+  },
+  "duck_meat": {
+    "foodNumber": "11208",
+    "officialName": "＜鳥肉類＞　かも　まがも　肉　皮なし　生"
+  },
+  "lamb_leg": {
+    "foodNumber": "11202",
+    "officialName": "＜畜肉類＞　めんよう　［ラム］　ロース　脂身つき　生"
+  },
+  "pork_shoulder": {
+    "foodNumber": "11119",
+    "officialName": "＜畜肉類＞　ぶた　［大型種肉］　かたロース　脂身つき　生"
+  },
+  "pork_cutlet_meat": {
+    "foodNumber": "11123",
+    "officialName": "＜畜肉類＞　ぶた　［大型種肉］　ロース　脂身つき　生"
+  },
+  "chashu_pork": {
+    "foodNumber": "11195",
+    "officialName": "＜畜肉類＞　ぶた　［その他］　焼き豚"
+  },
+  "karaage_chicken": {
+    "foodNumber": "18054",
+    "officialName": "和風料理　その他　とりから揚げ"
+  },
+  "yakitori_tsukune": {
+    "foodNumber": "11293",
+    "officialName": "＜鳥肉類＞　にわとり　［その他］　つくね"
+  },
+  "beef_tongue": {
+    "foodNumber": "11090",
+    "officialName": "＜畜肉類＞　うし　［副生物］　舌　生"
+  },
+  "beef_hormone": {
+    "foodNumber": "11099",
+    "officialName": "＜畜肉類＞　うし　［副生物］　大腸　生"
+  },
+  "pork_hormone": {
+    "foodNumber": "11170",
+    "officialName": "＜畜肉類＞　ぶた　［副生物］　大腸　ゆで"
+  },
+  "prosciutto": {
+    "foodNumber": "11181",
+    "officialName": "＜畜肉類＞　ぶた　［ハム類］　生ハム　促成"
+  },
+  "spam_luncheon_meat": {
+    "foodNumber": "11317",
+    "officialName": "＜畜肉類＞　ぶた　［ソーセージ類］　ランチョンミート"
+  },
+  "corned_beef": {
+    "foodNumber": "11105",
+    "officialName": "＜畜肉類＞　うし　［加工品］　コンビーフ缶詰"
+  },
+  "beef_jerky": {
+    "foodNumber": "11107",
+    "officialName": "＜畜肉類＞　うし　［加工品］　ビーフジャーキー"
+  },
+  "pork_shabu": {
+    "foodNumber": "11125",
+    "officialName": "＜畜肉類＞　ぶた　［大型種肉］　ロース　脂身つき　ゆで"
+  },
+  "salmon": {
+    "foodNumber": "10134",
+    "officialName": "＜魚類＞　（さけ・ます類）　しろさけ　生"
+  },
+  "tuna_akami": {
+    "foodNumber": "10253",
+    "officialName": "＜魚類＞　（まぐろ類）　くろまぐろ　天然　赤身　生"
+  },
+  "tuna_toro": {
+    "foodNumber": "10254",
+    "officialName": "＜魚類＞　（まぐろ類）　くろまぐろ　天然　脂身　生"
+  },
+  "mackerel": {
+    "foodNumber": "10154",
+    "officialName": "＜魚類＞　（さば類）　まさば　生"
+  },
+  "sardine": {
+    "foodNumber": "10047",
+    "officialName": "＜魚類＞　（いわし類）　まいわし　生"
+  },
+  "saury": {
+    "foodNumber": "10173",
+    "officialName": "＜魚類＞　さんま　皮つき　生"
+  },
+  "yellowtail": {
+    "foodNumber": "10241",
+    "officialName": "＜魚類＞　ぶり　成魚　生"
+  },
+  "bonito": {
+    "foodNumber": "10086",
+    "officialName": "＜魚類＞　（かつお類）　かつお　春獲り　生"
+  },
+  "cod": {
+    "foodNumber": "10205",
+    "officialName": "＜魚類＞　（たら類）　まだら　生"
+  },
+  "horse_mackerel": {
+    "foodNumber": "10003",
+    "officialName": "＜魚類＞　（あじ類）　まあじ　皮つき　生"
+  },
+  "sea_bream": {
+    "foodNumber": "10193",
+    "officialName": "＜魚類＞　（たい類）　まだい　養殖　皮つき　生"
+  },
+  "flatfish": {
+    "foodNumber": "10100",
+    "officialName": "＜魚類＞　（かれい類）　まがれい　生"
+  },
+  "eel_kabayaki": {
+    "foodNumber": "10070",
+    "officialName": "＜魚類＞　うなぎ　かば焼"
+  },
+  "shirasu_dried": {
+    "foodNumber": "10056",
+    "officialName": "＜魚類＞　（いわし類）　しらす干し　半乾燥品"
+  },
+  "niboshi": {
+    "foodNumber": "10045",
+    "officialName": "＜魚類＞　（いわし類）　かたくちいわし　煮干し"
+  },
+  "octopus": {
+    "foodNumber": "10362",
+    "officialName": "＜いか・たこ類＞　（たこ類）　まだこ　ゆで"
+  },
+  "squid": {
+    "foodNumber": "10345",
+    "officialName": "＜いか・たこ類＞　（いか類）　するめいか　生"
+  },
+  "shrimp": {
+    "foodNumber": "10329",
+    "officialName": "＜えび・かに類＞　（えび類）　ブラックタイガー　養殖　生"
+  },
+  "sakura_shrimp_dried": {
+    "foodNumber": "10325",
+    "officialName": "＜えび・かに類＞　（えび類）　さくらえび　素干し"
+  },
+  "crab": {
+    "foodNumber": "10335",
+    "officialName": "＜えび・かに類＞　（かに類）　ずわいがに　生"
+  },
+  "scallop": {
+    "foodNumber": "10313",
+    "officialName": "＜貝類＞　ほたてがい　貝柱　生"
+  },
+  "clam_asari": {
+    "foodNumber": "10281",
+    "officialName": "＜貝類＞　あさり　生"
+  },
+  "clam_shijimi": {
+    "foodNumber": "10297",
+    "officialName": "＜貝類＞　しじみ　生"
+  },
+  "oyster": {
+    "foodNumber": "10292",
+    "officialName": "＜貝類＞　かき　養殖　生"
+  },
+  "mentaiko": {
+    "foodNumber": "10204",
+    "officialName": "＜魚類＞　（たら類）　すけとうだら　からしめんたいこ"
+  },
+  "tarako": {
+    "foodNumber": "10202",
+    "officialName": "＜魚類＞　（たら類）　すけとうだら　たらこ　生"
+  },
+  "canned_tuna_water": {
+    "foodNumber": "10260",
+    "officialName": "＜魚類＞　（まぐろ類）　缶詰　水煮　フレーク　ライト"
+  },
+  "canned_tuna_oil": {
+    "foodNumber": "10263",
+    "officialName": "＜魚類＞　（まぐろ類）　缶詰　油漬　フレーク　ライト"
+  },
+  "canned_mackerel_miso": {
+    "foodNumber": "10165",
+    "officialName": "＜魚類＞　（さば類）　缶詰　みそ煮"
+  },
+  "canned_sardine": {
+    "foodNumber": "10060",
+    "officialName": "＜魚類＞　（いわし類）　缶詰　水煮"
+  },
+  "kamaboko": {
+    "foodNumber": "10379",
+    "officialName": "＜水産練り製品＞　蒸しかまぼこ"
+  },
+  "chikuwa": {
+    "foodNumber": "10381",
+    "officialName": "＜水産練り製品＞　焼き竹輪"
+  },
+  "hanpen": {
+    "foodNumber": "10385",
+    "officialName": "＜水産練り製品＞　はんぺん"
+  },
+  "satsuma_age": {
+    "foodNumber": "10386",
+    "officialName": "＜水産練り製品＞　さつま揚げ"
+  },
+  "dried_squid": {
+    "foodNumber": "10353",
+    "officialName": "＜いか・たこ類＞　（いか類）　加工品　するめ"
+  },
+  "fish_roe_herring": {
+    "foodNumber": "10224",
+    "officialName": "＜魚類＞　にしん　かずのこ　塩蔵　水戻し"
+  },
+  "whitebait_raw": {
+    "foodNumber": "10396",
+    "officialName": "＜魚類＞　（いわし類）　しらす　生"
+  },
+  "salmon_roe": {
+    "foodNumber": "10140",
+    "officialName": "＜魚類＞　（さけ・ます類）　しろさけ　イクラ"
+  },
+  "smoked_salmon": {
+    "foodNumber": "10151",
+    "officialName": "＜魚類＞　（さけ・ます類）　べにざけ　くん製"
+  },
+  "sea_urchin": {
+    "foodNumber": "10365",
+    "officialName": "＜その他＞　うに　生うに"
+  },
+  "chocolate_milk": {
+    "foodNumber": "15116",
+    "officialName": "＜チョコレート類＞　ミルクチョコレート"
+  },
+  "chocolate_dark": {
+    "foodNumber": "15187",
+    "officialName": "＜チョコレート類＞　スイートチョコレート　カカオ増量"
+  },
+  "potato_chips": {
+    "foodNumber": "15103",
+    "officialName": "＜スナック類＞　ポテトチップス　ポテトチップス"
+  },
+  "rice_cracker": {
+    "foodNumber": "15060",
+    "officialName": "＜和干菓子類＞　米菓　しょうゆせんべい"
+  },
+  "cookie": {
+    "foodNumber": "15098",
+    "officialName": "＜ビスケット類＞　ビスケット　ソフトビスケット"
+  },
+  "cake_short": {
+    "foodNumber": "15170",
+    "officialName": "＜ケーキ・ペストリー類＞　ショートケーキ　いちご"
+  },
+  "donut": {
+    "foodNumber": "15077",
+    "officialName": "＜ケーキ・ペストリー類＞　ドーナッツ　イーストドーナッツ　プレーン"
+  },
+  "ice_bar": {
+    "foodNumber": "13049",
+    "officialName": "＜牛乳及び乳製品＞　（その他）　シャーベット"
+  },
+  "jelly": {
+    "foodNumber": "15087",
+    "officialName": "＜デザート菓子類＞　ゼリー　オレンジ"
+  },
+  "yokan": {
+    "foodNumber": "15038",
+    "officialName": "＜和生菓子・和半生菓子類＞　ようかん　練りようかん"
+  },
+  "daifuku": {
+    "foodNumber": "15023",
+    "officialName": "＜和生菓子・和半生菓子類＞　大福もち　こしあん入り"
+  },
+  "dorayaki": {
+    "foodNumber": "15027",
+    "officialName": "＜和生菓子・和半生菓子類＞　どら焼　つぶしあん入り"
+  },
+  "castella": {
+    "foodNumber": "15009",
+    "officialName": "＜和生菓子・和半生菓子類＞　カステラ"
+  },
+  "pudding_snack": {
+    "foodNumber": "15086",
+    "officialName": "＜デザート菓子類＞　カスタードプリン"
+  },
+  "almond": {
+    "foodNumber": "05040",
+    "officialName": "アーモンド　いり　無塩"
+  },
+  "walnut": {
+    "foodNumber": "05014",
+    "officialName": "くるみ　いり"
+  },
+  "cashew": {
+    "foodNumber": "05005",
+    "officialName": "カシューナッツ　フライ　味付け"
+  },
+  "popcorn": {
+    "foodNumber": "01136",
+    "officialName": "とうもろこし　ポップコーン"
+  },
+  "pretzel": {
+    "foodNumber": "15099",
+    "officialName": "＜ビスケット類＞　プレッツェル"
+  },
+  "japanese_cracker_mix": {
+    "foodNumber": "15059",
+    "officialName": "＜和干菓子類＞　米菓　あられ"
+  },
+  "green_tea": {
+    "foodNumber": "16037",
+    "officialName": "＜茶類＞　（緑茶類）　せん茶　浸出液"
+  },
+  "barley_tea": {
+    "foodNumber": "16055",
+    "officialName": "＜その他＞　麦茶　浸出液"
+  },
+  "black_tea": {
+    "foodNumber": "16044",
+    "officialName": "＜茶類＞　（発酵茶類）　紅茶　浸出液"
+  },
+  "coffee_black": {
+    "foodNumber": "16045",
+    "officialName": "＜コーヒー・ココア類＞　コーヒー　浸出液"
+  },
+  "cafe_latte": {
+    "foodNumber": "13007",
+    "officialName": "＜牛乳及び乳製品＞　（液状乳類）　乳飲料　コーヒー"
+  },
+  "orange_juice": {
+    "foodNumber": "07043",
+    "officialName": "（かんきつ類）　オレンジ　バレンシア　果実飲料　濃縮還元ジュース"
+  },
+  "apple_juice": {
+    "foodNumber": "07150",
+    "officialName": "りんご　果実飲料　濃縮還元ジュース"
+  },
+  "vegetable_juice": {
+    "foodNumber": "06399",
+    "officialName": "（その他）　野菜ミックスジュース　通常タイプ"
+  },
+  "tomato_juice": {
+    "foodNumber": "06340",
+    "officialName": "（トマト類）　加工品　トマトジュース　食塩無添加"
+  },
+  "cola": {
+    "foodNumber": "16053",
+    "officialName": "＜その他＞　（炭酸飲料類）　コーラ"
+  },
+  "sports_drink": {
+    "foodNumber": "16057",
+    "officialName": "＜その他＞　スポーツドリンク"
+  },
+  "beer": {
+    "foodNumber": "16006",
+    "officialName": "＜アルコール飲料類＞　（醸造酒類）　ビール　淡色"
+  },
+  "sake": {
+    "foodNumber": "16001",
+    "officialName": "＜アルコール飲料類＞　（醸造酒類）　清酒　普通酒"
+  },
+  "wine_red": {
+    "foodNumber": "16011",
+    "officialName": "＜アルコール飲料類＞　（醸造酒類）　ぶどう酒　赤"
+  },
+  "wine_white": {
+    "foodNumber": "16010",
+    "officialName": "＜アルコール飲料類＞　（醸造酒類）　ぶどう酒　白"
+  },
+  "amazake": {
+    "foodNumber": "16050",
+    "officialName": "＜その他＞　甘酒"
+  },
+  "milk_drink": {
+    "foodNumber": "13007",
+    "officialName": "＜牛乳及び乳製品＞　（液状乳類）　乳飲料　コーヒー"
+  },
+  "soy_milk_drink": {
+    "foodNumber": "04053",
+    "officialName": "だいず　［その他］　豆乳　調製豆乳"
+  },
+  "croissant": {
+    "foodNumber": "01035",
+    "officialName": "こむぎ　［パン類］　クロワッサン　リッチタイプ"
+  },
+  "bagel_plain": {
+    "foodNumber": "01148",
+    "officialName": "こむぎ　［パン類］　ベーグル"
+  },
+  "english_muffin": {
+    "foodNumber": "01036",
+    "officialName": "こむぎ　［パン類］　イングリッシュマフィン"
+  },
+  "naan": {
+    "foodNumber": "01037",
+    "officialName": "こむぎ　［パン類］　ナン"
+  },
+  "yakisoba_noodle": {
+    "foodNumber": "01049",
+    "officialName": "こむぎ　［中華めん類］　蒸し中華めん　蒸し中華めん"
+  },
+  "rice_noodle": {
+    "foodNumber": "01115",
+    "officialName": "こめ　［うるち米製品］　ビーフン"
+  },
+  "pancake": {
+    "foodNumber": "15083",
+    "officialName": "＜ケーキ・ペストリー類＞　ホットケーキ"
+  },
+  "cornflakes": {
+    "foodNumber": "01137",
+    "officialName": "とうもろこし　コーンフレーク"
+  },
+  "gyoza_skin": {
+    "foodNumber": "01074",
+    "officialName": "こむぎ　［その他］　ぎょうざの皮　生"
+  },
+  "pizza_crust": {
+    "foodNumber": "01076",
+    "officialName": "こむぎ　［その他］　ピザ生地"
+  },
+  "plain_steamed_bun_skin": {
+    "foodNumber": "15035",
+    "officialName": "＜和生菓子・和半生菓子類＞　まんじゅう　中華まんじゅう　肉まん"
+  },
+  "rice_cake_kiritanpo": {
+    "foodNumber": "01113",
+    "officialName": "こめ　［うるち米製品］　きりたんぽ"
+  },
+  "bread_rye": {
+    "foodNumber": "01032",
+    "officialName": "こむぎ　［パン類］　ライ麦パン"
+  },
+  "whole_wheat_bread": {
+    "foodNumber": "01208",
+    "officialName": "こむぎ　［パン類］　全粒粉パン"
+  },
+  "anko_bun": {
+    "foodNumber": "15168",
+    "officialName": "＜菓子パン類＞　あんパン　つぶしあん入り"
+  },
+  "curry_bread": {
+    "foodNumber": "15127",
+    "officialName": "＜菓子パン類＞　カレーパン　皮及び具"
+  },
+  "rice_flour_bread": {
+    "foodNumber": "01211",
+    "officialName": "こめ　［うるち米製品］　米粉パン　食パン"
+  },
+  "potato_starch_noodle": {
+    "foodNumber": "02039",
+    "officialName": "＜でん粉・でん粉製品＞　（でん粉製品）　はるさめ　緑豆はるさめ　乾"
+  },
+  "rice_vermicelli_dry": {
+    "foodNumber": "01115",
+    "officialName": "こめ　［うるち米製品］　ビーフン"
+  },
+  "fried_rice": {
+    "foodNumber": "18057",
+    "officialName": "中国料理　菜類　チャーハン"
+  }
+}
