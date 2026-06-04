@@ -9,6 +9,7 @@ function loadMeals() {
 }
 function saveMeals(meals) {
   localStorage.setItem('eiyou_meals', JSON.stringify(meals));
+  if (!meals.length) localStorage.removeItem('eiyou_intake_summary');
 }
 function loadProfile() {
   const defaults = {age:35, sex:'male', activityLevel:'normal', bodyWeight:65, mealsPerDay:3};
@@ -1053,6 +1054,7 @@ document.getElementById('resetAllBtn').addEventListener('click', () => {
 document.getElementById('factoryResetBtn').addEventListener('click', () => {
   if (!confirm('全データ・設定・APIキーを含め初期状態に戻します。よろしいですか？')) return;
   localStorage.removeItem('eiyou_meals');
+  localStorage.removeItem('eiyou_intake_summary');
   localStorage.removeItem('eiyou_profile');
   localStorage.removeItem('eiyou_model');
   deleteApiKey(); // localStorageとsessionStorageの両方をクリア

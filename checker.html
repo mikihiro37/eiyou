@@ -117,6 +117,7 @@
         <div class="form-group">
           <label>食事の内容を自由に入力</label>
           <textarea id="textInput" rows="8" placeholder="例:&#10;4月19日&#10;朝　欠食&#10;昼　珈琲、蓬と小豆のマフィン&#10;夕　豆腐＋ブロッコリー＋ミンチ丼&#10;　　野菜サラダ&#10;&#10;※1食分でも複数日分でもOK"></textarea>
+          <div class="api-usage-tip">複数食を一度に入力すると、Gemini APIの利用回数を節約できます。1日分・複数日分をまとめて解析する運用がおすすめです。</div>
         </div>
         <button class="btn btn-primary btn-block" id="textAnalyzeBtn">Geminiで解析（1食分）</button>
 
@@ -257,7 +258,7 @@
 <!-- Footer -->
 <div class="footer">
   ※ 栄養素の推定値はAIによる概算です。医療・診断目的には使用しないでください。<br>
-  日本人の食事摂取基準（2020年版）に基づく推奨量を参考値として使用しています。
+  参考基準値は日本人の食事摂取基準（2025年版）をベースにしています。食品成分値は日本食品標準成分表（八訂）増補2023年を参照した概算です。
 </div>
 
 <!-- ======== Settings Modal ======== -->

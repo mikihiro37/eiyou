@@ -8,11 +8,11 @@
 // ============================================================
 const REFERENCE_METADATA = {
   referenceIntakeSource:  '日本人の食事摂取基準',
-  referenceIntakeVersion: '2020年版ベース（2025年版との整合性は要確認）',
+  referenceIntakeVersion: '2025年版ベース',
   foodCompositionSource:  '日本食品標準成分表',
-  foodCompositionVersion: '八訂（2020年）ベース（増補2023年との整合性は要確認）',
+  foodCompositionVersion: '八訂（2020年）増補2023年参照',
   targetBase:    '30〜49歳・身体活動レベルII（普通）の成人を参考対象としています',
-  dataStatus:    '2020年版ベース・要確認',
+  dataStatus:    '食事摂取基準2025年版ベース・食品成分表八訂増補2023年参照',
   versionCaution:
     '参考基準値と食品成分値は資料の版や算定方法が異なる場合があります。' +
     '年齢・妊娠・授乳・疾患・活動量等によっても大きく異なります。' +
@@ -110,7 +110,7 @@ const NUTRIENT_INFO = {
   },
   vitB12: {
     name:'ビタミンB12', unit:'μg', category:'vitamin', group:'ビタミン（水溶性）',
-    referenceType:'推奨量（RDA）', compareEnabled:true,
+    referenceType:'目安量（AI）', compareEnabled:true,
     deficiency:'悪性貧血、末梢神経障害、認知機能低下'
   },
   vitC: {
@@ -142,7 +142,7 @@ const NUTRIENT_INFO = {
   },
   k: {
     name:'カリウム', unit:'mg', category:'mineral', group:'ミネラル（主要）',
-    referenceType:'目安量（AI）', compareEnabled:true,
+    referenceType:'目標量（DG）', compareEnabled:true,
     deficiency:'筋力低下、不整脈、便秘'
   },
   // ミネラル（微量）
@@ -251,8 +251,8 @@ const GROUP_COLORS = {
 
 // ============================================================
 // 参照摂取量基準値
-// 日本人の食事摂取基準（2020年版）30〜49歳・身体活動レベルII（普通）を基本とした参考値。
-// 2025年版との整合性・各栄養素の指標種別は専門職による確認が必要です。
+// 日本人の食事摂取基準（2025年版）30〜49歳・身体活動レベルII（普通）を基本とした参考値。
+// 脂質・炭水化物は目標量の範囲中央値をg換算、ナトリウムは食塩相当量目標量をmg換算して使用。
 // ============================================================
 const REFERENCE_INTAKE_VALUES = {
   male: {
@@ -262,10 +262,10 @@ const REFERENCE_INTAKE_VALUES = {
       physicalActivityLevel: '普通（レベルII）',
       referenceVersion: REFERENCE_METADATA.referenceIntakeVersion
     },
-    calories:2650, protein:65, fat:73, carbs:364, fiber:21,
-    vitA:900, vitD:8.5, vitE:6.0, vitK:150,
-    vitB1:1.4, vitB2:1.6, vitB3:15, vitB5:6, vitB6:1.4, vitB7:50, vitB9:240, vitB12:2.4, vitC:100,
-    ca:750, p:1000, mg:370, na:600, k:3000,
+    calories:2700, protein:65, fat:75, carbs:371, fiber:22,
+    vitA:900, vitD:9.0, vitE:6.5, vitK:150,
+    vitB1:1.2, vitB2:1.7, vitB3:16, vitB5:6, vitB6:1.5, vitB7:50, vitB9:240, vitB12:4.0, vitC:100,
+    ca:750, p:1000, mg:380, na:2950, k:3000,
     fe:7.5, zn:11, cu:0.9, mn:4.0, iodine:130, se:30, mo:30
   },
   female: {
@@ -275,10 +275,10 @@ const REFERENCE_INTAKE_VALUES = {
       physicalActivityLevel: '普通（レベルII）',
       referenceVersion: REFERENCE_METADATA.referenceIntakeVersion
     },
-    calories:2000, protein:50, fat:55, carbs:275, fiber:18,
-    vitA:700, vitD:8.5, vitE:5.5, vitK:150,
-    vitB1:1.1, vitB2:1.2, vitB3:12, vitB5:5, vitB6:1.1, vitB7:50, vitB9:240, vitB12:2.4, vitC:100,
-    ca:650, p:800, mg:290, na:600, k:2600,
+    calories:2050, protein:50, fat:57, carbs:282, fiber:18,
+    vitA:700, vitD:9.0, vitE:6.0, vitK:150,
+    vitB1:0.9, vitB2:1.2, vitB3:12, vitB5:5, vitB6:1.2, vitB7:50, vitB9:240, vitB12:4.0, vitC:100,
+    ca:650, p:800, mg:290, na:2550, k:2600,
     fe:10.5, zn:8, cu:0.7, mn:3.5, iodine:130, se:25, mo:25
   }
 };
