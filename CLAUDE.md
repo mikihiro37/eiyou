@@ -81,3 +81,11 @@ python3 -m http.server 8000
 - `checker/data.js` の `NUTRIENT_INFO` と `RDA` を変更すると、チェッカー全体の計算に影響する
 - Gemini APIのプロンプトは `checker/gemini.js` にある。モデルの出力形式が変わると解析が壊れる可能性あり
 - `checker/img/` のガイド画像はAPIキー設定ポップアップで表示される
+
+## Codex / Claude Code 引き継ぎルール
+
+- 作業開始時は `PROJECT_STATUS.md` を確認し、現在の確認対象が「ローカル」「本番URL」「iPhone実機」のどれかを把握する
+- 作業終了時は `PROJECT_STATUS.md` を更新し、ローカル確認・commit・push・deploy・実機確認の状態を明記する
+- Codexは主に実装、Claude Codeは主にレビュー・commit・deployを担当する想定。ただしトークン制限等で交代する場合は、次担当が読めるように残作業を書く
+- ローカルで直っていても、push / deploy されるまではiPhoneや公開URLには反映されないことを明示する
+- `.wrangler/` など生成物や未追跡ファイルは、目的が明確でない限りコミット対象に含めない
