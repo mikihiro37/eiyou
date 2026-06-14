@@ -27,3 +27,8 @@ docs/**
 
 # Wrangler設定残骸
 **/*.ipc
+
+# 管理用ファイル（本番公開不要）
+.gitignore
+.assetsignore
+.wranglerignore
