@@ -460,7 +460,7 @@
           <span>栄養バランスを意識したAI献立アイデア</span>
         </div>
       </div>
-      <div class="apikey-privacy">キーはこの端末にのみ保存されます。外部サーバーには送信されません。</div>
+      <div class="apikey-privacy">APIキーはこの端末に保存されます。食事内容・画像・年齢・性別・体重などのプロフィール情報は、AI解析のためGoogle Gemini APIに送信されます。氏名・電話番号・住所は入力・送信しない設計です。共用端末で使用する場合は、利用後に「全データ削除」を実行してください。</div>
     </div>
     <div class="modal-footer" style="flex-direction:column;gap:8px">
       <button class="btn btn-primary btn-block" id="apiKeySetupBtn">設定を開いてAPIキーを登録</button>
@@ -519,8 +519,9 @@
         <ul style="margin:8px 0 4px 16px;color:#555">
           <li>食事内容を解析する際、入力内容が <strong>Google Gemini API</strong> へ送信されます。</li>
           <li>APIキーはご自身のGoogle アカウントで取得したものをご使用ください（BYOK構成）。</li>
-          <li>APIキーはこの端末のブラウザ内（localStorage / sessionStorage）にのみ保存されます。外部サーバーには送信されません。</li>
-          <li><strong>共用端末での使用は避けてください。</strong>使用後は設定画面の「APIキーを削除」から削除できます。</li>
+          <li>APIキーはこの端末のブラウザ内（localStorage / sessionStorage）にのみ保存されます。APIキー自体が外部サーバーへ送信されることはありません。</li>
+          <li>食事内容・画像・年齢・性別・体重などのプロフィール情報は、AI解析のため<strong>Google Gemini APIに送信されます</strong>。氏名・電話番号・住所・患者IDは入力・送信しない設計です。</li>
+          <li><strong>共用端末での使用は避けてください。</strong>使用後は設定画面の「全データ削除」でデータを削除できます。</li>
           <li>設定画面で「このセッション中だけ使う」を選ぶと、ブラウザを閉じるとキーが消えます。</li>
           <li>Googleの利用規約・プライバシーポリシーが適用されます。</li>
         </ul>
