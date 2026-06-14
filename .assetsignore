@@ -1,0 +1,29 @@
+# Git管理情報
+.git
+.git/**
+
+# Wranglerローカルキャッシュ
+.wrangler
+.wrangler/**
+
+# macOS
+.DS_Store
+
+# 環境変数・秘密情報
+.env
+.env.*
+
+# 依存パッケージ
+node_modules
+node_modules/**
+
+# ローカル補助スクリプト（本番不要）
+scripts
+scripts/**
+
+# ドキュメント（本番不要）
+docs
+docs/**
+
+# Wrangler設定残骸
+**/*.ipc

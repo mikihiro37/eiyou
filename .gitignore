@@ -1,0 +1,9 @@
+# Wranglerローカルキャッシュ
+.wrangler/
+
+# macOS
+.DS_Store
+
+# 環境変数・秘密情報
+.env
+.env.*
