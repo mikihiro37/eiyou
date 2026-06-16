@@ -32,3 +32,9 @@ docs/**
 .gitignore
 .assetsignore
 .wranglerignore
+AGENTS.md
+CLAUDE.md
+HANDOFF_FOR_CODEX.md
+PROJECT_STATUS.md
+SETUP.md
+wrangler.jsonc
