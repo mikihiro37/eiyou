@@ -8,14 +8,15 @@ Codex と Claude Code の引き継ぎ用ステータスです。作業開始時�
 - 主な担当分担: Codex = 実装 / Claude Code = レビュー・commit・deploy
 - ローカル修正: 実装済み（解析レポートと保存後の栄養バランスに、摂取量と1日の必要量目安をラベル付きで表示）
 - ローカル動作確認: ユーザー確認済み（Safariで保存後の必要量表示を確認し、実装内容を採用）
-- commit: 実施（2026-08-28、今回の必要量表示改善）
+- commit: 実施（`4f32bad`、今回の必要量表示改善）
 - push: 実施（origin/main）
-- deploy: 未実施
+- deploy: 実施（Cloudflare Workers、Version ID `cfbc8184-36dc-414e-9424-7d9be95b1e41`）
 - iPhone実機確認: 未実施（必要量を強調した新表示はローカルの375px幅とSafariで確認済み）
-- 現在の注意点: mainへのpushまで実施。本番URLやiPhone実機への反映はdeploy後に確認する
+- 現在の注意点: 本番配信コードへの反映は確認済み。Safari／iPhone実機での最終操作確認は未実施
 
 ## 直近の作業
 
+- Cloudflare Workersへdeployし、本番URLが200で応答することと、`v=6`のCSS・JSおよび必要量表示コードの配信を確認
 - ユーザーがSafariで保存後も必要量を確認できる表示を確認し、ローカル実装として採用
 - 保存後も下部の「栄養バランス」で、各栄養素の摂取量と1日の必要量目安を継続表示
 - まとめて保存後は保存日付範囲へ自動切替し、栄養バランスまで自動スクロールするよう変更
@@ -31,7 +32,7 @@ Codex と Claude Code の引き継ぎ用ステータスです。作業開始時�
 ## 確認URL
 
 - ローカル: `http://127.0.0.1:<port>/`
-- 本番: デプロイ先URLを確認して記入
+- 本番: `https://eiyou.miki0307tuta.workers.dev/checker`
 - iPhone確認: 本番URLを再読み込みして確認
 
 ## 作業開始時チェック
@@ -51,5 +52,4 @@ Codex と Claude Code の引き継ぎ用ステータスです。作業開始時�
 
 ## 次アクション
 
-- 人間またはClaude Codeがdeployを行う
-- 公開後、テキスト一括入力を実行し、本番URLとiPhone実機で必要量表示を確認する
+- Safari／iPhone実機で本番URLを開き、テキスト一括入力から保存後の必要量表示まで確認する
