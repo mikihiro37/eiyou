@@ -144,6 +144,8 @@ function renderBulkMeta() {
 // --- バーチャート ---
 function renderBarChart(daily, rda, numDays) {
   const container = document.getElementById('bulkBarChart');
+  const intakeLabel = numDays > 1 ? '1日平均の推定摂取量' : '推定摂取量';
+  const intakeShortLabel = numDays > 1 ? '摂取量（1日平均）' : '摂取量';
   const groupedKeys = {};
   NUTRIENT_KEYS.forEach(k => {
     const g = NUTRIENT_INFO[k].group;
@@ -151,7 +153,11 @@ function renderBarChart(daily, rda, numDays) {
     groupedKeys[g].push(k);
   });
 
-  let html = '';
+  let html = `<div class="bulk-chart-guide">
+    <strong>1日の栄養量と必要量の目安</strong>
+    <span>各栄養素の「${intakeShortLabel}」と「1日の必要量目安」を並べて表示しています。</span>
+    <small>必要量目安は食事摂取基準をベースにした参考値です。％は必要量目安に対する摂取割合です。</small>
+  </div>`;
   for (const group of NUTRIENT_GROUPS) {
     const keys = groupedKeys[group] || [];
     const color = GROUP_COLORS[group] || '#666';
@@ -167,12 +173,24 @@ function renderBarChart(daily, rda, numDays) {
         : getBarColor(pct);
       const barWidth = Math.min(pct, 200);
       const displayVal = val >= 100 ? Math.round(val) : Math.round(val * 10) / 10;
-      html += `<div class="bar-row">
+      const displayRda = rdaVal >= 100 ? Math.round(rdaVal) : Math.round(rdaVal * 10) / 10;
+      html += `<div class="bar-row bulk-bar-row">
         <span class="bar-label">${info.name}</span>
         <div class="bar-track" style="--max-pct:200">
           <div class="bar-fill" style="width:${barWidth / 2}%;background:${barColor}"></div>
         </div>
-        <span class="bar-value"><span class="bar-pct" style="color:${barColor}">${pct}%</span> <span style="font-size:10px">${displayVal}</span></span>
+        <span class="bar-value bulk-bar-value" aria-label="${intakeLabel} ${displayVal}${info.unit}、1日の必要量の目安 ${displayRda}${info.unit}">
+          <span class="bar-pct bulk-bar-pct" style="color:${barColor}">${pct}%</span>
+          <span class="bulk-amount-box">
+            <span class="bulk-amount-label">${intakeShortLabel}</span>
+            <strong>${displayVal}</strong><span class="bulk-amount-unit">${info.unit}</span>
+          </span>
+          <span class="bulk-amount-separator" aria-hidden="true">/</span>
+          <span class="bulk-amount-box bulk-reference-amount">
+            <span class="bulk-amount-label">1日の必要量目安</span>
+            <strong>${displayRda}</strong><span class="bulk-amount-unit">${info.unit}</span>
+          </span>
+        </span>
       </div>`;
     }
     html += '</div>';
@@ -361,5 +379,20 @@ function handleBulkSave() {
   saveMeals(meals);
   closeModal('bulkReportModal');
   showToast('食事記録を保存しました', 'success');
+
+  // 保存した日付範囲を表示し、必要量を保存後もすぐ確認できるようにする
+  const savedDates = result.days
+    .filter(day => (day.meals || []).some(meal => !meal.skipped))
+    .map(day => day.date)
+    .filter(date => /^\d{4}-\d{2}-\d{2}$/.test(date))
+    .sort();
+  if (savedDates.length > 0) {
+    setDashboardPeriod('custom', savedDates[0], savedDates[savedDates.length - 1]);
+  } else {
+    setDashboardPeriod('7days');
+  }
   renderAll();
+  requestAnimationFrame(() => {
+    document.getElementById('dashboardCard')?.scrollIntoView({behavior:'smooth', block:'start'});
+  });
 }

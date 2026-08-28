@@ -630,20 +630,34 @@ let currentPeriod = 'today';
 let customStart = '';
 let customEnd = '';
 
+function setDashboardPeriod(period, start, end) {
+  currentPeriod = period;
+  if (period === 'custom' && start && end) {
+    customStart = start;
+    customEnd = end;
+    document.getElementById('periodStart').value = start;
+    document.getElementById('periodEnd').value = end;
+  }
+  document.querySelectorAll('.period-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.period === period);
+  });
+  document.getElementById('customPeriod').classList.toggle('show', period === 'custom');
+}
+
 document.querySelectorAll('.period-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentPeriod = btn.dataset.period;
-    document.getElementById('customPeriod').classList.toggle('show', currentPeriod === 'custom');
+    setDashboardPeriod(btn.dataset.period);
     if (currentPeriod !== 'custom') renderAll();
   });
 });
 
 document.getElementById('applyPeriod').addEventListener('click', () => {
-  customStart = document.getElementById('periodStart').value;
-  customEnd = document.getElementById('periodEnd').value;
-  if (customStart && customEnd) renderAll();
+  const start = document.getElementById('periodStart').value;
+  const end = document.getElementById('periodEnd').value;
+  if (start && end) {
+    setDashboardPeriod('custom', start, end);
+    renderAll();
+  }
 });
 
 function getPeriodDates() {
@@ -706,6 +720,7 @@ function renderDashboard() {
   NUTRIENT_KEYS.forEach(k => daily[k] = (totals[k] / numDays) * scale);
 
   const rda = calcRDA(profile);
+  const intakeShortLabel = numDays > 1 ? '摂取量（1日平均）' : '摂取量';
 
   // Build bar chart HTML
   let html = '';
@@ -733,6 +748,7 @@ function renderDashboard() {
         : getBarColor(pct);
       const barWidth = Math.min(pct, 200);
       const displayVal = val >= 100 ? Math.round(val) : Math.round(val * 10) / 10;
+      const displayRda = rdaVal >= 100 ? Math.round(rdaVal) : Math.round(rdaVal * 10) / 10;
 
       // 摂取傾向バッジ（濃淡だけに頼らず一目で判断できるよう）
       let badgeClass, badgeText;
@@ -747,19 +763,35 @@ function renderDashboard() {
       }
       const badgeHtml = `<span class="bar-intake-badge ${badgeClass}">${badgeText}</span>`;
 
-      html += `<div class="bar-row">
+      html += `<div class="bar-row dashboard-bar-row">
         <span class="bar-label">${info.name}</span>
         <div class="bar-track" style="--max-pct:200">
           <div class="bar-fill" style="width:${barWidth / 2}%;background:${barColor}"></div>
         </div>
-        <span class="bar-value"><span class="bar-pct" style="color:${barColor}">${pct}%</span> <span style="font-size:10px">${displayVal}</span></span>
+        <span class="bar-value bulk-bar-value" aria-label="${intakeShortLabel} ${displayVal}${info.unit}、1日の必要量の目安 ${displayRda}${info.unit}">
+          <span class="bar-pct bulk-bar-pct" style="color:${barColor}">${pct}%</span>
+          <span class="bulk-amount-box">
+            <span class="bulk-amount-label">${intakeShortLabel}</span>
+            <strong>${displayVal}</strong><span class="bulk-amount-unit">${info.unit}</span>
+          </span>
+          <span class="bulk-amount-separator" aria-hidden="true">/</span>
+          <span class="bulk-amount-box bulk-reference-amount">
+            <span class="bulk-amount-label">1日の必要量目安</span>
+            <strong>${displayRda}</strong><span class="bulk-amount-unit">${info.unit}</span>
+          </span>
+        </span>
         ${badgeHtml}
       </div>`;
     }
     html += '</div>';
   }
 
-  html = `<div style="font-size:12px;color:#888;margin-bottom:12px">1日${mealsPerDay}食設定で推計（${numDays}日間の記録）</div>` + html;
+  html = `<div class="bulk-chart-guide dashboard-chart-guide">
+    <strong>保存済み記録の栄養量と1日の必要量目安</strong>
+    <span>各栄養素の「${intakeShortLabel}」と、青枠の「1日の必要量目安」を比較できます。</span>
+    <small>必要量目安は食事摂取基準をベースにした参考値です。</small>
+  </div>
+  <div style="font-size:12px;color:#888;margin-bottom:12px">1日${mealsPerDay}食設定で推計（${numDays}日間の記録）</div>` + html;
 
   content.innerHTML = html;
 
