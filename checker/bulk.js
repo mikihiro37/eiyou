@@ -33,7 +33,15 @@ async function handleBulkAnalyze() {
 
   showLoading('食事を解析中...');
   try {
-    _bulkResult = await analyzeBulkText(text);
+    _bulkResult = await analyzeBulkText(text, progress => {
+      const prefix = progress.total > 1
+        ? `${progress.current}/${progress.total}日目を解析中...`
+        : '食事を解析中...';
+      const received = progress.receivedChars > 0
+        ? ` (受信: ${progress.receivedChars}文字)`
+        : '';
+      updateLoadingText(prefix + received);
+    });
     hideLoading();
     initSelections();
     renderReport();

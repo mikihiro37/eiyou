@@ -468,6 +468,10 @@ function handleApiError(err) {
   console.error('API Error:', msg, err);
   if (msg === 'CANCELLED') {
     showToast('キャンセルしました', 'info');
+  } else if (msg === 'TIMEOUT') {
+    showToast('解析が時間内に完了しませんでした。食事内容を少し短くして再度お試しください。', 'error');
+  } else if (msg.startsWith('TOO_MANY_DAYS:')) {
+    showToast('一度に解析できるのは7日分までです。入力期間を分けてお試しください。', 'error');
   } else if (msg === 'API_KEY_MISSING') {
     showToast('APIキーが見つかりません。設定でAPIキーを入力し、保存してください。', 'error');
     openModal('settingsModal');

@@ -23,7 +23,7 @@ function cancelGemini() {
 }
 
 // Gemini API呼び出し
-async function callGemini(prompt, imageBase64, onProgress) {
+async function callGemini(prompt, imageBase64, onProgress, options) {
   // 共通関数 getApiKey() で取得（checkApiKey と同じ取得元を保証）
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('API_KEY_MISSING');
@@ -40,10 +40,16 @@ async function callGemini(prompt, imageBase64, onProgress) {
 
   const genConfig = {temperature:0.2, responseMimeType:'application/json'};
 
-  // AbortController: ユーザーキャンセル + 60秒タイムアウト
-  _currentAbort = new AbortController();
-  const timeoutId = setTimeout(() => _currentAbort?.abort(), 60000);
-  const signal = _currentAbort.signal;
+  // AbortController: ユーザーキャンセルとタイムアウトを区別する
+  const timeoutMs = Math.max(1000, Number(options?.timeoutMs) || 60000);
+  const controller = new AbortController();
+  let didTimeout = false;
+  _currentAbort = controller;
+  const timeoutId = setTimeout(() => {
+    didTimeout = true;
+    controller.abort();
+  }, timeoutMs);
+  const signal = controller.signal;
 
   let resp;
   try {
@@ -59,7 +65,7 @@ async function callGemini(prompt, imageBase64, onProgress) {
   } catch (e) {
     clearTimeout(timeoutId);
     _currentAbort = null;
-    if (e.name === 'AbortError') throw new Error('CANCELLED');
+    if (e.name === 'AbortError') throw new Error(didTimeout ? 'TIMEOUT' : 'CANCELLED');
     throw e;
   }
   if (!resp.ok) {
@@ -140,7 +146,7 @@ async function callGemini(prompt, imageBase64, onProgress) {
   } catch (e) {
     clearTimeout(timeoutId);
     _currentAbort = null;
-    if (e.name === 'AbortError') throw new Error('CANCELLED');
+    if (e.name === 'AbortError') throw new Error(didTimeout ? 'TIMEOUT' : 'CANCELLED');
     throw e;
   }
 
@@ -434,7 +440,35 @@ categoryは「主食」「主菜」「副菜」「汁物」「デザート」「
 // ============================================================
 // --- まとめてテキスト解析（複数日・複数食対応） ---
 // ============================================================
-async function analyzeBulkText(text) {
+const BULK_MAX_DAYS = 7;
+const BULK_DAY_TIMEOUT_MS = 120000;
+
+function splitBulkTextByDate(text) {
+  const normalized = String(text || '').trim();
+  if (!normalized) return [];
+
+  const lines = normalized.split(/\r?\n/);
+  const dateHeaderPattern = /^\s*(?:(?:19|20)\d{2}\s*(?:年|[\/.-])\s*)?\d{1,2}\s*(?:月|[\/.-])\s*\d{1,2}\s*日?(?:\s|$|[（(])/;
+  const chunks = [];
+  const preamble = [];
+  let current = null;
+
+  lines.forEach(line => {
+    if (dateHeaderPattern.test(line)) {
+      if (current) chunks.push(current.join('\n').trim());
+      current = current === null ? [...preamble, line] : [line];
+    } else if (current) {
+      current.push(line);
+    } else {
+      preamble.push(line);
+    }
+  });
+
+  if (current) chunks.push(current.join('\n').trim());
+  return chunks.filter(Boolean).length > 0 ? chunks.filter(Boolean) : [normalized];
+}
+
+async function analyzeBulkTextChunk(text, onProgress) {
   const today = new Date().toISOString().split('T')[0];
   const year  = new Date().getFullYear();
 
@@ -500,7 +534,7 @@ ${text}
 - 日付が推定できない場合は${today}を使用
 - アミノ酸はmg単位`;
 
-  const raw = await callGemini(prompt);
+  const raw = await callGemini(prompt, null, onProgress, {timeoutMs:BULK_DAY_TIMEOUT_MS});
 
   if (!raw.days || !Array.isArray(raw.days)) {
     throw new Error('解析結果のフォーマットが不正です');
@@ -523,6 +557,44 @@ ${text}
     overallUncertainItems: Array.isArray(raw.overallUncertainItems) ? raw.overallUncertainItems.map(String) : [],
     overallConfidence:     (raw.overallConfidence === '低' || raw.overallConfidence === '高') ? raw.overallConfidence : '中',
     warnings:              Array.isArray(raw.warnings)              ? raw.warnings.map(String)              : [],
+    notForMedicalUse: true
+  };
+}
+
+async function analyzeBulkText(text, onProgress) {
+  const chunks = splitBulkTextByDate(text);
+  if (chunks.length > BULK_MAX_DAYS) {
+    throw new Error(`TOO_MANY_DAYS:${chunks.length}`);
+  }
+
+  const results = [];
+  for (let i = 0; i < chunks.length; i++) {
+    const progressBase = {current:i + 1, total:chunks.length};
+    onProgress?.({...progressBase, receivedChars:0});
+    const result = await analyzeBulkTextChunk(chunks[i], count => {
+      onProgress?.({...progressBase, receivedChars:count});
+    });
+    results.push(result);
+  }
+
+  const days = results.flatMap(result => result.days || []);
+  if (days.length > BULK_MAX_DAYS) {
+    throw new Error(`TOO_MANY_DAYS:${days.length}`);
+  }
+
+  const uniqueStrings = values => [...new Set(values.flat().filter(Boolean).map(String))];
+  const confidenceRank = {低:0, 中:1, 高:2};
+  const overallConfidence = results.reduce((lowest, result) => {
+    const confidence = result.overallConfidence || '中';
+    return confidenceRank[confidence] < confidenceRank[lowest] ? confidence : lowest;
+  }, '高');
+
+  return {
+    days,
+    overallAssumptions: uniqueStrings(results.map(result => result.overallAssumptions || [])),
+    overallUncertainItems: uniqueStrings(results.map(result => result.overallUncertainItems || [])),
+    overallConfidence,
+    warnings: uniqueStrings(results.map(result => result.warnings || [])),
     notForMedicalUse: true
   };
 }
